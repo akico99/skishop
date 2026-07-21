@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>놀러와 - 무주 스키 렌탈 신규 오픈 이벤트</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family:'Pretendard',sans-serif; background:#f1f5f9; display:flex; justify-content:center; margin:0; min-height:100vh; }
+        .mobile-app { width:100%; max-width:414px; background:#fff; position:relative; overflow-x:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,.25); }
+        .soft-shadow { box-shadow:0 10px 25px -5px rgba(0,77,230,.15),0 8px 10px -6px rgba(0,77,230,.1); }
+        .hide-scrollbar::-webkit-scrollbar { display:none; }
+        .hide-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
+        #main-slide-wrapper { transition:opacity .2s ease-in-out; }
+
+        /* 토스트 */
+        #toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:#0f172a; color:#fff; padding:10px 20px; border-radius:999px; font-size:13px; font-weight:600; white-space:nowrap; opacity:0; transition:opacity .3s,transform .3s; pointer-events:none; z-index:999; }
+        #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+        /* 메뉴 모달 */
+        #modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; justify-content:center; align-items:flex-end; }
+        #modal-overlay.open { display:flex; }
+        #modal-box { background:#fff; width:100%; max-width:414px; border-radius:20px 20px 0 0; padding:24px 20px 40px; transform:translateY(100%); transition:transform .3s ease; }
+        #modal-overlay.open #modal-box { transform:translateY(0); }
+
+        /* 예약완료 모달 */
+        #confirm-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:200; justify-content:center; align-items:flex-end; }
+        #confirm-overlay.open { display:flex; }
+        #confirm-box { background:#fff; width:100%; max-width:414px; border-radius:24px 24px 0 0; padding:28px 20px 48px; transform:translateY(100%); transition:transform .35s cubic-bezier(.34,1.56,.64,1); max-height:90vh; overflow-y:auto; }
+        #confirm-overlay.open #confirm-box { transform:translateY(0); }
+
+        /* 수량 버튼 */
+        .qty-btn { width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:8px; font-size:16px; font-weight:700; color:#64748b; background:#f8fafc; border:1px solid #e2e8f0; transition:all .15s; }
+        .qty-btn:hover { background:#eff6ff; color:#7c3aed; border-color:#bfdbfe; }
+        .qty-btn:disabled { opacity:.3; pointer-events:none; }
+        .qty-val { min-width:24px; text-align:center; font-weight:700; color:#0f172a; font-size:14px; }
+
+        /* 폼 섹션 타이틀 */
+        .form-section-title { font-size:12px; font-weight:700; color:#7c3aed; letter-spacing:.03em; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+        .form-section-title::after { content:''; flex:1; height:1px; background:#e0eaff; }
+
+        /* 아이템 행 */
+        .item-row { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#fff; border-radius:12px; border:1px solid #f1f5f9; }
+        .item-row:hover { border-color:#bfdbfe; }
+
+        /* 리프트권 행 */
+        .lift-section { background:#fff; border-radius:14px; border:1px solid #f1f5f9; padding:10px 12px; margin-bottom:8px; }
+        .lift-section:hover { border-color:#bfdbfe; }
+
+        /* 메뉴 버튼 활성 */
+        .menu-btn.active { border-color:#7c3aed; box-shadow:0 4px 12px rgba(0,77,230,.15); }
+        .menu-btn.active .menu-icon { background-color:#7c3aed; }
+        .menu-btn.active .menu-icon i { color:#fff; }
+        .menu-btn.active .menu-label { color:#7c3aed; }
+
+        /* 스피너 */
+        .spinner { width:18px; height:18px; border:2.5px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; display:inline-block; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        /* 큰 세로 슬라이드 — 화면의 약 62%, 아래 견적이 걸쳐 보이도록 */
+        #main-slide-container { height: 62vh; max-height: 620px; min-height: 420px; }
+
+        /* 단일 컬럼 흐름: 슬라이드 → 견적 → 아이콘 → 룩북 → 후기 */
+        .pc-wrapper { display: flex; flex-direction: column; }
+        .pc-slide    { order: 1; }   /* 큰 세로 슬라이드 (맨 위) */
+        .pc-quote    { order: 2; }   /* 실시간 견적 및 간편 예약 */
+        .pc-menu     { order: 3; }   /* 아이콘 메뉴 */
+        .pc-lookbook { order: 4; }   /* (미사용) */
+        .pc-rest     { order: 4; }   /* 후기 + FAQ + 푸터 */
+
+        /* 하단 고정 바: 모바일·PC 공통 노출 */
+        body { padding-bottom: 76px; }
+
+        @media (min-width: 1024px) {
+            body { display: block; background: #e5e7eb; padding-bottom: 0; }
+            .mobile-app {
+                width: 760px !important;
+                max-width: 760px !important;
+                margin: 0 auto !important;
+                min-height: 100vh !important;
+                overflow: visible !important;
+                box-shadow: 0 0 40px rgba(0,0,0,0.12) !important;
+                padding-bottom: 80px !important;
+                background: #fff !important;
+            }
+            .mobile-app > header {
+                position: sticky !important;
+                top: 0 !important;
+                width: 100% !important;
+                z-index: 50 !important;
+            }
+            /* 하단 고정 바를 중앙 컬럼 폭(760px)에 맞춰 가운데 정렬 */
+            .mobile-bottom-bar {
+                max-width: 760px !important;
+                width: 760px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+            }
+            /* 본문은 슬라이드 → 아이콘 → 콘텐츠 (견적폼은 왼쪽 고정으로 분리) */
+            .pc-wrapper { display: flex; flex-direction: column; }
+            .pc-slide { order: 1; } .pc-menu { order: 2; }
+            .pc-lookbook { order: 3; } .pc-rest { order: 4; }
+
+            /* 견적폼 전체를 PC 왼쪽에 고정 */
+            .pc-quote {
+                position: fixed; top: 80px; z-index: 60;
+                left: calc(50% - 380px - 312px);   /* 중앙 760px 컬럼 왼쪽 바깥 */
+                width: 300px; max-height: calc(100vh - 120px); overflow-y: auto;
+                background: #fff; border:1px solid #e5e7eb; border-radius:16px;
+                box-shadow:0 10px 30px rgba(0,0,0,.12);
+            }
+            @media (max-width: 1480px) { .pc-quote { left: 16px; } }
+
+            /* PC에서 본문 큰 견적 카드(트리거)는 숨기고, 왼쪽 패널 헤더만 보이게 */
+            #quote-btn { display: none !important; }
+            #pc-quote-head { display: flex !important; }
+            /* PC에서는 견적폼을 기본으로 펼쳐 보여줌(헤더로 여닫기) */
+            #quote-section { display: block !important; }
+            .pc-quote.collapsed #quote-section { display: none !important; }
+
+            .pc-side-right { display: flex !important; }
+
+            /* 좁은 왼쪽 패널: 리프트권 대인/소인을 세로 1열로 */
+            .lift-qty-grid { grid-template-columns: 1fr !important; }
+        }
+        /* 좌·우 사이드 / PC 패널 헤더는 기본(모바일) 숨김 */
+        .pc-side-right { display: none; }
+        #pc-quote-head { display: none; }
+
+        /* 예약 확인 바텀시트 */
+        #lookup-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:200; justify-content:center; align-items:flex-end; }
+        #lookup-overlay.open { display:flex; }
+        #lookup-box { background:#fff; width:100%; max-width:414px; border-radius:24px 24px 0 0; padding:24px 20px 48px; transform:translateY(100%); transition:transform .35s cubic-bezier(.34,1.56,.64,1); max-height:85vh; overflow-y:auto; }
+        #lookup-overlay.open #lookup-box { transform:translateY(0); }
+
+        /* 진입 프로모션 팝업 (모바일 전용) */
+        #promo-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:300; justify-content:center; align-items:flex-end; }
+        #promo-overlay.open { display:flex; }
+        #promo-box { background:#fff; width:100%; max-width:414px; border-radius:20px 20px 0 0; overflow:hidden; transform:translateY(100%); transition:transform .4s cubic-bezier(.34,1.56,.64,1); }
+        #promo-overlay.open #promo-box { transform:translateY(0); }
+        #promo-track { display:flex; transition:transform .35s ease; }
+        #promo-track > div { flex:0 0 100%; }
+        /* PC에서는 진입 팝업 미노출 */
+        @media (min-width: 1024px) { #promo-overlay { display:none !important; } }
+
+        /* ===== 이미지 팝업(모달) ===== */
+        #img-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:400; justify-content:center; align-items:center; padding:24px; }
+        #img-modal.open { display:flex; }
+        #img-modal img { max-width:90vw; max-height:85vh; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.5); }
+        #img-modal .img-modal-close { position:absolute; top:20px; right:24px; width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,.15); color:#fff; font-size:22px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s; }
+        #img-modal .img-modal-close:hover { background:rgba(255,255,255,.3); }
+
+        /* ===== PC 견적폼 왼쪽 패널 헤더 (여닫이) ===== */
+        #pc-quote-head {
+            background:#7c3aed; color:#fff; padding:14px 16px; cursor:pointer;
+            align-items:center; justify-content:space-between; font-weight:800; font-size:14px;
+            position:sticky; top:0; z-index:5;
+        }
+        #pc-quote-head .pqh-chevron { transition:transform .3s ease; }
+        .pc-quote.collapsed #pc-quote-head .pqh-chevron { transform:rotate(180deg); }
+        .pc-quote.collapsed #quote-section { display:none !important; }
+
+        /* ===== PC 우측 세로 퀵버튼 ===== */
+        .pc-side-right {
+            position: fixed; top: 50%; transform: translateY(-50%);
+            left: calc(50% + 380px + 20px);  /* 중앙 컬럼 오른쪽 바깥 */
+            flex-direction: column; gap: 10px; z-index: 60;
+        }
+        @media (max-width: 1320px) { .pc-side-right { left: auto; right: 16px; } }
+        .pc-side-right a {
+            width:64px; height:64px; border-radius:16px; display:flex; flex-direction:column;
+            align-items:center; justify-content:center; gap:3px; text-decoration:none;
+            box-shadow:0 6px 18px rgba(0,0,0,.15); transition:transform .15s ease;
+        }
+        .pc-side-right a:hover { transform:translateY(-2px); }
+    </style>
+</head>
+<body>
+
+<!-- 토스트 -->
+<div id="toast" role="alert" aria-live="polite"></div>
+
+<!-- 이미지 팝업(모달) -->
+<div id="img-modal" role="dialog" aria-modal="true" aria-label="이미지 크게 보기" onclick="closeImgModal(event)">
+    <div class="img-modal-close" onclick="closeImgModal()" aria-label="닫기">&times;</div>
+    <img id="img-modal-img" src="" alt="확대 이미지">
+</div>
+
+<!-- 진입 프로모션 팝업 (모바일 전용) -->
+<div id="promo-overlay" role="dialog" aria-modal="true" aria-label="이벤트 안내">
+    <div id="promo-box">
+        <div class="relative">
+            <div id="promo-track">
+                <!-- 슬라이드 1 -->
+                <div class="bg-gradient-to-br from-[#7c3aed] to-[#5b21b6] text-white p-6 pb-8">
+                    <p class="text-[13px] font-bold text-violet-100 mb-1">무주 스키 렌탈 신규 오픈</p>
+                    <h3 class="text-[26px] font-black leading-tight mb-2">풀세트 <span class="text-[#7cc0ff]">40,000원</span></h3>
+                    <p class="text-[13px] text-violet-100 mb-5">장비 + 의류 + 헬멧 + 고글 + 장갑<br>오픈 기념 한정 특가</p>
+                    <button onclick="promoGoReserve()" class="bg-white text-[#7c3aed] font-black text-[14px] px-5 py-2.5 rounded-full inline-flex items-center gap-1.5 hover:bg-violet-50 transition">
+                        지금 예약하기 <i class="fa-solid fa-arrow-right text-[12px]"></i>
+                    </button>
+                </div>
+                <!-- 슬라이드 2 -->
+                <div class="bg-gradient-to-br from-[#0f172a] to-[#334155] text-white p-6 pb-8">
+                    <p class="text-[13px] font-bold text-gray-300 mb-1">26/27 시즌 신상 입고</p>
+                    <h3 class="text-[26px] font-black leading-tight mb-2">올해 제일 <span class="text-[#7cc0ff]">잘 입은 사람</span></h3>
+                    <p class="text-[13px] text-gray-300 mb-5">사장이 직접 고른 트렌디한 신상 스키복<br>슬로프 앞까지 무료 배달</p>
+                    <button onclick="promoGoLookbook()" class="bg-white text-[#0f172a] font-black text-[14px] px-5 py-2.5 rounded-full inline-flex items-center gap-1.5 hover:bg-gray-100 transition">
+                        룩북 구경하기 <i class="fa-solid fa-arrow-right text-[12px]"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- 인디케이터 -->
+            <div id="promo-dots" class="absolute bottom-3 right-5 flex gap-1.5"></div>
+        </div>
+        <!-- 하단 컨트롤 -->
+        <div class="flex items-center justify-between border-t border-gray-100 text-[13px] font-bold text-gray-500">
+            <button onclick="promoDismissToday()" class="flex-1 py-4 hover:bg-gray-50 transition">오늘은 그만보기</button>
+            <div class="w-px h-5 bg-gray-200"></div>
+            <button onclick="promoClose()" class="flex-1 py-4 text-[#0f172a] hover:bg-gray-50 transition">닫기</button>
+        </div>
+    </div>
+</div>
+
+<!-- 예약 완료 모달 -->
+<div id="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div id="confirm-box">
+        <!-- 성공 -->
+        <div id="confirm-success">
+            <div class="text-center mb-5">
+                <div class="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-circle-check text-green-500 text-[1.8rem]"></i>
+                </div>
+                <h2 id="confirm-title" class="font-black text-[#0f172a] text-[18px] mb-1">예약이 접수되었습니다</h2>
+                <p class="text-gray-400 text-[12px]">예약 확정을 위해 아래 방법으로 결제를 진행해주세요</p>
+            </div>
+            <!-- 예약 요약 -->
+            <div class="bg-gray-50 rounded-2xl p-4 space-y-2 mb-4 text-[13px]">
+                <div class="flex justify-between"><span class="text-gray-400">예약번호</span><span id="confirm-no" class="font-black text-[#7c3aed] text-[15px]"></span></div>
+                <div class="h-px bg-gray-200"></div>
+                <div class="flex justify-between"><span class="text-gray-400">예약자</span><span id="confirm-name" class="font-bold text-[#0f172a]"></span></div>
+                <div class="flex justify-between"><span class="text-gray-400">연락처</span><span id="confirm-phone" class="font-bold text-[#0f172a]"></span></div>
+                <div class="flex justify-between"><span class="text-gray-400">방문 일시</span><span id="confirm-date" class="font-bold text-[#0f172a]"></span></div>
+                <div class="flex justify-between"><span class="text-gray-400">예상 금액</span><span id="confirm-price" class="font-bold text-[#7c3aed]"></span></div>
+            </div>
+            <!-- 결제 안내 -->
+            <div class="space-y-2.5 mb-4">
+                <!-- 계좌 입금 -->
+                <div class="bg-violet-50 border border-violet-100 rounded-xl p-3.5">
+                    <p class="text-[11px] font-bold text-[#7c3aed] mb-2 flex items-center gap-1"><i class="fa-solid fa-building-columns text-[10px]"></i> 방법 1. 계좌 입금</p>
+                    <div class="space-y-1 text-[12px] text-[#0f172a]">
+                        <div class="flex gap-2"><span class="text-gray-400 w-10 flex-shrink-0">은행</span><span class="font-bold">추후 안내 예정</span></div>
+                        <div class="flex gap-2"><span class="text-gray-400 w-10 flex-shrink-0">계좌</span><span class="font-bold">추후 안내 예정</span></div>
+                        <div class="flex gap-2"><span class="text-gray-400 w-10 flex-shrink-0">예금주</span><span class="font-bold">추후 안내 예정</span></div>
+                    </div>
+                </div>
+                <!-- 네이버 예약 -->
+                <a href="#" target="_blank" rel="noopener noreferrer"
+                   class="flex items-center justify-between bg-[#03c75a] text-white rounded-xl px-4 py-3 hover:opacity-90 transition">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-credit-card text-[14px]"></i>
+                        <div>
+                            <p class="font-bold text-[13px]">방법 2. 네이버 예약으로 결제하기</p>
+                            <p class="text-[10px] text-green-100">카드·네이버페이 결제 가능</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-[12px] opacity-80"></i>
+                </a>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 flex gap-2 items-start mb-4">
+                <i class="fa-solid fa-circle-exclamation text-amber-500 flex-shrink-0 mt-0.5 text-[12px]"></i>
+                <p class="text-[11px] text-amber-700 font-medium">예약 번호를 캡처하거나 메모해두세요. 예약 확인 시 필요합니다.</p>
+            </div>
+            <button onclick="closeConfirm()" class="w-full bg-[#0f172a] text-white rounded-xl py-3 font-bold text-[14px] hover:bg-gray-800 transition mb-3">확인했습니다</button>
+            <!-- 강습 유도 -->
+            <div class="border border-gray-100 rounded-xl p-4 text-center">
+                <p class="text-[12px] text-gray-400 mb-1">⛷️ 강습도 함께 받으시겠어요?</p>
+                <p class="text-[11px] text-gray-400 mb-3">원하는 강사를 직접 선택하고 스케줄을 확인할 수 있습니다</p>
+                <a href="https://sbski.co.kr" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-1.5 bg-violet-50 text-[#7c3aed] font-bold text-[13px] px-4 py-2.5 rounded-xl hover:bg-violet-100 transition">
+                    강습 예약하러 가기 <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                </a>
+            </div>
+        </div>
+        <!-- 오류 -->
+        <div id="confirm-error" class="hidden text-center">
+            <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3">
+                <i class="fa-solid fa-circle-xmark text-red-400 text-[1.8rem]"></i>
+            </div>
+            <h2 class="font-black text-[#0f172a] text-[17px] mb-2">예약 접수에 실패했습니다</h2>
+            <p class="text-gray-400 text-[12px] mb-5">잠시 후 다시 시도하거나<br>카카오톡으로 문의해주세요</p>
+            <button onclick="closeConfirm()" class="w-full bg-gray-100 text-gray-700 rounded-xl py-3 font-bold text-[14px]">닫기</button>
+        </div>
+    </div>
+</div>
+
+<!-- 예약 확인 바텀시트 모달 -->
+<div id="lookup-overlay" role="dialog" aria-modal="true" aria-labelledby="lookup-title"
+     onclick="if(event.target===this) closeLookupModal()">
+    <div id="lookup-box">
+        <!-- 헤더 -->
+        <div class="flex justify-between items-center mb-5">
+            <div>
+                <h2 id="lookup-title" class="font-black text-[#0f172a] text-[18px]">예약 확인하기</h2>
+                <p class="text-[12px] text-gray-400 mt-0.5">이름과 연락처로 예약 상태를 확인합니다</p>
+            </div>
+            <button onclick="closeLookupModal()" aria-label="닫기"
+                    class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition">
+                <i class="fa-solid fa-xmark text-gray-600"></i>
+            </button>
+        </div>
+        <!-- 입력 -->
+        <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-[10px] text-gray-400 font-medium mb-1">예약자 이름</label>
+                    <input type="text" id="lookup-name" placeholder="홍길동"
+                           class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 outline-none focus:border-violet-500 text-[13px]">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-gray-400 font-medium mb-1">연락처</label>
+                    <input type="tel" id="lookup-phone" placeholder="010-0000-0000" maxlength="13"
+                           oninput="formatPhone(this)"
+                           onkeydown="if(event.key==='Enter') lookupReservation()"
+                           class="w-full border border-gray-200 rounded-xl px-3 py-2.5 bg-white text-gray-800 outline-none focus:border-violet-500 text-[13px]">
+                </div>
+            </div>
+            <button onclick="lookupReservation()" id="lookup-btn"
+                    class="w-full bg-[#7c3aed] text-white rounded-xl py-3.5 font-bold text-[14px] hover:bg-violet-700 transition flex items-center justify-center gap-2">
+                <span id="lookup-btn-text"><i class="fa-solid fa-magnifying-glass mr-1"></i> 예약 확인</span>
+            </button>
+            <!-- 결과 -->
+            <div id="lookup-result" class="hidden pt-1"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 메뉴 모달 -->
+<div id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div id="modal-box">
+        <div class="flex justify-between items-center mb-5">
+            <span id="modal-title" class="font-black text-[#0f172a] text-[17px]">메뉴</span>
+            <button onclick="closeModal()" aria-label="메뉴 닫기" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+                <i class="fa-solid fa-xmark text-lg text-gray-600"></i>
+            </button>
+        </div>
+        <nav><ul class="space-y-1">
+            <li><button onclick="openPanelFromMenu('lift-preview-section')" class="w-full text-left px-3 py-3 rounded-xl text-[15px] font-bold text-[#0f172a] hover:bg-gray-50 flex items-center gap-3"><i class="fa-solid fa-ticket-simple text-[#7c3aed] w-5"></i> 리프트권 요금</button></li>
+            <li><button onclick="openPanelFromMenu('outfit-section')" class="w-full text-left px-3 py-3 rounded-xl text-[15px] font-bold text-[#0f172a] hover:bg-gray-50 flex items-center gap-3"><i class="fa-solid fa-shirt text-[#7c3aed] w-5"></i> 의류/장비</button></li>
+            <li><button onclick="openPanelFromMenu('lesson-section')" class="w-full text-left px-3 py-3 rounded-xl text-[15px] font-bold text-[#0f172a] hover:bg-gray-50 flex items-center gap-3"><i class="fa-solid fa-person-skiing text-[#7c3aed] w-5"></i> 강습 안내</button></li>
+            <li><button onclick="openPanelFromMenu('pension-section')" class="w-full text-left px-3 py-3 rounded-xl text-[15px] font-bold text-[#0f172a] hover:bg-gray-50 flex items-center gap-3"><i class="fa-solid fa-house text-[#7c3aed] w-5"></i> 펜션 예약</button></li>
+            <li><button onclick="openPanelFromMenu('guide-section')" class="w-full text-left px-3 py-3 rounded-xl text-[15px] font-bold text-[#0f172a] hover:bg-gray-50 flex items-center gap-3"><i class="fa-solid fa-book-open text-[#7c3aed] w-5"></i> 이용 가이드</button></li>
+            <li><button onclick="openPanelFromMenu('map-section')" class="w-full text-left px-3 py-3 rounded-xl text-[15px] font-bold text-[#0f172a] hover:bg-gray-50 flex items-center gap-3"><i class="fa-solid fa-map-location-dot text-[#7c3aed] w-5"></i> 오시는 길</button></li>
+        </ul></nav>
+    </div>
+</div>
+
+<div class="mobile-app pb-20">
+
+    <!-- 헤더 -->
+    <header class="flex justify-between items-center px-5 py-3.5 bg-white sticky top-0 z-50 border-b border-gray-100 shadow-sm">
+        <a href="/" onclick="window.scrollTo(0,0); if(history.scrollRestoration){history.scrollRestoration='manual';} location.reload(); return false;" aria-label="놀러와 메인으로" class="flex items-center space-x-2 cursor-pointer">
+            <i class="fa-solid fa-mountain text-[#7c3aed] text-xl" aria-hidden="true"></i>
+            <span class="font-black text-[#0f172a] text-[19px] tracking-tight">놀러와</span>
+        </a>
+        <button onclick="openModal()" aria-label="전체 메뉴 열기" class="text-[#0f172a] text-2xl w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+            <i class="fa-solid fa-bars" aria-hidden="true"></i>
+        </button>
+    </header>
+
+    <div class="pc-wrapper">
+    <!-- PC 오른쪽 상단 / 모바일 첫 번째: 슬라이드 -->
+    <div class="pc-slide">
+
+    <!-- 큰 세로 메인 슬라이드 -->
+    <section class="bg-white" aria-label="이벤트 배너">
+        <div id="main-slide-container" class="relative w-full overflow-hidden bg-[#1e293b]">
+            <div id="main-slide-wrapper" class="absolute inset-0 opacity-100">
+                <img id="main-slide-img" src="./2.jpg" alt="배너" class="w-full h-full object-cover object-center">
+                <div id="main-slide-gradient" class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
+                <div class="absolute left-0 right-0 bottom-0 flex flex-col px-6 pb-8 z-10">
+                    <div id="main-slide-badge" class="self-start bg-white/90 text-[#7c3aed] px-2.5 py-1 rounded-full font-bold text-[11px] shadow-sm flex items-center mb-2">
+                        <i class="fa-regular fa-snowflake mr-1"></i> 신규 OPEN
+                    </div>
+                    <p id="main-slide-title" class="text-white font-black text-[28px] leading-tight drop-shadow-lg tracking-tight">
+                        풀세트 단돈 <span class="text-[#7cc0ff]">40,000원</span>
+                    </p>
+                    <p id="main-slide-desc" class="text-white/85 text-[14px] font-medium mt-1.5 drop-shadow">
+                        장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가
+                    </p>
+                </div>
+            </div>
+            <button onclick="changeMainSlide(-1)" aria-label="이전 슬라이드" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-white/40 backdrop-blur-sm text-gray-900 rounded-full hover:bg-white/70 transition z-20">
+                <i class="fa-solid fa-chevron-left text-[13px] pr-0.5"></i>
+            </button>
+            <button onclick="changeMainSlide(1)" aria-label="다음 슬라이드" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-white/40 backdrop-blur-sm text-gray-900 rounded-full hover:bg-white/70 transition z-20">
+                <i class="fa-solid fa-chevron-right text-[13px] pl-0.5"></i>
+            </button>
+            <div id="main-slide-dots" class="absolute bottom-4 right-5 flex gap-1.5 z-20"></div>
+        </div>
+    </section>
+
+    </div><!-- /pc-slide -->
+
+    <!-- PC 왼쪽 / 모바일 두 번째: 견적 폼 -->
+    <div class="pc-quote" id="pc-quote">
+
+    <!-- PC 전용 패널 헤더 (여닫기) -->
+    <div id="pc-quote-head" onclick="togglePcQuote()">
+        <span><i class="fa-solid fa-calculator mr-1.5"></i> 실시간 견적/예약</span>
+        <i class="fa-solid fa-chevron-up pqh-chevron text-[12px]"></i>
+    </div>
+
+    <!-- 실시간 견적 및 간편 예약 (맨 위 핵심) -->
+    <section class="quote-section-wrap px-4 pt-5 pb-4 bg-white relative z-20">
+        <button id="quote-btn" aria-expanded="false" aria-controls="quote-section"
+                class="w-full bg-gradient-to-r from-[#f3eeff] to-white border-2 border-[#7c3aed] rounded-2xl py-4 pl-5 pr-4 flex items-center justify-between soft-shadow hover:from-[#ede4ff] transition duration-200 relative overflow-hidden">
+            <span class="flex items-center gap-3 text-left z-10 pr-16">
+                <span class="w-10 h-10 rounded-full bg-[#7c3aed] flex items-center justify-center flex-shrink-0">
+                    <i id="quote-icon" class="fa-solid fa-plus text-white text-[16px] transition-transform duration-300" style="transform:rotate(0deg)"></i>
+                </span>
+                <span>
+                    <span class="block font-black text-[#7c3aed] text-[17px] leading-tight">실시간 견적 및 간편 예약</span>
+                    <span class="block text-[12px] text-gray-500 font-medium mt-1">탭 한 번이면 내 가격이 바로 나와요</span>
+                    <span class="inline-block text-[10px] text-[#7c3aed] font-bold bg-violet-100/70 px-2 py-0.5 rounded-md mt-2">예약금 없음 · 3초 견적</span>
+                </span>
+            </span>
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#7c3aed]/15 z-0" aria-hidden="true">
+                <i class="fa-solid fa-person-skiing text-[56px]"></i>
+            </span>
+        </button>
+
+        <div id="quote-section" class="hidden overflow-hidden transition-all duration-300 mt-3">
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-5">
+
+                <!-- ① 예약자 정보 -->
+                <div>
+                    <p class="form-section-title"><i class="fa-solid fa-user text-[10px]"></i> 예약자 정보</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label for="reserver-name" class="block text-[10px] text-gray-400 font-medium mb-1">이름 <span class="text-red-400">*</span></label>
+                            <input type="text" id="reserver-name" placeholder="홍길동"
+                                   class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-800 outline-none focus:border-violet-500 text-[13px]">
+                        </div>
+                        <div>
+                            <label for="reserver-phone" class="block text-[10px] text-gray-400 font-medium mb-1">연락처 <span class="text-red-400">*</span></label>
+                            <input type="tel" id="reserver-phone" placeholder="010-0000-0000"
+                                   maxlength="13"
+                                   oninput="formatPhone(this)"
+                                   class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-800 outline-none focus:border-violet-500 text-[13px]">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ② 방문 일시 -->
+                <div>
+                    <p class="form-section-title"><i class="fa-regular fa-calendar text-[10px]"></i> 방문 일시</p>
+                    <div class="space-y-2 mb-2">
+                        <div>
+                            <label for="visit-date" class="block text-[10px] text-gray-400 font-medium mb-1">방문 날짜</label>
+                            <input type="date" id="visit-date" onchange="onDateChange()"
+                                   class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-800 outline-none focus:border-violet-500 text-[13px]">
+                        </div>
+                        <div>
+                            <label for="visit-time" class="block text-[10px] text-gray-400 font-medium mb-1">방문 시간</label>
+                            <select id="visit-time" class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-800 outline-none focus:border-violet-500 text-[13px]">
+                                <option>07:30</option><option>08:00</option><option>08:30</option>
+                                <option>09:00</option><option>09:30</option><option>10:00</option>
+                                <option>10:30</option><option>11:00</option><option>11:30</option>
+                                <option>12:00</option><option>12:30</option><option>13:00</option>
+                                <option>13:30</option><option>14:00</option><option>14:30</option>
+                                <option>15:00</option><option>15:30</option><option>16:00</option>
+                                <option>16:30</option><option>17:00</option><option>17:30</option>
+                                <option>18:00</option><option>18:30</option><option>19:00</option>
+                                <option>19:30</option><option>20:00</option><option>20:30</option>
+                                <option>21:00</option><option>21:30</option><option>22:00</option>
+                                <option>22:30</option><option>23:00</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="day-type-wrap" class="hidden">
+                        <span id="day-type-badge" class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                            <i class="fa-solid fa-circle-info text-[10px]"></i>
+                            <span id="day-type-text"></span>
+                        </span>
+                        <span class="text-[11px] text-gray-400 ml-1">리프트권 요금 자동 반영</span>
+                    </div>
+                </div>
+
+                <!-- ③ 리프트권 -->
+                <div>
+                    <p class="form-section-title"><i class="fa-solid fa-ticket text-[10px]"></i> 리프트권</p>
+
+                    <!-- 3시간권 -->
+                    <div class="lift-section mb-2">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-[13px] text-[#0f172a]">3시간권</span>
+                            <span id="lift3h-price" class="text-[10px] text-gray-400 font-medium"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 lift-qty-grid">
+                            <div class="flex items-center justify-between bg-gray-50 rounded-lg px-2 py-1.5">
+                                <span class="text-[11px] text-gray-500 font-medium whitespace-nowrap">대인</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button id="lift3hAdult-minus" class="qty-btn" onclick="updateQty('lift3hAdult',-1)" aria-label="3시간권 대인 감소" disabled>−</button>
+                                    <span id="lift3hAdult-qty" class="qty-val">0</span>
+                                    <button class="qty-btn" onclick="updateQty('lift3hAdult',1)" aria-label="3시간권 대인 증가">+</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-gray-50 rounded-lg px-2 py-1.5">
+                                <span class="text-[11px] text-gray-500 font-medium whitespace-nowrap">소인</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button id="lift3hChild-minus" class="qty-btn" onclick="updateQty('lift3hChild',-1)" aria-label="3시간권 소인 감소" disabled>−</button>
+                                    <span id="lift3hChild-qty" class="qty-val">0</span>
+                                    <button class="qty-btn" onclick="updateQty('lift3hChild',1)" aria-label="3시간권 소인 증가">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4시간권 -->
+                    <div class="lift-section mb-2">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-[13px] text-[#0f172a]">4시간권</span>
+                            <span id="lift4h-price" class="text-[10px] text-gray-400 font-medium"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 lift-qty-grid">
+                            <div class="flex items-center justify-between bg-gray-50 rounded-lg px-2 py-1.5">
+                                <span class="text-[11px] text-gray-500 font-medium whitespace-nowrap">대인</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button id="lift4hAdult-minus" class="qty-btn" onclick="updateQty('lift4hAdult',-1)" aria-label="4시간권 대인 감소" disabled>−</button>
+                                    <span id="lift4hAdult-qty" class="qty-val">0</span>
+                                    <button class="qty-btn" onclick="updateQty('lift4hAdult',1)" aria-label="4시간권 대인 증가">+</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-gray-50 rounded-lg px-2 py-1.5">
+                                <span class="text-[11px] text-gray-500 font-medium whitespace-nowrap">소인</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button id="lift4hChild-minus" class="qty-btn" onclick="updateQty('lift4hChild',-1)" aria-label="4시간권 소인 감소" disabled>−</button>
+                                    <span id="lift4hChild-qty" class="qty-val">0</span>
+                                    <button class="qty-btn" onclick="updateQty('lift4hChild',1)" aria-label="4시간권 소인 증가">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6시간권 -->
+                    <div class="lift-section">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-[13px] text-[#0f172a]">6시간권</span>
+                            <span id="lift6h-price" class="text-[10px] text-gray-400 font-medium"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 lift-qty-grid">
+                            <div class="flex items-center justify-between bg-gray-50 rounded-lg px-2 py-1.5">
+                                <span class="text-[11px] text-gray-500 font-medium whitespace-nowrap">대인</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button id="lift6hAdult-minus" class="qty-btn" onclick="updateQty('lift6hAdult',-1)" aria-label="6시간권 대인 감소" disabled>−</button>
+                                    <span id="lift6hAdult-qty" class="qty-val">0</span>
+                                    <button class="qty-btn" onclick="updateQty('lift6hAdult',1)" aria-label="6시간권 대인 증가">+</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-gray-50 rounded-lg px-2 py-1.5">
+                                <span class="text-[11px] text-gray-500 font-medium whitespace-nowrap">소인</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button id="lift6hChild-minus" class="qty-btn" onclick="updateQty('lift6hChild',-1)" aria-label="6시간권 소인 감소" disabled>−</button>
+                                    <span id="lift6hChild-qty" class="qty-val">0</span>
+                                    <button class="qty-btn" onclick="updateQty('lift6hChild',1)" aria-label="6시간권 소인 증가">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ④ 장비 / 의류 -->
+                <div>
+                    <p class="form-section-title"><i class="fa-solid fa-shirt text-[10px]"></i> 장비 / 의류</p>
+                    <div class="space-y-2">
+                        <div class="item-row">
+                            <div><p class="font-bold text-[#0f172a] text-[13px]">장비 렌탈</p><p class="text-[10px] text-gray-400">15,000원 / 인</p></div>
+                            <div class="flex items-center gap-1.5">
+                                <button id="equip-minus" class="qty-btn" onclick="updateQty('equip',-1)" disabled>−</button>
+                                <span id="equip-qty" class="qty-val">0</span>
+                                <button class="qty-btn" onclick="updateQty('equip',1)">+</button>
+                            </div>
+                        </div>
+                        <div class="item-row">
+                            <div><p class="font-bold text-[#0f172a] text-[13px]">의류 렌탈</p><p class="text-[10px] text-gray-400">15,000원 / 인</p></div>
+                            <div class="flex items-center gap-1.5">
+                                <button id="cloth-minus" class="qty-btn" onclick="updateQty('cloth',-1)" disabled>−</button>
+                                <span id="cloth-qty" class="qty-val">0</span>
+                                <button class="qty-btn" onclick="updateQty('cloth',1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ⑤ 추가 옵션 -->
+                <div>
+                    <p class="form-section-title"><i class="fa-solid fa-plus text-[10px]"></i> 추가 옵션</p>
+                    <div class="space-y-2">
+                        <div class="item-row">
+                            <div><p class="font-bold text-[#0f172a] text-[13px]">헬멧</p><p class="text-[10px] text-gray-400">10,000원 / 개</p></div>
+                            <div class="flex items-center gap-1.5">
+                                <button id="helmet-minus" class="qty-btn" onclick="updateQty('helmet',-1)" disabled>−</button>
+                                <span id="helmet-qty" class="qty-val">0</span>
+                                <button class="qty-btn" onclick="updateQty('helmet',1)">+</button>
+                            </div>
+                        </div>
+                        <div class="item-row">
+                            <div><p class="font-bold text-[#0f172a] text-[13px]">고글</p><p class="text-[10px] text-gray-400">10,000원 / 개</p></div>
+                            <div class="flex items-center gap-1.5">
+                                <button id="goggle-minus" class="qty-btn" onclick="updateQty('goggle',-1)" disabled>−</button>
+                                <span id="goggle-qty" class="qty-val">0</span>
+                                <button class="qty-btn" onclick="updateQty('goggle',1)">+</button>
+                            </div>
+                        </div>
+                        <div class="item-row">
+                            <div><p class="font-bold text-[#0f172a] text-[13px]">헬멧+고글 (바이저)</p><p class="text-[10px] text-gray-400">15,000원 / 개</p></div>
+                            <div class="flex items-center gap-1.5">
+                                <button id="visor-minus" class="qty-btn" onclick="updateQty('visor',-1)" disabled>−</button>
+                                <span id="visor-qty" class="qty-val">0</span>
+                                <button class="qty-btn" onclick="updateQty('visor',1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ⑥ 기타 요청사항 -->
+                <div>
+                    <p class="form-section-title"><i class="fa-regular fa-comment text-[10px]"></i> 기타 요청사항</p>
+                    <textarea id="reserver-memo" rows="2" placeholder="사이즈, 특이사항 등을 입력해주세요"
+                              class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-800 outline-none focus:border-violet-500 text-[12px] resize-none"></textarea>
+                </div>
+
+                <!-- 약관 -->
+                <div class="bg-gray-100 rounded-xl p-3 text-[11px] text-gray-500 leading-relaxed space-y-1">
+                    <p>· 장비 파손·분실 시 스키/보드 30만원, 기타 장비 원가의 70% 보상</p>
+                    <p>· 리프트권 당일 취소 시 환불 불가, 익일 17시 전 취소 시 100% 환불</p>
+                    <p>· 의류 심각한 오염 시 보상 책임 있음</p>
+                </div>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="reserver-agree" class="w-4 h-4 accent-[#7c3aed]">
+                    <span class="text-[12px] text-gray-600 font-medium">위 이용약관에 동의합니다 <span class="text-red-400">*</span></span>
+                </label>
+
+                <!-- 합계 -->
+                <div class="flex justify-between items-end pt-2 border-t border-gray-200">
+                    <div>
+                        <span class="font-bold text-[#0f172a] text-[14px]">예상 합계</span>
+                        <p id="qty-hint" class="text-[11px] text-amber-500 font-medium mt-0.5 hidden">항목을 1개 이상 선택해주세요</p>
+                    </div>
+                    <div>
+                        <span id="total-price" class="text-2xl font-black text-[#7c3aed]">0</span>
+                        <span class="text-[#7c3aed] font-bold text-sm">원</span>
+                    </div>
+                </div>
+
+                <button id="reserve-submit-btn" onclick="onReserve()"
+                        class="w-full bg-[#0f172a] text-white rounded-xl py-3.5 font-bold text-[14px] shadow-sm hover:bg-gray-800 transition flex items-center justify-center gap-2">
+                    <span id="reserve-btn-text">예약 진행하기</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    </div><!-- /pc-quote -->
+
+    <!-- 아이콘 메뉴 (🔍 더 알아보기) -->
+    <div class="pc-menu">
+
+    <!-- 메뉴 섹션 -->
+    <section class="px-4 py-4 bg-white" aria-label="메뉴">
+
+        <div class="flex items-center gap-1.5 mb-3 px-1">
+            <i class="fa-solid fa-magnifying-glass text-[#7c3aed] text-[13px]"></i>
+            <span class="font-black text-[#0f172a] text-[14px]">더 알아보기</span>
+        </div>
+
+        <!-- 아이콘 메뉴 그리드 (JS에서 menuItems 배열로 자동 생성) -->
+        <div id="menu-grid" class="menu-grid grid grid-cols-3 gap-3"></div>
+
+        <!-- ===== 패널: 리프트권 요금표 ===== -->
+        <div id="lift-preview-section" class="hidden mt-3 bg-[#f8fafc] rounded-xl border border-violet-100 shadow-inner overflow-hidden pb-5 pt-4">
+            <div class="px-4 mb-3 flex justify-between items-end">
+                <h3 class="font-black text-[#0f172a] text-[15px] flex items-center"><i class="fa-solid fa-ticket mr-1.5 text-[#7c3aed]"></i> 리프트권 최대 할인가</h3>
+                <span class="text-[10px] text-gray-400">← 좌우 스와이프 →</span>
+            </div>
+            <div class="lift-cards-container flex overflow-x-auto snap-x snap-mandatory space-x-3 px-4 pb-2 hide-scrollbar" role="list">
+                <!-- 3시간권 -->
+                <div class="snap-center flex-none w-[240px] bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" role="listitem">
+                    <div class="bg-[#1e293b] text-white text-center py-2 font-bold text-[15px] tracking-wide">3시간권</div>
+                    <div class="p-4 space-y-4">
+                        <div>
+                            <span class="inline-block border-b-2 border-[#7c3aed] pb-0.5 mb-1.5 font-bold text-[12px] text-[#0f172a]">주중요금</span>
+                            <div class="flex justify-between items-center mb-1"><span class="text-[11px] text-gray-500">대인</span><div><span class="text-[10px] text-gray-400 line-through mr-1">60,000</span><span class="text-[14px] font-bold text-[#0f172a]">44,000<span class="text-[11px] font-normal">원</span></span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[11px] text-gray-500">소인</span><div><span class="text-[10px] text-gray-400 line-through mr-1">48,000</span><span class="text-[14px] font-bold text-[#0f172a]">35,000<span class="text-[11px] font-normal">원</span></span></div></div>
+                        </div>
+                        <div>
+                            <span class="inline-block border-b-2 border-[#7c3aed] pb-0.5 mb-1.5 font-bold text-[12px] text-[#0f172a]">주말요금</span>
+                            <div class="flex justify-between items-center mb-1"><span class="text-[11px] text-gray-500">대인</span><div><span class="text-[10px] text-gray-400 line-through mr-1">74,000</span><span class="text-[14px] font-bold text-[#0f172a]">54,000<span class="text-[11px] font-normal">원</span></span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[11px] text-gray-500">소인</span><div><span class="text-[10px] text-gray-400 line-through mr-1">59,000</span><span class="text-[14px] font-bold text-[#0f172a]">43,000<span class="text-[11px] font-normal">원</span></span></div></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 4시간권 -->
+                <div class="snap-center flex-none w-[240px] bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" role="listitem">
+                    <div class="bg-[#1e293b] text-white text-center py-2 font-bold text-[15px] tracking-wide">4시간권</div>
+                    <div class="p-4 space-y-4">
+                        <div>
+                            <span class="inline-block border-b-2 border-[#7c3aed] pb-0.5 mb-1.5 font-bold text-[12px] text-[#0f172a]">주중요금</span>
+                            <div class="flex justify-between items-center mb-1"><span class="text-[11px] text-gray-500">대인</span><div><span class="text-[10px] text-gray-400 line-through mr-1">70,000</span><span class="text-[14px] font-bold text-[#0f172a]">51,000<span class="text-[11px] font-normal">원</span></span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[11px] text-gray-500">소인</span><div><span class="text-[10px] text-gray-400 line-through mr-1">56,000</span><span class="text-[14px] font-bold text-[#0f172a]">41,000<span class="text-[11px] font-normal">원</span></span></div></div>
+                        </div>
+                        <div>
+                            <span class="inline-block border-b-2 border-[#7c3aed] pb-0.5 mb-1.5 font-bold text-[12px] text-[#0f172a]">주말요금</span>
+                            <div class="flex justify-between items-center mb-1"><span class="text-[11px] text-gray-500">대인</span><div><span class="text-[10px] text-gray-400 line-through mr-1">84,000</span><span class="text-[14px] font-bold text-[#0f172a]">61,000<span class="text-[11px] font-normal">원</span></span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[11px] text-gray-500">소인</span><div><span class="text-[10px] text-gray-400 line-through mr-1">67,000</span><span class="text-[14px] font-bold text-[#0f172a]">49,000<span class="text-[11px] font-normal">원</span></span></div></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 6시간권 -->
+                <div class="snap-center flex-none w-[240px] bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" role="listitem">
+                    <div class="bg-[#7c3aed] text-white text-center py-2 font-bold text-[15px] tracking-wide">6시간권</div>
+                    <div class="p-4 space-y-4">
+                        <div>
+                            <span class="inline-block border-b-2 border-[#7c3aed] pb-0.5 mb-1.5 font-bold text-[12px] text-[#0f172a]">주중요금</span>
+                            <div class="flex justify-between items-center mb-1"><span class="text-[11px] text-gray-500">대인</span><div><span class="text-[10px] text-gray-400 line-through mr-1">80,000</span><span class="text-[14px] font-bold text-[#0f172a]">58,000<span class="text-[11px] font-normal">원</span></span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[11px] text-gray-500">소인</span><div><span class="text-[10px] text-gray-400 line-through mr-1">64,000</span><span class="text-[14px] font-bold text-[#0f172a]">47,000<span class="text-[11px] font-normal">원</span></span></div></div>
+                        </div>
+                        <div>
+                            <span class="inline-block border-b-2 border-[#7c3aed] pb-0.5 mb-1.5 font-bold text-[12px] text-[#0f172a]">주말요금</span>
+                            <div class="flex justify-between items-center mb-1"><span class="text-[11px] text-gray-500">대인</span><div><span class="text-[10px] text-gray-400 line-through mr-1">94,000</span><span class="text-[14px] font-bold text-[#0f172a]">69,000<span class="text-[11px] font-normal">원</span></span></div></div>
+                            <div class="flex justify-between items-center"><span class="text-[11px] text-gray-500">소인</span><div><span class="text-[10px] text-gray-400 line-through mr-1">75,000</span><span class="text-[14px] font-bold text-[#0f172a]">55,000<span class="text-[11px] font-normal">원</span></span></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 패널: 의류·장비 ===== -->
+        <div id="outfit-section" class="hidden mt-3 rounded-xl border border-gray-100 overflow-hidden bg-white">
+
+            <!-- ① 가격표 (가격 안내는 여기에서만) -->
+            <div class="px-4 pt-4 pb-3">
+                <h3 class="font-black text-[#0f172a] text-[15px] mb-2"><i class="fa-solid fa-tags text-[#7c3aed] mr-1.5"></i> 렌탈 가격 안내</h3>
+                <div class="rounded-2xl border border-violet-100 overflow-hidden">
+                    <div class="grid grid-cols-2 bg-[#7c3aed] text-white text-[13px] font-bold">
+                        <div class="py-2.5 text-center">품목</div>
+                        <div class="py-2.5 text-center border-l border-white/20">1인 가격</div>
+                    </div>
+                    <div class="grid grid-cols-2 text-[14px] border-b border-gray-100">
+                        <div class="py-3 text-center font-bold text-[#0f172a]">의류</div>
+                        <div class="py-3 text-center border-l border-gray-100 font-black text-[#7c3aed]">15,000원</div>
+                    </div>
+                    <div class="grid grid-cols-2 text-[14px] border-b border-gray-100">
+                        <div class="py-3 text-center font-bold text-[#0f172a]">장비</div>
+                        <div class="py-3 text-center border-l border-gray-100 font-black text-[#7c3aed]">15,000원</div>
+                    </div>
+                    <div class="grid grid-cols-2 text-[14px] border-b border-gray-100">
+                        <div class="py-3 text-center font-bold text-[#0f172a]">헬멧</div>
+                        <div class="py-3 text-center border-l border-gray-100 font-black text-[#7c3aed]">10,000원</div>
+                    </div>
+                    <div class="grid grid-cols-2 text-[14px] border-b border-gray-100">
+                        <div class="py-3 text-center font-bold text-[#0f172a]">고글</div>
+                        <div class="py-3 text-center border-l border-gray-100 font-black text-[#7c3aed]">10,000원</div>
+                    </div>
+                    <div class="grid grid-cols-2 text-[14px]">
+                        <div class="py-3 text-center font-bold text-[#0f172a]">헬멧 + 고글</div>
+                        <div class="py-3 text-center border-l border-gray-100 font-black text-[#7c3aed]">15,000원</div>
+                    </div>
+                </div>
+                <p class="text-[11px] text-gray-400 mt-2 text-center">의류·장비 1인 15,000원 · 헬멧+고글 함께 빌리면 5,000원 할인</p>
+            </div>
+
+            <!-- ② 26/27 시즌 의류 -->
+            <div class="px-4 pt-2 pb-1 flex justify-between items-center">
+                <h3 class="font-black text-[#0f172a] text-[15px]"><i class="fa-solid fa-shirt text-[#7c3aed] mr-1.5"></i> 26/27 시즌 의류</h3>
+            </div>
+            <div class="grid grid-cols-3 gap-2 px-4 pb-4 pt-2">
+                <!-- 의류1 -->
+                <button type="button" onclick="openImgModal('./p/의류1.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#7c3aed] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류1.jpg" alt="매장 입구 의류·헬멧 진열" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-bold text-[#7c3aed] bg-violet-50 px-1.5 py-0.5 rounded-full">#매장전경</span>
+                    </div>
+                </button>
+                <!-- 의류2 -->
+                <button type="button" onclick="openImgModal('./p/의류2.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#7c3aed] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류2.jpg" alt="상하의 전 사이즈 진열" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-bold text-[#7c3aed] bg-violet-50 px-1.5 py-0.5 rounded-full">#전사이즈보유</span>
+                    </div>
+                </button>
+                <!-- 의류3 -->
+                <button type="button" onclick="openImgModal('./p/의류3.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#7c3aed] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류3.jpg" alt="그레이·블랙톤 세트업" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-bold text-[#7c3aed] bg-violet-50 px-1.5 py-0.5 rounded-full">#그레이블랙톤</span>
+                    </div>
+                </button>
+                <!-- 의류4 -->
+                <button type="button" onclick="openImgModal('./p/의류4.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#7c3aed] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류4.jpg" alt="블루·베이지톤 세트업" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-bold text-[#7c3aed] bg-violet-50 px-1.5 py-0.5 rounded-full">#블루베이지톤</span>
+                    </div>
+                </button>
+                <!-- 의류5 -->
+                <button type="button" onclick="openImgModal('./p/의류5.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#7c3aed] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류5.jpg" alt="화이트·형광 세이프티 컬러" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-bold text-[#7c3aed] bg-violet-50 px-1.5 py-0.5 rounded-full">#세이프티컬러</span>
+                    </div>
+                </button>
+                <!-- 의류6 -->
+                <button type="button" onclick="openImgModal('./p/의류6.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#7c3aed] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류6.jpg" alt="레드·블루·그린 포인트컬러" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-bold text-[#7c3aed] bg-violet-50 px-1.5 py-0.5 rounded-full">#포인트컬러</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- ③ 장비 소개 -->
+            <div class="px-4 pt-2 pb-1 flex justify-between items-center border-t border-gray-100">
+                <h3 class="font-black text-[#0f172a] text-[15px] pt-3"><i class="fa-solid fa-person-skiing text-[#7c3aed] mr-1.5"></i> 장비 소개</h3>
+            </div>
+            <div class="grid grid-cols-3 gap-2 px-4 pb-4 pt-2">
+                <!-- 장비1 -->
+                <button type="button" onclick="openImgModal('./p/장비1.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#7c3aed] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비1.jpg" alt="스키·스노보드 판 다수 보유" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-bold text-[#7c3aed] bg-violet-50 px-1.5 py-0.5 rounded-full">#스키보드판다수보유</span>
+                    </div>
+                </button>
+                <!-- 장비2 -->
+                <button type="button" onclick="openImgModal('./p/장비2.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#7c3aed] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비2.jpg" alt="스키부츠 전 사이즈 진열" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-bold text-[#7c3aed] bg-violet-50 px-1.5 py-0.5 rounded-full">#스키부츠전사이즈</span>
+                    </div>
+                </button>
+                <!-- 장비3 -->
+                <button type="button" onclick="openImgModal('./p/장비3.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#7c3aed] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비3.jpg" alt="스노보드 데크 다수 보유" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-bold text-[#7c3aed] bg-violet-50 px-1.5 py-0.5 rounded-full">#보드데크다수보유</span>
+                    </div>
+                </button>
+                <!-- 장비4 -->
+                <button type="button" onclick="openImgModal('./p/장비4.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#7c3aed] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비4.jpg" alt="보드부츠 전 사이즈 진열" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-bold text-[#7c3aed] bg-violet-50 px-1.5 py-0.5 rounded-full">#보드부츠전사이즈</span>
+                    </div>
+                </button>
+                <!-- 장비5 · 숏스키(스키에이트) -->
+                <button type="button" onclick="openImgModal('./p/장비5.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#7c3aed] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비5.jpg" alt="숏스키(스키에이트)" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1">
+                        <span class="text-[10px] font-bold text-[#7c3aed] bg-violet-50 px-1.5 py-0.5 rounded-full">#숏스키입문추천</span>
+                    </div>
+                </button>
+            </div>
+
+            <div class="px-4 pb-4"><button onclick="openQuote()" class="w-full bg-[#7c3aed] text-white rounded-xl py-3 font-bold text-[14px] hover:bg-violet-700 transition">의류·장비 예약하기</button></div>
+        </div>
+
+        <!-- ===== 패널: 강습 안내 ===== -->
+        <div id="lesson-section" class="hidden mt-3 rounded-xl border border-gray-100 bg-white overflow-hidden">
+            <div class="bg-[#0f172a] px-4 py-5 text-center">
+                <p class="text-gray-400 text-[12px] mb-1">강습 신청했는데</p>
+                <p class="text-white font-black text-[16px] leading-snug">"강사가 누구인지도 모르고<br>탔던 적 있으시죠?"</p>
+            </div>
+            <div class="px-4 py-5 space-y-3">
+                <p class="text-[12px] text-gray-400 text-center">저희는 다릅니다</p>
+                <div class="flex items-start gap-3 bg-violet-50 rounded-xl p-3"><div class="w-9 h-9 rounded-full bg-[#7c3aed] flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-user text-white text-[14px]"></i></div><div><p class="font-bold text-[#0f172a] text-[13px]">강사 프로필 공개</p><p class="text-[11px] text-gray-500 mt-0.5">경력·전문 분야를 미리 확인하고 직접 선택</p></div></div>
+                <div class="flex items-start gap-3 bg-violet-50 rounded-xl p-3"><div class="w-9 h-9 rounded-full bg-[#7c3aed] flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-calendar-check text-white text-[14px]"></i></div><div><p class="font-bold text-[#0f172a] text-[13px]">스케줄 실시간 확인</p><p class="text-[11px] text-gray-500 mt-0.5">전화 없이 원하는 날짜·시간 바로 선택</p></div></div>
+                <div class="flex items-start gap-3 bg-violet-50 rounded-xl p-3"><div class="w-9 h-9 rounded-full bg-[#7c3aed] flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-star text-white text-[14px]"></i></div><div><p class="font-bold text-[#0f172a] text-[13px]">1:1 맞춤 배정</p><p class="text-[11px] text-gray-500 mt-0.5">초보·아이·상급자 수준별 강사 직접 지정</p></div></div>
+            </div>
+            <div class="px-4 pb-5 flex gap-2">
+                <a href="https://sbski.co.kr" target="_blank" rel="noopener noreferrer" class="flex-1 bg-[#7c3aed] text-white rounded-xl py-3 font-bold text-[13px] text-center hover:bg-violet-700 transition flex items-center justify-center gap-1.5"><i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i> 강사 직접 선택하기</a>
+                <a href="tel:010-3600-1196" class="flex-1 bg-[#0f172a] text-white rounded-xl py-3 font-bold text-[13px] text-center hover:bg-gray-800 transition flex items-center justify-center gap-1.5"><i class="fa-solid fa-phone text-[11px]"></i> 강습 문의하기</a>
+            </div>
+        </div>
+
+        <!-- ===== 패널: 펜션 예약 ===== -->
+        <div id="pension-section" class="hidden mt-3 rounded-xl border border-gray-100 bg-white overflow-hidden">
+            <div class="px-4 pt-4 pb-3 flex justify-between items-center">
+                <h3 class="font-black text-[#0f172a] text-[15px]">제휴 펜션 <span class="text-[#7c3aed]">안내</span></h3>
+            </div>
+            <div class="px-4 pb-4">
+                <!-- 무곡 (넓은 단독 카드 · 사진 3장) -->
+                <a href="https://mugok.co.kr/" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden border border-gray-100 shadow-sm mb-2.5 hover:border-[#1f9a9a] transition">
+                    <div class="grid grid-cols-3 gap-0.5 bg-gray-100">
+                        <div class="aspect-[4/3] bg-gray-100"><img src="./p/무곡1.PNG" alt="무곡 전경" class="w-full h-full object-cover"></div>
+                        <div class="aspect-[4/3] bg-gray-100"><img src="./p/무곡2.PNG" alt="무곡 객실" class="w-full h-full object-cover"></div>
+                        <div class="aspect-[4/3] bg-gray-100"><img src="./p/무곡3.PNG" alt="무곡 내부" class="w-full h-full object-cover"></div>
+                    </div>
+                    <div class="bg-[#7c3aed] text-white text-center py-2.5 px-1"><p class="font-bold text-[14px]">무곡</p><p class="text-[11px] opacity-90 mt-0.5">010-9813-3421</p></div>
+                </a>
+                <!-- 나머지 펜션 (3열 그리드) -->
+                <div class="grid grid-cols-3 gap-2.5">
+                    <!-- 스케치펜션 -->
+                    <a href="http://mujusketch.com" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:border-[#1f9a9a] transition">
+                        <div class="w-full aspect-[4/3] bg-gray-100"><img src="./p/스케치.PNG" alt="스케치펜션" class="w-full h-full object-cover"></div>
+                        <div class="bg-[#7c3aed] text-white text-center py-2 px-1"><p class="font-bold text-[12px]">스케치펜션</p><p class="text-[10px] opacity-90 mt-0.5">010-4747-6747</p></div>
+                    </a>
+                    <!-- 로베펜션 -->
+                    <a href="http://mujulaube.com" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:border-[#1f9a9a] transition">
+                        <div class="w-full aspect-[4/3] bg-gray-100"><img src="./p/로베.PNG" alt="로베펜션" class="w-full h-full object-cover"></div>
+                        <div class="bg-[#7c3aed] text-white text-center py-2 px-1"><p class="font-bold text-[12px]">로베펜션</p><p class="text-[10px] opacity-90 mt-0.5">010-4656-1048</p></div>
+                    </a>
+                    <!-- 루마인펜션 -->
+                    <a href="http://rumine.kr/" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:border-[#1f9a9a] transition">
+                        <div class="w-full aspect-[4/3] bg-gray-100"><img src="./p/루마인.PNG" alt="루마인펜션" class="w-full h-full object-cover"></div>
+                        <div class="bg-[#7c3aed] text-white text-center py-2 px-1"><p class="font-bold text-[12px]">루마인펜션</p><p class="text-[10px] opacity-90 mt-0.5">010-9000-9396</p></div>
+                    </a>
+                    <!-- 빌라드무주펜션 -->
+                    <a href="http://villademuju.com/" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:border-[#1f9a9a] transition">
+                        <div class="w-full aspect-[4/3] bg-gray-100"><img src="./p/빌라드.PNG" alt="빌라드무주펜션" class="w-full h-full object-cover"></div>
+                        <div class="bg-[#7c3aed] text-white text-center py-2 px-1"><p class="font-bold text-[12px]">빌라드무주펜션</p><p class="text-[10px] opacity-90 mt-0.5">010-8890-6390</p></div>
+                    </a>
+                    <!-- 모모펜션 -->
+                    <a href="http://www.guesthousemomo.com" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:border-[#1f9a9a] transition">
+                        <div class="w-full aspect-[4/3] bg-gray-100"><img src="./p/모모.PNG" alt="모모펜션" class="w-full h-full object-cover"></div>
+                        <div class="bg-[#7c3aed] text-white text-center py-2 px-1"><p class="font-bold text-[12px]">모모펜션</p><p class="text-[10px] opacity-90 mt-0.5">010-5401-2408</p></div>
+                    </a>
+                    <!-- 라비앙로즈 -->
+                    <a href="http://lavieenrosemuju.com/" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:border-[#1f9a9a] transition">
+                        <div class="w-full aspect-[4/3] bg-gray-100"><img src="./p/라비앙로즈.PNG" alt="라비앙로즈" class="w-full h-full object-cover"></div>
+                        <div class="bg-[#7c3aed] text-white text-center py-2 px-1"><p class="font-bold text-[12px]">라비앙로즈</p><p class="text-[10px] opacity-90 mt-0.5">010-3729-6748</p></div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 패널: 이용 가이드 ===== -->
+        <div id="guide-section" class="hidden mt-3 rounded-xl border border-gray-100 bg-white overflow-hidden">
+            <div class="px-4 pt-4 pb-3"><h3 class="font-black text-[#0f172a] text-[15px]">이용 방법 안내</h3></div>
+            <div class="flex px-4 gap-2 mb-4">
+                <button id="guide-tab-reserved" onclick="switchGuideTab('reserved')" class="flex-1 py-2 rounded-xl text-[13px] font-bold bg-[#7c3aed] text-white transition">예약 고객</button>
+                <button id="guide-tab-walkin" onclick="switchGuideTab('walkin')" class="flex-1 py-2 rounded-xl text-[13px] font-bold bg-gray-100 text-gray-500 transition">당일 방문</button>
+            </div>
+            <div id="guide-reserved" class="px-4 pb-5">
+                <div class="flex gap-3"><div class="flex flex-col items-center"><div class="w-8 h-8 rounded-full bg-[#7c3aed] text-white flex items-center justify-center font-black text-[13px] flex-shrink-0">1</div><div class="w-0.5 h-10 bg-violet-100 mt-1"></div></div><div class="pt-1 pb-4"><p class="font-bold text-[#0f172a] text-[13px]">카운터 방문 · 예약 확인</p><p class="text-[11px] text-gray-400 mt-0.5">예약 번호 또는 이름으로 빠르게 확인</p></div></div>
+                <div class="flex gap-3"><div class="flex flex-col items-center"><div class="w-8 h-8 rounded-full bg-[#7c3aed] text-white flex items-center justify-center font-black text-[13px] flex-shrink-0">2</div><div class="w-0.5 h-10 bg-violet-100 mt-1"></div></div><div class="pt-1 pb-4"><p class="font-bold text-[#0f172a] text-[13px]">장비 · 의류 렌탈</p><p class="text-[11px] text-gray-400 mt-0.5">사이즈 맞춤 후 즉시 수령</p></div></div>
+                <div class="flex gap-3"><div class="flex flex-col items-center"><div class="w-8 h-8 rounded-full bg-[#7c3aed] text-white flex items-center justify-center font-black text-[13px] flex-shrink-0">3</div><div class="w-0.5 h-10 bg-violet-100 mt-1"></div></div><div class="pt-1 pb-4"><p class="font-bold text-[#0f172a] text-[13px]">슬로프 앞 지정 장소 픽업</p><p class="text-[11px] text-gray-400 mt-0.5">배달 신청 시 슬로프 앞까지 직접 가져다드림</p></div></div>
+                <div class="flex gap-3"><div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center font-black text-[13px] flex-shrink-0"><i class="fa-solid fa-check text-[11px]"></i></div><div class="pt-1"><p class="font-bold text-[#0f172a] text-[13px]">이용 후 반납</p><p class="text-[11px] text-gray-400 mt-0.5">지정 장소 또는 카운터 반납 모두 가능</p></div></div>
+            </div>
+            <div id="guide-walkin" class="hidden px-4 pb-5">
+                <div class="flex gap-3"><div class="flex flex-col items-center"><div class="w-8 h-8 rounded-full bg-gray-700 text-white flex items-center justify-center font-black text-[13px] flex-shrink-0">1</div><div class="w-0.5 h-10 bg-gray-200 mt-1"></div></div><div class="pt-1 pb-4"><p class="font-bold text-[#0f172a] text-[13px]">카운터 방문 · 당일 현장 신청</p><p class="text-[11px] text-gray-400 mt-0.5">재고 확인 후 현장 접수 (성수기 대기 가능)</p></div></div>
+                <div class="flex gap-3"><div class="flex flex-col items-center"><div class="w-8 h-8 rounded-full bg-gray-700 text-white flex items-center justify-center font-black text-[13px] flex-shrink-0">2</div><div class="w-0.5 h-10 bg-gray-200 mt-1"></div></div><div class="pt-1 pb-4"><p class="font-bold text-[#0f172a] text-[13px]">장비 · 의류 렌탈</p><p class="text-[11px] text-gray-400 mt-0.5">사이즈 맞춤 후 즉시 수령</p></div></div>
+                <div class="flex gap-3"><div class="flex flex-col items-center"><div class="w-8 h-8 rounded-full bg-gray-700 text-white flex items-center justify-center font-black text-[13px] flex-shrink-0">3</div><div class="w-0.5 h-10 bg-gray-200 mt-1"></div></div><div class="pt-1 pb-4"><p class="font-bold text-[#0f172a] text-[13px]">슬로프 앞 지정 장소 픽업</p><p class="text-[11px] text-gray-400 mt-0.5">배달 신청 시 슬로프 앞까지 직접 가져다드림</p></div></div>
+                <div class="flex gap-3"><div class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center font-black text-[13px] flex-shrink-0"><i class="fa-solid fa-check text-[11px]"></i></div><div class="pt-1"><p class="font-bold text-[#0f172a] text-[13px]">이용 후 반납</p><p class="text-[11px] text-gray-400 mt-0.5">지정 장소 또는 카운터 반납 모두 가능</p></div></div>
+                <div class="mt-3 bg-amber-50 border border-amber-200 rounded-xl px-3 py-3 flex gap-2 items-start"><i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5 flex-shrink-0"></i><p class="text-[11px] text-amber-700 font-medium">성수기(주말·연휴)에는 재고 소진이 빠릅니다. 사전 예약을 추천드립니다.</p></div>
+            </div>
+        </div>
+
+        <!-- ===== 패널: 오시는 길 ===== -->
+        <div id="map-section" class="hidden mt-3 rounded-xl border border-gray-100 bg-white overflow-hidden">
+            <div class="w-full h-[200px] bg-gray-100 overflow-hidden">
+                <iframe src="https://maps.google.com/maps?q=%EC%A0%84%EB%B6%81%20%EB%AC%B4%EC%A3%BC%EA%B5%B0%20%EC%84%A4%EC%B2%9C%EB%A9%B4%20%EA%B5%AC%EC%B2%9C%EB%8F%99%EB%A1%9C%201050&output=embed"
+                    width="100%" height="200" style="border:0;" allowfullscreen loading="lazy" title="놀러와 위치"></iframe>
+            </div>
+            <div class="px-4 py-3 flex items-center gap-2 border-b border-gray-100">
+                <i class="fa-solid fa-location-dot text-[#7c3aed] flex-shrink-0"></i>
+                <div><p class="font-bold text-[#0f172a] text-[13px]">전북 무주군 설천면 구천동로 1050</p><p class="text-[11px] text-gray-400 mt-0.5">무주 덕유산 리조트 스키장 정문 앞</p></div>
+            </div>
+            <div class="px-4 py-4 grid grid-cols-3 gap-2">
+                <a href="tmap://route?goalname=무주스키렌탈&goalx=127.5842&goaly=36.0" class="flex flex-col items-center justify-center bg-[#1A6FE8] text-white rounded-xl py-3 gap-1.5 hover:opacity-90 transition"><span class="text-[18px]">🗺️</span><span class="text-[11px] font-bold">T맵</span></a>
+                <a href="kakaomap://route?ep=36.0,127.5842&by=CAR" class="flex flex-col items-center justify-center bg-[#FEE500] text-[#3A1D1D] rounded-xl py-3 gap-1.5 hover:opacity-90 transition"><span class="text-[18px]">🗺️</span><span class="text-[11px] font-bold">카카오맵</span></a>
+                <a href="nmap://route/car?dlat=36.0&dlng=127.5842&dname=무주스키렌탈&appname=com.mujuskirental" class="flex flex-col items-center justify-center bg-[#03C75A] text-white rounded-xl py-3 gap-1.5 hover:opacity-90 transition"><span class="text-[18px]">🗺️</span><span class="text-[11px] font-bold">네이버지도</span></a>
+            </div>
+        </div>
+
+    </section>
+
+    </div><!-- /pc-menu -->
+
+    <!-- 후기 + 푸터 (풀폭) -->
+    <div class="pc-rest">
+
+    <!-- 신뢰 섹션 (신규 오픈 · 리뷰 대체) -->
+    <div class="w-full h-2 bg-gray-100" role="separator"></div>
+    <section class="px-4 py-6 bg-white">
+        <!-- 헤더 -->
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h3 class="font-black text-[#0f172a] text-[16px]">놀러와를 믿을 수 있는 이유</h3>
+                <p class="text-[11px] text-gray-400 mt-0.5">26/27 시즌, 새로 문을 열었습니다</p>
+            </div>
+            <span class="inline-flex items-center gap-1 bg-[#7c3aed] text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex-shrink-0">
+                <i class="fa-regular fa-snowflake text-[10px]"></i> NEW OPEN
+            </span>
+        </div>
+
+        <!-- 차별점 키워드 -->
+        <div class="flex flex-wrap gap-2 mb-5">
+            <span class="text-[12px] font-bold text-[#7c3aed] bg-violet-50 px-3 py-1.5 rounded-full">#전사이즈보유</span>
+            <span class="text-[12px] font-bold text-[#7c3aed] bg-violet-50 px-3 py-1.5 rounded-full">#슬로프앞배달</span>
+            <span class="text-[12px] font-bold text-[#7c3aed] bg-violet-50 px-3 py-1.5 rounded-full">#강사직접선택</span>
+            <span class="text-[12px] font-bold text-[#7c3aed] bg-violet-50 px-3 py-1.5 rounded-full">#투명한보상정책</span>
+        </div>
+
+        <!-- 차별점 카드 -->
+        <div class="flex overflow-x-auto snap-x snap-mandatory gap-3 pb-2 hide-scrollbar">
+            <div class="snap-center flex-none w-[220px] bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <div class="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center mb-3"><i class="fa-solid fa-ruler-combined text-[#7c3aed] text-[16px]"></i></div>
+                <p class="font-bold text-[#0f172a] text-[14px] mb-1.5">사이즈 걱정 끝</p>
+                <p class="text-[12px] text-gray-500 leading-relaxed">아동부터 성인 XXL까지 전 사이즈 보유, 맞지 않으면 현장에서 바로 교체해 드려요.</p>
+            </div>
+            <div class="snap-center flex-none w-[220px] bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <div class="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center mb-3"><i class="fa-solid fa-truck-fast text-[#7c3aed] text-[16px]"></i></div>
+                <p class="font-bold text-[#0f172a] text-[14px] mb-1.5">슬로프 앞까지 배달</p>
+                <p class="text-[12px] text-gray-500 leading-relaxed">무거운 장비를 들고 이동할 필요 없이, 지정 장소로 픽업·반납해 드립니다.</p>
+            </div>
+            <div class="snap-center flex-none w-[220px] bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <div class="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center mb-3"><i class="fa-solid fa-person-chalkboard text-[#7c3aed] text-[16px]"></i></div>
+                <p class="font-bold text-[#0f172a] text-[14px] mb-1.5">강사, 직접 골라요</p>
+                <p class="text-[12px] text-gray-500 leading-relaxed">강사 프로필과 후기를 미리 확인하고, 원하는 강사를 직접 선택할 수 있어요.</p>
+            </div>
+            <div class="snap-center flex-none w-[220px] bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <div class="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center mb-3"><i class="fa-solid fa-shield-halved text-[#7c3aed] text-[16px]"></i></div>
+                <p class="font-bold text-[#0f172a] text-[14px] mb-1.5">투명한 보상 정책</p>
+                <p class="text-[12px] text-gray-500 leading-relaxed">파손·오염 보상 기준을 예약 전에 미리 확인할 수 있어 걱정 없이 이용하세요.</p>
+            </div>
+        </div>
+
+        <p class="text-[11px] text-gray-400 text-center mt-4">이용 후기는 시즌이 진행되며 이 자리에 차곡차곡 채워질 예정입니다</p>
+    </section>
+
+    <!-- 자주 묻는 질문 (FAQ) -->
+    <div class="w-full h-2 bg-gray-100" role="separator"></div>
+    <section class="px-4 py-6 bg-white">
+        <div class="mb-4">
+            <h3 class="font-black text-[#0f172a] text-[16px] flex items-center gap-1.5">
+                <i class="fa-regular fa-circle-question text-[#7c3aed] text-[15px]"></i> 자주 묻는 질문
+            </h3>
+            <p class="text-[11px] text-gray-400 mt-0.5">예약 전 궁금한 점을 확인해 보세요</p>
+        </div>
+        <div class="space-y-2">
+            <div class="faq-item border border-gray-100 rounded-xl overflow-hidden">
+                <button class="faq-q w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-gray-50 transition">
+                    <span class="font-bold text-[#0f172a] text-[13px]"><span class="text-[#7c3aed] mr-1.5">Q</span>당일 예약도 가능한가요?</span>
+                    <i class="faq-icon fa-solid fa-chevron-down text-gray-400 text-[12px] transition-transform"></i>
+                </button>
+                <div class="faq-a hidden px-4 pb-4 pt-0 text-[12px] text-gray-500 leading-relaxed">
+                    네, 당일 예약도 가능합니다. 다만 주말·성수기에는 인기 사이즈가 일찍 마감될 수 있어, 온라인으로 미리 견적·예약하시면 더 확실하게 준비해 드립니다.
+                </div>
+            </div>
+            <div class="faq-item border border-gray-100 rounded-xl overflow-hidden">
+                <button class="faq-q w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-gray-50 transition">
+                    <span class="font-bold text-[#0f172a] text-[13px]"><span class="text-[#7c3aed] mr-1.5">Q</span>사이즈가 안 맞으면 교체되나요?</span>
+                    <i class="faq-icon fa-solid fa-chevron-down text-gray-400 text-[12px] transition-transform"></i>
+                </button>
+                <div class="faq-a hidden px-4 pb-4 pt-0 text-[12px] text-gray-500 leading-relaxed">
+                    물론입니다. 착용 후 맞지 않으면 매장에서 바로 교체해 드립니다. 의류·장비·부츠 모두 전 사이즈를 보유하고 있어 걱정 없이 방문하셔도 됩니다.
+                </div>
+            </div>
+            <div class="faq-item border border-gray-100 rounded-xl overflow-hidden">
+                <button class="faq-q w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-gray-50 transition">
+                    <span class="font-bold text-[#0f172a] text-[13px]"><span class="text-[#7c3aed] mr-1.5">Q</span>결제는 어떻게 하나요?</span>
+                    <i class="faq-icon fa-solid fa-chevron-down text-gray-400 text-[12px] transition-transform"></i>
+                </button>
+                <div class="faq-a hidden px-4 pb-4 pt-0 text-[12px] text-gray-500 leading-relaxed">
+                    예약 시 예약금은 없으며, 방문하셔서 현장에서 결제하시면 됩니다. 카드·현금 모두 가능합니다.
+                </div>
+            </div>
+            <div class="faq-item border border-gray-100 rounded-xl overflow-hidden">
+                <button class="faq-q w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-gray-50 transition">
+                    <span class="font-bold text-[#0f172a] text-[13px]"><span class="text-[#7c3aed] mr-1.5">Q</span>장갑·양말도 빌릴 수 있나요?</span>
+                    <i class="faq-icon fa-solid fa-chevron-down text-gray-400 text-[12px] transition-transform"></i>
+                </button>
+                <div class="faq-a hidden px-4 pb-4 pt-0 text-[12px] text-gray-500 leading-relaxed">
+                    장갑·양말은 위생상 대여가 되지 않아 매장에서 판매하고 있습니다. 깜빡하고 안 챙기셨다면 현장에서 바로 구매하실 수 있어요. 핫팩도 함께 준비되어 있습니다.
+                </div>
+            </div>
+            <div class="faq-item border border-gray-100 rounded-xl overflow-hidden">
+                <button class="faq-q w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-gray-50 transition">
+                    <span class="font-bold text-[#0f172a] text-[13px]"><span class="text-[#7c3aed] mr-1.5">Q</span>슬로프 앞까지 배달이 되나요?</span>
+                    <i class="faq-icon fa-solid fa-chevron-down text-gray-400 text-[12px] transition-transform"></i>
+                </button>
+                <div class="faq-a hidden px-4 pb-4 pt-0 text-[12px] text-gray-500 leading-relaxed">
+                    네, 슬로프 앞까지 장비를 가져다드리고 반납도 직접 찾아갑니다. 무거운 장비를 들고 이동하지 않으셔도 됩니다. 자세한 위치·시간은 예약 후 안내해 드립니다.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="bg-[#0f172a] text-gray-400 px-5 py-6">
+        <div class="mb-4">
+            <div class="flex items-center gap-2 mb-3">
+                <i class="fa-solid fa-mountain text-[#7c3aed]" aria-hidden="true"></i>
+                <span class="font-black text-white text-[15px] tracking-tight">놀러와</span>
+            </div>
+            <div class="space-y-1 text-[12px] leading-relaxed">
+                <p>사업자등록번호: 000-00-00000</p>
+                <p>대표자: (대표자명)</p>
+                <p>주소: 전북 무주군 설천면 구천동로 1050</p>
+                <p>대표번호: 063-000-0000</p>
+                <p>이메일: contact@mujuskirental.com</p>
+            </div>
+        </div>
+        <div class="pt-4 border-t border-gray-800 flex justify-between items-center">
+            <p class="text-[11px] text-gray-600">© 2026 놀러와. All rights reserved.</p>
+            <a href="admin.html"
+               class="text-[11px] text-gray-400 hover:text-white flex items-center gap-1 transition"
+               aria-label="관리자 페이지">
+                <i class="fa-solid fa-lock text-[10px]" aria-hidden="true"></i> 관리자
+            </a>
+        </div>
+    </footer>
+
+    </div><!-- /pc-rest -->
+    </div><!-- /pc-wrapper -->
+
+    <!-- PC 우측 퀵버튼 -->
+    <div class="pc-side-right">
+        <a href="#" onclick="openQuote(); return false;" class="bg-[#7c3aed] text-white" aria-label="견적 및 예약하기">
+            <i class="fa-solid fa-calculator text-[18px]"></i><span class="text-[10px] font-bold">예약</span>
+        </a>
+        <a href="#" onclick="openLookup(); return false;" class="bg-[#0f172a] text-white" aria-label="예약 확인하기">
+            <i class="fa-solid fa-magnifying-glass text-[16px]"></i><span class="text-[10px] font-bold">예약확인</span>
+        </a>
+        <a href="http://pf.kakao.com/_DYBbxj/chat" target="_blank" rel="noopener" class="bg-[#FEE500] text-[#3A1D1D]" aria-label="카카오톡 상담">
+            <i class="fa-solid fa-comment text-[18px]"></i><span class="text-[10px] font-bold">카톡상담</span>
+        </a>
+    </div>
+
+    <!-- 하단 고정 바 (모바일·PC 공통) -->
+    <div class="mobile-bottom-bar fixed bottom-0 w-full max-w-[414px] bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 px-3 py-3 flex gap-2 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+        <button onclick="openQuote()" class="flex-1 bg-white border border-[#7c3aed] text-[#7c3aed] rounded-xl font-bold text-[13px] py-3 hover:bg-violet-50 transition flex items-center justify-center gap-1">
+            <i class="fa-solid fa-calculator text-[13px]"></i> 견적신청
+        </button>
+        <button onclick="openLookup()" class="flex-1 bg-[#0f172a] text-white rounded-xl font-bold text-[13px] py-3 hover:bg-gray-800 transition flex items-center justify-center gap-1">
+            <i class="fa-solid fa-magnifying-glass text-[12px]"></i> 예약확인
+        </button>
+        <button onclick="openQuote()" class="flex-[1.4] bg-[#7c3aed] text-white rounded-xl font-bold text-[14px] py-3 hover:bg-violet-700 transition flex items-center justify-center gap-1">
+            예약신청 <i class="fa-solid fa-arrow-right text-[12px]"></i>
+        </button>
+    </div>
+
+</div>
+
+<script>
+// 새로고침·재방문 시 항상 맨 위에서 시작
+if (history.scrollRestoration) { history.scrollRestoration = 'manual'; }
+window.scrollTo(0, 0);
+
+const { createClient } = supabase;
+const _supabase = createClient(
+    'https://ffreclgubmxdznubedam.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmcmVjbGd1Ym14ZHpudWJlZGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NDI2OTIsImV4cCI6MjA5NDMxODY5Mn0.PLb2oy5u5qd7lqFOlbr4UJDIk2okxy3OJZkE1sW6FLY'
+);
+
+// ===== 슬라이드 데이터 (큰 세로 메인 슬라이드) =====
+const mainSlidesData = [
+    { img:'./2.jpg', badge:'오픈 특가', titleHtml:`풀세트 단돈 <span class="text-[#7cc0ff]">40,000원</span>`, desc:'장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가' },
+    { img:'./1.jpg', badge:'26/27 신상', titleHtml:`무주에서 제일 잘 입은 사람 <span class="text-[#7cc0ff]">되기</span>`, desc:'사장이 직접 고른 트렌디한 신상 스키복' },
+    { img:'./4.jpg', badge:'무료 배달', titleHtml:`장비는 <span class="text-[#7cc0ff]">슬로프 앞까지</span>`, desc:'픽업 · 반납도 직접 찾아갑니다' }
+];
+let currentMainSlide = 0;
+let slideTimer = null;
+
+function renderSlideDots() {
+    const wrap = document.getElementById('main-slide-dots');
+    if (!wrap) return;
+    wrap.innerHTML = mainSlidesData.map((_, i) =>
+        `<span class="block rounded-full transition-all ${i === currentMainSlide ? 'w-4 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/50'}"></span>`
+    ).join('');
+}
+
+window.changeMainSlide = function(dir) {
+    currentMainSlide = (currentMainSlide + dir + mainSlidesData.length) % mainSlidesData.length;
+    const d = mainSlidesData[currentMainSlide];
+    const w = document.getElementById('main-slide-wrapper');
+    w.style.opacity = '0';
+    setTimeout(() => {
+        document.getElementById('main-slide-img').src = d.img;
+        document.getElementById('main-slide-badge').innerHTML = `<i class="fa-regular fa-snowflake mr-1"></i> ${d.badge}`;
+        document.getElementById('main-slide-title').innerHTML = d.titleHtml;
+        document.getElementById('main-slide-desc').innerText = d.desc;
+        renderSlideDots();
+        w.style.opacity = '1';
+    }, 200);
+    resetSlideTimer();
+};
+function resetSlideTimer() { clearInterval(slideTimer); slideTimer = setInterval(() => changeMainSlide(1), 4000); }
+
+// 첫 슬라이드를 데이터(mainSlidesData[0])에서 즉시 적용 — 액자의 초기 src와 무관하게 항상 일치
+function initFirstSlide() {
+    const d = mainSlidesData[0];
+    document.getElementById('main-slide-img').src = d.img;
+    document.getElementById('main-slide-badge').innerHTML = `<i class="fa-regular fa-snowflake mr-1"></i> ${d.badge}`;
+    document.getElementById('main-slide-title').innerHTML = d.titleHtml;
+    document.getElementById('main-slide-desc').innerText = d.desc;
+}
+initFirstSlide();
+renderSlideDots();
+resetSlideTimer();
+
+// 슬라이드 높이 CSS로 제어 (모바일 340px / PC 420px)
+
+// ===== 전화번호 자동 포맷 =====
+window.formatPhone = function(input) {
+    let v = input.value.replace(/\D/g,'');
+    if (v.length <= 3)       input.value = v;
+    else if (v.length <= 7)  input.value = v.slice(0,3) + '-' + v.slice(3);
+    else                     input.value = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11);
+};
+
+// ===== 가격표 =====
+const PRICES = {
+    lift: {
+        '3h': { wday:{ adult:44000, child:35000 }, wend:{ adult:54000, child:43000 } },
+        '4h': { wday:{ adult:51000, child:41000 }, wend:{ adult:61000, child:49000 } },
+        '6h': { wday:{ adult:58000, child:47000 }, wend:{ adult:69000, child:55000 } }
+    },
+    equip: 15000,
+    cloth: 15000,
+    helmet: 10000, goggle: 10000, visor: 15000
+};
+
+// ===== 수량 상태 =====
+const qtys = {
+    lift3hAdult:0, lift3hChild:0,
+    lift4hAdult:0, lift4hChild:0,
+    lift6hAdult:0, lift6hChild:0,
+    equip:0, cloth:0,
+    helmet:0, goggle:0, visor:0
+};
+
+window.updateQty = function(key, delta) {
+    qtys[key] = Math.max(0, qtys[key] + delta);
+    const el = document.getElementById(key + '-qty');
+    if (el) el.innerText = qtys[key];
+    const mb = document.getElementById(key + '-minus');
+    if (mb) mb.disabled = qtys[key] <= 0;
+    calculateTotal();
+};
+
+// ===== 주중/주말 =====
+function isWeekend(dateStr) {
+    if (!dateStr) return null;
+    const d = new Date(dateStr); return d.getDay()===0 || d.getDay()===6;
+}
+
+window.onDateChange = function() {
+    const v    = document.getElementById('visit-date').value;
+    const wrap = document.getElementById('day-type-wrap');
+    const badge= document.getElementById('day-type-badge');
+    const text = document.getElementById('day-type-text');
+    if (!v) { wrap.classList.add('hidden'); updateLiftPriceLabels(null); calculateTotal(); return; }
+    wrap.classList.remove('hidden');
+    const wend = isWeekend(v);
+    if (wend) {
+        badge.className = 'inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-orange-100 text-orange-700';
+        text.innerText = '주말 요금 적용';
+    } else {
+        badge.className = 'inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-violet-100 text-violet-700';
+        text.innerText = '주중 요금 적용';
+    }
+    updateLiftPriceLabels(wend);
+    calculateTotal();
+};
+
+function updateLiftPriceLabels(wend) {
+    const key = (wend === true) ? 'wend' : 'wday';
+    const show = wend !== null;
+    ['3h','4h','6h'].forEach(t => {
+        const el = document.getElementById(`lift${t}-price`);
+        if (!el) return;
+        if (show) {
+            const p = PRICES.lift[t][key];
+            el.innerText = `대인 ${p.adult.toLocaleString()} / 소인 ${p.child.toLocaleString()}원`;
+        } else {
+            el.innerText = '';
+        }
+    });
+}
+
+// ===== 합계 계산 =====
+function calculateTotal() {
+    const v    = document.getElementById('visit-date').value;
+    const wend = isWeekend(v);
+    const dk   = (wend === true) ? 'wend' : 'wday';
+    let total  = 0;
+
+    total += PRICES.lift['3h'][dk].adult * qtys.lift3hAdult;
+    total += PRICES.lift['3h'][dk].child * qtys.lift3hChild;
+    total += PRICES.lift['4h'][dk].adult * qtys.lift4hAdult;
+    total += PRICES.lift['4h'][dk].child * qtys.lift4hChild;
+    total += PRICES.lift['6h'][dk].adult * qtys.lift6hAdult;
+    total += PRICES.lift['6h'][dk].child * qtys.lift6hChild;
+    total += PRICES.equip * qtys.equip;
+    total += PRICES.cloth * qtys.cloth;
+    total += PRICES.helmet * qtys.helmet;
+    total += PRICES.goggle * qtys.goggle;
+    total += PRICES.visor  * qtys.visor;
+
+    document.getElementById('total-price').innerText = total.toLocaleString();
+
+    const anyQty = Object.values(qtys).some(v => v > 0);
+    document.getElementById('qty-hint').classList.toggle('hidden', anyQty);
+    return total;
+}
+
+// ===== 견적 아코디언 =====
+const quoteBtn     = document.getElementById('quote-btn');
+const quoteSection = document.getElementById('quote-section');
+const quoteIcon    = document.getElementById('quote-icon');
+
+function setQuoteOpen(open) {
+    quoteSection.classList.toggle('hidden', !open);
+    quoteBtn.setAttribute('aria-expanded', String(open));
+    quoteIcon.style.transform = open ? 'rotate(45deg)' : 'rotate(0deg)';
+}
+// 견적/예약 열기: PC는 왼쪽 고정 패널 펼치기, 모바일은 본문 견적 섹션 펼치기
+window.openQuote = function() {
+    const isPC = window.matchMedia('(min-width: 1024px)').matches;
+    if (isPC) {
+        const panel = document.getElementById('pc-quote');
+        if (panel) {
+            panel.classList.remove('collapsed');
+            panel.scrollTo({ top: 0, behavior: 'smooth' });
+            // 잠깐 강조 효과
+            panel.style.boxShadow = '0 0 0 3px #7c3aed, 0 10px 30px rgba(0,0,0,.12)';
+            setTimeout(() => { panel.style.boxShadow = ''; }, 1200);
+        }
+    } else {
+        setQuoteOpen(true);
+        setTimeout(() => quoteBtn.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+    }
+};
+quoteBtn.addEventListener('click', () => {
+    const isOpen = quoteBtn.getAttribute('aria-expanded') === 'true';
+    setQuoteOpen(!isOpen);
+    if (!isOpen) setTimeout(() => quoteSection.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+});
+
+// ===== 메뉴 탭 =====
+const allPanels = ['lift-preview-section','outfit-section','lesson-section','pension-section','guide-section','map-section'];
+
+/* 아이콘 메뉴 데이터 — 운영자는 여기 img만 실제 이미지 경로로 바꾸면 됩니다.
+   img 가 비어("") 있으면 임시로 글꼴 아이콘(icon)을 보여줍니다. */
+const menuItems = [
+    { panel:'lift-preview-section', label:'리프트권',  img:'', icon:'fa-ticket-simple', badge:'할인' },
+    { panel:'outfit-section',       label:'의류/장비', img:'', icon:'fa-shirt' },
+    { panel:'lesson-section',       label:'강습',      img:'', icon:'fa-person-skiing' },
+    { panel:'pension-section',      label:'펜션',      img:'', icon:'fa-house' },
+    { panel:'guide-section',        label:'가이드',    img:'', icon:'fa-book-open' },
+    { panel:'map-section',          label:'오시는길',  img:'', icon:'fa-map-location-dot' }
+];
+
+function renderMenuGrid() {
+    const grid = document.getElementById('menu-grid');
+    if (!grid) return;
+    grid.innerHTML = menuItems.map(m => {
+        const visual = m.img
+            ? `<img src="${m.img}" alt="${m.label}" class="w-full h-full object-cover">`
+            : `<i class="fa-solid ${m.icon} text-xl text-[#7c3aed]"></i>`;
+        const badge = m.badge
+            ? `<div class="absolute top-0 right-0 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg">${m.badge}</div>`
+            : '';
+        return `
+        <button data-panel="${m.panel}" aria-expanded="false"
+                class="menu-btn bg-white rounded-xl py-4 flex flex-col items-center shadow-sm border border-gray-100 transition relative overflow-hidden">
+            ${badge}
+            <div class="menu-icon w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center mb-2 overflow-hidden transition">
+                ${visual}
+            </div>
+            <span class="menu-label text-[12px] font-bold text-[#0f172a]">${m.label}</span>
+        </button>`;
+    }).join('');
+}
+renderMenuGrid();
+
+function deactivateAllMenuBtns() { document.querySelectorAll('.menu-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-expanded','false'); }); }
+function closeAllPanels() { allPanels.forEach(id => { const el=document.getElementById(id); if(el) el.classList.add('hidden'); }); }
+
+// 이벤트 위임 — 동적으로 생성된 버튼에도 적용
+document.getElementById('menu-grid').addEventListener('click', (e) => {
+    const btn = e.target.closest('.menu-btn');
+    if (!btn) return;
+    const panelId = btn.dataset.panel;
+    if (!panelId) return;
+    const panel   = document.getElementById(panelId);
+    const isOpen  = btn.getAttribute('aria-expanded') === 'true';
+    deactivateAllMenuBtns();
+    closeAllPanels();
+    if (!isOpen) {
+        btn.classList.add('active'); btn.setAttribute('aria-expanded','true');
+        if (panel) { panel.classList.remove('hidden'); setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100); }
+    }
+});
+
+// ===== 이용가이드 탭 =====
+window.switchGuideTab = function(tab) {
+    const r = tab === 'reserved';
+    document.getElementById('guide-reserved').classList.toggle('hidden', !r);
+    document.getElementById('guide-walkin').classList.toggle('hidden', r);
+    document.getElementById('guide-tab-reserved').className = `flex-1 py-2 rounded-xl text-[13px] font-bold transition ${r ? 'bg-[#7c3aed] text-white' : 'bg-gray-100 text-gray-500'}`;
+    document.getElementById('guide-tab-walkin').className   = `flex-1 py-2 rounded-xl text-[13px] font-bold transition ${!r ? 'bg-[#7c3aed] text-white' : 'bg-gray-100 text-gray-500'}`;
+};
+
+// ===== 예약 확인 바텀시트 =====
+window.openLookup = function() {
+    // 입력값·결과 초기화
+    document.getElementById('lookup-name').value  = '';
+    document.getElementById('lookup-phone').value = '';
+    document.getElementById('lookup-result').classList.add('hidden');
+    document.getElementById('lookup-result').innerHTML = '';
+    // 모달 열기
+    document.getElementById('lookup-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('lookup-name').focus(), 400);
+};
+
+window.closeLookupModal = function() {
+    document.getElementById('lookup-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+};
+
+// ===== 메뉴 모달에서 패널 열기 =====
+window.openPanelFromMenu = function(panelId) {
+    closeModal();
+    // 기존 탭 모두 닫기
+    deactivateAllMenuBtns();
+    closeAllPanels();
+    // 해당 패널 열기
+    const panel = document.getElementById(panelId);
+    const btn   = document.querySelector(`[data-panel="${panelId}"]`);
+    if (btn)   { btn.classList.add('active'); btn.setAttribute('aria-expanded','true'); }
+    if (panel) {
+        panel.classList.remove('hidden');
+        setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'nearest' }), 350);
+    }
+};
+
+// ===== 모달 =====
+window.openModal = function() { document.getElementById('modal-overlay').classList.add('open'); document.body.style.overflow='hidden'; };
+window.closeModal = function() { document.getElementById('modal-overlay').classList.remove('open'); document.body.style.overflow=''; };
+document.getElementById('modal-overlay').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+
+// ===== 토스트 =====
+let toastTimer = null;
+window.showToast = function(msg) {
+    const t = document.getElementById('toast');
+    t.innerText = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+};
+
+// ===== 예약 완료 모달 =====
+function openConfirm(data) {
+    document.getElementById('confirm-success').classList.toggle('hidden', !data);
+    document.getElementById('confirm-error').classList.toggle('hidden', !!data);
+    if (data) {
+        document.getElementById('confirm-no').innerText    = `#${String(data.reservation_no).padStart(4,'0')}`;
+        document.getElementById('confirm-name').innerText  = data.name;
+        document.getElementById('confirm-phone').innerText = data.phone;
+        document.getElementById('confirm-date').innerText  = `${data.visit_date} ${data.visit_time}`;
+        const total = calculateTotal();
+        document.getElementById('confirm-price').innerText = `약 ${total.toLocaleString()}원`;
+    }
+    document.getElementById('confirm-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+window.closeConfirm = function() { document.getElementById('confirm-overlay').classList.remove('open'); document.body.style.overflow=''; };
+document.getElementById('confirm-overlay').addEventListener('click', function(e) { if(e.target===this) closeConfirm(); });
+
+// ===== 예약 진행하기 =====
+window.onReserve = async function() {
+    const name  = document.getElementById('reserver-name').value.trim();
+    const phone = document.getElementById('reserver-phone').value.trim();
+    const date  = document.getElementById('visit-date').value;
+    const time  = document.getElementById('visit-time').value;
+    const agree = document.getElementById('reserver-agree').checked;
+    const anyQty= Object.values(qtys).some(v => v > 0);
+
+    // 유효성 검사
+    if (!name) { showToast('예약자 이름을 입력해주세요'); document.getElementById('reserver-name').focus(); return; }
+    if (!phone || phone.length < 12) { showToast('연락처를 올바르게 입력해주세요'); document.getElementById('reserver-phone').focus(); return; }
+    if (!date) {
+        if (quoteSection.classList.contains('hidden')) { quoteSection.classList.remove('hidden'); quoteBtn.setAttribute('aria-expanded','true'); quoteIcon.style.transform='rotate(-180deg)'; }
+        showToast('방문 날짜를 선택해주세요');
+        setTimeout(() => document.getElementById('visit-date').focus(), 300); return;
+    }
+    if (!anyQty) { showToast('항목을 1개 이상 선택해주세요'); return; }
+    if (!agree)  { showToast('이용약관에 동의해주세요'); return; }
+
+    // 로딩
+    const btn     = document.getElementById('reserve-submit-btn');
+    const btnText = document.getElementById('reserve-btn-text');
+    btn.disabled  = true;
+    btnText.innerHTML = '<span class="spinner"></span> 예약 접수 중...';
+
+    const payload = {
+        name, phone,
+        visit_date: date, visit_time: time,
+        lift_3h_adult: qtys.lift3hAdult, lift_3h_child: qtys.lift3hChild,
+        lift_4h_adult: qtys.lift4hAdult, lift_4h_child: qtys.lift4hChild,
+        lift_6h_adult: qtys.lift6hAdult, lift_6h_child: qtys.lift6hChild,
+        equip_normal: qtys.equip, equip_premium: 0,
+        cloth_normal: qtys.cloth, cloth_premium: 0,
+        helmet_count: qtys.helmet, goggle_count: qtys.goggle, visor_count: qtys.visor,
+        memo: document.getElementById('reserver-memo').value.trim() || null,
+        status: '접수', deposit_status: '미입금'
+    };
+
+    try {
+        const { data, error } = await _supabase.from('reservations').insert([payload]).select().single();
+        if (error) throw error;
+        openConfirm(data);
+        // 폼 초기화
+        ['reserver-name','reserver-phone','reserver-memo'].forEach(id => document.getElementById(id).value='');
+        document.getElementById('visit-date').value = '';
+        document.getElementById('reserver-agree').checked = false;
+        Object.keys(qtys).forEach(k => { qtys[k]=0; const el=document.getElementById(k+'-qty'); if(el) el.innerText='0'; const mb=document.getElementById(k+'-minus'); if(mb) mb.disabled=true; });
+        calculateTotal(); onDateChange();
+    } catch(err) {
+        console.error('예약 오류:', err);
+        openConfirm(null);
+    } finally {
+        btn.disabled = false;
+        btnText.innerHTML = '예약 진행하기';
+    }
+};
+
+// ===== 예약 확인 조회 =====
+window.lookupReservation = async function() {
+    const name  = document.getElementById('lookup-name').value.trim();
+    const phone = document.getElementById('lookup-phone').value.trim();
+    const result= document.getElementById('lookup-result');
+    const btn   = document.getElementById('lookup-btn');
+    const btnText= document.getElementById('lookup-btn-text');
+
+    if (!name)  { showToast('이름을 입력해주세요'); document.getElementById('lookup-name').focus(); return; }
+    if (!phone) { showToast('연락처를 입력해주세요'); document.getElementById('lookup-phone').focus(); return; }
+
+    btn.disabled = true;
+    btnText.innerHTML = '<span class="spinner"></span> 조회 중...';
+    result.classList.add('hidden');
+
+    try {
+        const { data, error } = await _supabase
+            .from('reservations')
+            .select('reservation_no,name,phone,visit_date,visit_time,status,deposit_status,created_at')
+            .eq('name', name)
+            .eq('phone', phone)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            result.innerHTML = `
+                <div class="bg-gray-50 rounded-xl p-4 text-center border border-gray-100">
+                    <i class="fa-solid fa-circle-exclamation text-gray-300 text-2xl mb-2 block"></i>
+                    <p class="text-[13px] font-bold text-gray-500">예약 내역이 없습니다</p>
+                    <p class="text-[11px] text-gray-400 mt-1">이름과 연락처를 다시 확인해주세요</p>
+                </div>`;
+        } else {
+            const statusColor = { '접수':'bg-violet-100 text-violet-700', '확인':'bg-green-100 text-green-700', '완료':'bg-gray-100 text-gray-600', '취소':'bg-red-100 text-red-600' };
+            const depColor    = { '미입금':'bg-amber-100 text-amber-700', '부분입금':'bg-orange-100 text-orange-700', '입금':'bg-green-100 text-green-700' };
+            result.innerHTML = data.map(r => `
+                <div class="bg-white border border-gray-200 rounded-xl p-4 space-y-2.5 text-[13px] mb-2">
+                    <div class="flex justify-between items-center">
+                        <span class="font-black text-[#7c3aed] text-[15px]">#${String(r.reservation_no).padStart(4,'0')}</span>
+                        <div class="flex gap-1.5">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColor[r.status]||'bg-gray-100 text-gray-600'}">${r.status}</span>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${depColor[r.deposit_status]||'bg-gray-100 text-gray-600'}">${r.deposit_status}</span>
+                        </div>
+                    </div>
+                    <div class="h-px bg-gray-100"></div>
+                    <div class="flex justify-between"><span class="text-gray-400">방문 일시</span><span class="font-bold text-[#0f172a]">${r.visit_date} ${r.visit_time}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">접수 일시</span><span class="font-bold text-[#0f172a]">${new Date(r.created_at).toLocaleDateString('ko-KR')}</span></div>
+                </div>`).join('');
+        }
+        result.classList.remove('hidden');
+    } catch(err) {
+        result.innerHTML = `<div class="bg-red-50 border border-red-100 rounded-xl p-4 text-center"><p class="text-[13px] text-red-500 font-bold">조회 중 오류가 발생했습니다</p><p class="text-[11px] text-gray-400 mt-1">${err.message}</p></div>`;
+        result.classList.remove('hidden');
+    } finally {
+        btn.disabled = false;
+        btnText.innerHTML = '<i class="fa-solid fa-magnifying-glass mr-1"></i> 예약 확인';
+    }
+};
+
+// ===== 진입 프로모션 팝업 (모바일 전용, '오늘 그만보기' = 하루 숨김) =====
+(function initPromo() {
+    const PROMO_KEY = 'muju_promo_hide_until';
+    const overlay = document.getElementById('promo-overlay');
+    const track   = document.getElementById('promo-track');
+    const dotsWrap = document.getElementById('promo-dots');
+    if (!overlay || !track) return;
+
+    const slideCount = track.children.length;
+    let promoIdx = 0;
+    let promoTimer = null;
+
+    function renderDots() {
+        if (!dotsWrap) return;
+        dotsWrap.innerHTML = Array.from({ length: slideCount }).map((_, i) =>
+            `<span class="block rounded-full transition-all ${i === promoIdx ? 'w-4 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/50'}"></span>`
+        ).join('');
+    }
+    function goPromo(i) {
+        promoIdx = (i + slideCount) % slideCount;
+        track.style.transform = `translateX(-${promoIdx * 100}%)`;
+        renderDots();
+    }
+    function startPromoTimer() { clearInterval(promoTimer); promoTimer = setInterval(() => goPromo(promoIdx + 1), 3500); }
+
+    window.promoClose = function() {
+        overlay.classList.remove('open');
+        clearInterval(promoTimer);
+    };
+    window.promoDismissToday = function() {
+        const tomorrow = new Date(); tomorrow.setHours(24, 0, 0, 0);
+        try { localStorage.setItem(PROMO_KEY, String(tomorrow.getTime())); } catch (e) {}
+        promoClose();
+    };
+    window.promoGoReserve = function() { promoClose(); if (window.openQuote) openQuote(); };
+    window.promoGoLookbook = function() { promoClose(); if (window.openPanelFromMenu) openPanelFromMenu('outfit-section'); };
+
+    // 노출 판단: PC는 CSS로 숨김 / 하루 숨김 기간이면 미노출
+    let hideUntil = 0;
+    try { hideUntil = parseInt(localStorage.getItem(PROMO_KEY) || '0', 10); } catch (e) {}
+    if (Date.now() < hideUntil) return;
+
+    // 진입 직후 잠깐 뒤 등장
+    setTimeout(() => {
+        renderDots();
+        overlay.classList.add('open');
+        startPromoTimer();
+    }, 900);
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) promoClose(); });
+})();
+
+// ===== PC 가로 스크롤: 마우스 드래그 + 휠로 좌우 이동 =====
+(function initDragScroll() {
+    const lists = document.querySelectorAll('.hide-scrollbar');
+    lists.forEach(el => {
+        let isDown = false, startX = 0, startLeft = 0, moved = 0;
+
+        el.addEventListener('mousedown', (e) => {
+            isDown = true; moved = 0;
+            startX = e.pageX; startLeft = el.scrollLeft;
+            el.style.cursor = 'grabbing'; el.style.userSelect = 'none';
+        });
+        window.addEventListener('mouseup', () => {
+            if (!isDown) return;
+            isDown = false;
+            el.style.cursor = ''; el.style.userSelect = '';
+        });
+        el.addEventListener('mouseleave', () => { if (isDown) { isDown = false; el.style.cursor = ''; el.style.userSelect = ''; } });
+        el.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            const dx = e.pageX - startX;
+            moved += Math.abs(dx);
+            el.scrollLeft = startLeft - dx;
+        });
+        // 드래그한 직후의 클릭은 무시 (카드 버튼 오작동 방지)
+        el.addEventListener('click', (e) => {
+            if (moved > 6) { e.preventDefault(); e.stopPropagation(); }
+        }, true);
+
+        // 세로 휠 → 가로 스크롤 (가로 스크롤이 가능한 경우에만)
+        el.addEventListener('wheel', (e) => {
+            if (el.scrollWidth <= el.clientWidth) return;
+            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                el.scrollLeft += e.deltaY;
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        el.style.cursor = 'grab';
+    });
+})();
+
+// ===== FAQ 아코디언 =====
+(function initFaq() {
+    document.querySelectorAll('.faq-item').forEach(item => {
+        const q = item.querySelector('.faq-q');
+        const a = item.querySelector('.faq-a');
+        const icon = item.querySelector('.faq-icon');
+        q.addEventListener('click', () => {
+            const isOpen = !a.classList.contains('hidden');
+            // 다른 항목 모두 닫기
+            document.querySelectorAll('.faq-item').forEach(other => {
+                other.querySelector('.faq-a').classList.add('hidden');
+                const oi = other.querySelector('.faq-icon');
+                if (oi) oi.style.transform = 'rotate(0deg)';
+            });
+            // 현재 항목 토글
+            if (!isOpen) {
+                a.classList.remove('hidden');
+                if (icon) icon.style.transform = 'rotate(180deg)';
+            }
+        });
+    });
+})();
+
+// ===== PC 견적폼 왼쪽 패널 여닫기 =====
+window.togglePcQuote = function() {
+    document.getElementById('pc-quote').classList.toggle('collapsed');
+};
+
+// ===== 이미지 팝업(모달) 열기/닫기 =====
+window.openImgModal = function(src) {
+    document.getElementById('img-modal-img').src = src;
+    document.getElementById('img-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+};
+window.closeImgModal = function(e) {
+    // 배경(오버레이) 또는 닫기 버튼 클릭 시 닫기. 이미지 자체 클릭은 무시.
+    if (e && e.target && e.target.id === 'img-modal-img') return;
+    document.getElementById('img-modal').classList.remove('open');
+    document.body.style.overflow = '';
+};
+// ESC로 닫기
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeImgModal(); });
+</script>
+</body>
+</html>
