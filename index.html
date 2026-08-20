@@ -64,6 +64,12 @@
         /* 큰 세로 슬라이드 — 화면의 약 62%, 아래 견적이 걸쳐 보이도록 */
         #main-slide-container { height: 62vh; max-height: 620px; min-height: 420px; }
 
+        /* ===== 히어로 슬라이드 문구(배지/제목/설명) — 위치/색상/크기를 관리자에서 자유 지정, 말풍선 박스 없이 사진 위에 바로 ===== */
+        .hero-el { position:absolute; left:var(--x,6%); top:var(--y,80%); max-width:88%; }
+        #main-slide-title.hero-el { font-size:var(--size,28px); color:var(--color,#ffffff); }
+        #main-slide-desc.hero-el { font-size:var(--size,14px); color:var(--color,rgba(255,255,255,.85)); }
+        #main-slide-badge.hero-el { font-size:var(--size,11px); }
+
         /* 단일 컬럼 흐름: 슬라이드 → 견적 → 아이콘 → 룩북 → 후기 */
         .pc-wrapper { display: flex; flex-direction: column; }
         .pc-slide    { order: 1; }   /* 큰 세로 슬라이드 (맨 위) */
@@ -76,60 +82,102 @@
         body { padding-bottom: 76px; }
 
         @media (min-width: 1024px) {
-            body { display: block; background: #e5e7eb; padding-bottom: 0; }
+            body { display: block; background: #f1edfa; padding-bottom: 0; }
             .mobile-app {
-                width: 760px !important;
-                max-width: 760px !important;
+                width: 100%;
+                max-width: 1240px !important;
                 margin: 0 auto !important;
+                padding: 0 24px;
                 min-height: 100vh !important;
                 overflow: visible !important;
-                box-shadow: 0 0 40px rgba(0,0,0,0.12) !important;
-                padding-bottom: 80px !important;
-                background: #fff !important;
+                box-shadow: none !important;
+                padding-bottom: 64px !important;
+                background: transparent !important;
             }
             .mobile-app > header {
                 position: sticky !important;
                 top: 0 !important;
-                width: 100% !important;
                 z-index: 50 !important;
+                margin: 0 -24px !important;
+                padding-left: 24px !important;
+                padding-right: 24px !important;
+                background: rgba(255,255,255,.92) !important;
+                backdrop-filter: blur(8px);
             }
-            /* 하단 고정 바를 중앙 컬럼 폭(760px)에 맞춰 가운데 정렬 */
-            .mobile-bottom-bar {
-                max-width: 760px !important;
-                width: 760px !important;
-                left: 50% !important;
-                transform: translateX(-50%) !important;
-            }
-            /* 본문은 슬라이드 → 아이콘 → 콘텐츠 (견적폼은 왼쪽 고정으로 분리) */
-            .pc-wrapper { display: flex; flex-direction: column; }
-            .pc-slide { order: 1; } .pc-menu { order: 2; }
-            .pc-lookbook { order: 3; } .pc-rest { order: 4; }
 
-            /* 견적폼 전체를 PC 왼쪽에 고정 */
+            /* 데스크탑 상단 내비게이션 노출 / 모바일 햄버거 숨김 */
+            #pc-nav { display: flex !important; }
+            #mobile-hamburger { display: none !important; }
+
+            /* 본문: 좌측 콘텐츠 + 우측 sticky 예약 패널 2단 그리드 */
+            .pc-wrapper {
+                display: grid;
+                grid-template-columns: minmax(0,1fr) 320px;
+                grid-template-areas:
+                    "slide quote"
+                    "menu  quote"
+                    "rest  quote";
+                column-gap: 28px;
+                align-items: start;
+            }
+            .pc-slide { grid-area: slide; margin-top: 20px; border-radius: 20px; overflow: hidden; }
+            .pc-menu  { grid-area: menu; }
+            .pc-rest  { grid-area: rest; }
+
+            /* 견적폼: 그리드 우측 칸에서 스크롤을 따라다니는 sticky 패널 */
             .pc-quote {
-                position: fixed; top: 80px; z-index: 60;
-                left: calc(50% - 380px - 312px);   /* 중앙 760px 컬럼 왼쪽 바깥 */
-                width: 300px; max-height: calc(100vh - 120px); overflow-y: auto;
-                background: #fff; border:1px solid #e5e7eb; border-radius:16px;
-                box-shadow:0 10px 30px rgba(0,0,0,.12);
+                grid-area: quote;
+                position: sticky;
+                top: 96px;
+                max-height: calc(100vh - 116px);
+                overflow-y: auto;
+                margin-top: 20px;
+                background: #fff;
+                border: 1px solid #ece7f9;
+                border-radius: 20px;
+                box-shadow: 0 16px 36px -12px rgba(76,29,149,.18);
             }
-            @media (max-width: 1480px) { .pc-quote { left: 16px; } }
 
-            /* PC에서 본문 큰 견적 카드(트리거)는 숨기고, 왼쪽 패널 헤더만 보이게 */
+            /* PC에서 본문 큰 견적 카드(트리거)는 숨기고, 우측 패널 헤더만 보이게 */
             #quote-btn { display: none !important; }
-            #pc-quote-head { display: flex !important; }
+            #pc-quote-head { display: flex !important; border-radius: 20px 20px 0 0; }
             /* PC에서는 견적폼을 기본으로 펼쳐 보여줌(헤더로 여닫기) */
             #quote-section { display: block !important; }
             .pc-quote.collapsed #quote-section { display: none !important; }
 
-            .pc-side-right { display: flex !important; }
+            /* 예약확인/카톡상담 — 헤더 바로 아래, 스크롤해도 계속 보이도록 고정 */
+            .pc-side-right {
+                display: flex !important;
+                position: sticky !important;
+                top: 50px;
+                transform: none !important;
+                flex-direction: row;
+                gap: 8px;
+                padding: 10px 12px;
+                border-bottom: 1px solid #f1eefb;
+                background: #fff;
+                z-index: 25;
+            }
+            .pc-side-right a {
+                width: auto; height: auto; flex: 1;
+                flex-direction: row; padding: 10px 6px;
+                border-radius: 12px; box-shadow: none;
+            }
 
-            /* 좁은 왼쪽 패널: 리프트권 대인/소인을 세로 1열로 */
+            /* 좁은 오른쪽 패널: 리프트권 대인/소인을 세로 1열로 */
             .lift-qty-grid { grid-template-columns: 1fr !important; }
+
+            .mobile-bottom-bar { display: none !important; }
         }
-        /* 좌·우 사이드 / PC 패널 헤더는 기본(모바일) 숨김 */
+        @media (min-width: 1024px) and (max-width: 1360px) {
+            .pc-wrapper { grid-template-columns: minmax(0,1fr) 288px; }
+        }
+        /* 데스크탑 전용 UI는 기본(모바일)에서 숨김 */
         .pc-side-right { display: none; }
         #pc-quote-head { display: none; }
+        #pc-nav { display: none; }
+        #pc-quote-modal { display: none !important; }
+        @media (min-width: 1024px) { #pc-quote-modal { display: flex !important; } }
 
         /* 예약 확인 바텀시트 */
         #lookup-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:200; justify-content:center; align-items:flex-end; }
@@ -158,25 +206,61 @@
         #pc-quote-head {
             background:#7c3aed; color:#fff; padding:14px 16px; cursor:pointer;
             align-items:center; justify-content:space-between; font-weight:800; font-size:14px;
-            position:sticky; top:0; z-index:5;
+            position:sticky; top:0; z-index:26;
         }
         #pc-quote-head .pqh-chevron { transition:transform .3s ease; }
         .pc-quote.collapsed #pc-quote-head .pqh-chevron { transform:rotate(180deg); }
         .pc-quote.collapsed #quote-section { display:none !important; }
 
-        /* ===== PC 우측 세로 퀵버튼 ===== */
-        .pc-side-right {
-            position: fixed; top: 50%; transform: translateY(-50%);
-            left: calc(50% + 380px + 20px);  /* 중앙 컬럼 오른쪽 바깥 */
-            flex-direction: column; gap: 10px; z-index: 60;
+        /* ===== 견적 패널 닫기/최소화 버튼 (평소 사이드바에서는 숨김, 모달로 확대됐을 때만 노출) ===== */
+        .pc-quote-modal-controls { display:none; align-items:center; gap:6px; }
+        .pqm-btn {
+            width:26px; height:26px; border-radius:8px; border:0; cursor:pointer;
+            background:rgba(255,255,255,.18); color:#fff; display:flex; align-items:center; justify-content:center;
+            font-size:12px; transition:background .15s;
         }
-        @media (max-width: 1320px) { .pc-side-right { left: auto; right: 16px; } }
+        .pqm-btn:hover { background:rgba(255,255,255,.32); }
+
+        /* ===== "빠른예약" 등을 눌렀을 때 견적 패널을 화면 중앙으로 확대하는 모달 ===== */
+        #pc-quote-modal {
+            position:fixed; inset:0; z-index:200; padding:40px;
+            align-items:center; justify-content:center;
+            background:rgba(15,10,35,.55);
+            visibility:hidden; opacity:0; pointer-events:none;
+            transition:opacity .25s ease, visibility 0s linear .25s;
+        }
+        #pc-quote-modal.open {
+            visibility:visible; opacity:1; pointer-events:auto;
+            transition:opacity .25s ease, visibility 0s linear 0s;
+        }
+        #pc-quote-modal-inner { width:480px; max-width:100%; max-height:88vh; }
+        .pc-quote { transition:transform .32s cubic-bezier(.34,1.15,.64,1), opacity .22s ease; }
+        #pc-quote-modal #pc-quote {
+            position:relative !important; width:100%; max-height:88vh;
+            transform:scale(.94); opacity:0;
+        }
+        #pc-quote-modal #pc-quote.pqm-in { transform:scale(1); opacity:1; }
+        /* 모달로 떠 있는 동안: 접기 화살표는 숨기고 닫기/최소화 버튼만 노출 */
+        #pc-quote-modal .pqh-chevron { display:none; }
+        #pc-quote-modal .pc-quote-modal-controls { display:flex; }
+
+        /* ===== 예약확인/카톡상담 액션 바 (PC에서는 예약 패널 하단에 인라인 표시) ===== */
         .pc-side-right a {
-            width:64px; height:64px; border-radius:16px; display:flex; flex-direction:column;
-            align-items:center; justify-content:center; gap:3px; text-decoration:none;
-            box-shadow:0 6px 18px rgba(0,0,0,.15); transition:transform .15s ease;
+            border-radius:12px; display:flex; align-items:center; justify-content:center; gap:6px;
+            text-decoration:none; font-size:11px; padding:10px 6px; transition:opacity .15s ease;
         }
-        .pc-side-right a:hover { transform:translateY(-2px); }
+        .pc-side-right a:hover { opacity:.85; }
+
+        /* ===== 데스크탑 상단 내비게이션 ===== */
+        #pc-nav a {
+            font-size:13px; font-weight:700; color:#475569; padding:8px 12px; border-radius:10px;
+            transition:background .15s,color .15s; white-space:nowrap; cursor:pointer;
+        }
+        #pc-nav a:hover { background:#f5f3ff; color:#7c3aed; }
+        #pc-nav .pc-nav-cta {
+            background:#7c3aed; color:#fff; padding:9px 18px; border-radius:10px; margin-left:4px;
+        }
+        #pc-nav .pc-nav-cta:hover { background:#6d28d9; color:#fff; }
     </style>
 </head>
 <body>
@@ -188,6 +272,12 @@
 <div id="img-modal" role="dialog" aria-modal="true" aria-label="이미지 크게 보기" onclick="closeImgModal(event)">
     <div class="img-modal-close" onclick="closeImgModal()" aria-label="닫기">&times;</div>
     <img id="img-modal-img" src="" alt="확대 이미지">
+</div>
+
+<!-- PC 전용: "빠른예약" 등을 눌렀을 때 견적 패널을 화면 중앙으로 확대해서 보여주는 모달 셸.
+     실제 폼은 새로 만들지 않고 #pc-quote 요소를 이 안으로 옮겼다가, 닫으면 원래 자리(#pc-quote-anchor)로 되돌려놓는 방식. -->
+<div id="pc-quote-modal" role="dialog" aria-modal="true" aria-label="실시간 견적/예약" onclick="if(event.target===this) closeQuoteModal()">
+    <div id="pc-quote-modal-inner"></div>
 </div>
 
 <!-- 진입 프로모션 팝업 (모바일 전용) -->
@@ -367,7 +457,17 @@
             <i class="fa-solid fa-mountain text-[#7c3aed] text-xl" aria-hidden="true"></i>
             <span class="font-black text-[#0f172a] text-[19px] tracking-tight">놀러와</span>
         </a>
-        <button onclick="openModal()" aria-label="전체 메뉴 열기" class="text-[#0f172a] text-2xl w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+        <!-- 데스크탑 전용 내비게이션 -->
+        <nav id="pc-nav" aria-label="주요 메뉴" class="items-center">
+            <a onclick="openPanelFromMenu('lift-preview-section')">리프트권</a>
+            <a onclick="openPanelFromMenu('outfit-section')">의류·장비</a>
+            <a onclick="openPanelFromMenu('lesson-section')">강습</a>
+            <a onclick="openPanelFromMenu('pension-section')">펜션</a>
+            <a onclick="openPanelFromMenu('guide-section')">가이드</a>
+            <a onclick="openPanelFromMenu('map-section')">오시는길</a>
+            <a onclick="openQuote()" class="pc-nav-cta">빠른예약</a>
+        </nav>
+        <button id="mobile-hamburger" onclick="openModal()" aria-label="전체 메뉴 열기" class="text-[#0f172a] text-2xl w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
             <i class="fa-solid fa-bars" aria-hidden="true"></i>
         </button>
     </header>
@@ -380,19 +480,17 @@
     <section class="bg-white" aria-label="이벤트 배너">
         <div id="main-slide-container" class="relative w-full overflow-hidden bg-[#1e293b]">
             <div id="main-slide-wrapper" class="absolute inset-0 opacity-100">
-                <img id="main-slide-img" src="./2.jpg" alt="배너" class="w-full h-full object-cover object-center">
+                <img id="main-slide-img" src="./2.jpg" alt="배너" class="w-full h-full object-cover" style="object-position:var(--fx,50%) var(--fy,50%); transform:scale(var(--zoom,1)); transform-origin:var(--fx,50%) var(--fy,50%);">
                 <div id="main-slide-gradient" class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
-                <div class="absolute left-0 right-0 bottom-0 flex flex-col px-6 pb-8 z-10">
-                    <div id="main-slide-badge" class="self-start bg-white/90 text-[#7c3aed] px-2.5 py-1 rounded-full font-bold text-[11px] shadow-sm flex items-center mb-2">
-                        <i class="fa-regular fa-snowflake mr-1"></i> 신규 OPEN
-                    </div>
-                    <p id="main-slide-title" class="text-white font-black text-[28px] leading-tight drop-shadow-lg tracking-tight">
-                        풀세트 단돈 <span class="text-[#7cc0ff]">40,000원</span>
-                    </p>
-                    <p id="main-slide-desc" class="text-white/85 text-[14px] font-medium mt-1.5 drop-shadow">
-                        장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가
-                    </p>
+                <div id="main-slide-badge" class="hero-el bg-white/90 text-[#7c3aed] px-2.5 py-1 rounded-full font-bold text-[11px] shadow-sm inline-flex items-center z-10">
+                    <i class="fa-regular fa-snowflake mr-1"></i> <span id="main-slide-badge-text">신규 OPEN</span>
                 </div>
+                <p id="main-slide-title" class="hero-el text-white font-black leading-tight drop-shadow-lg tracking-tight z-10">
+                    풀세트 단돈 <span class="text-[#7cc0ff]">40,000원</span>
+                </p>
+                <p id="main-slide-desc" class="hero-el text-white/85 font-medium drop-shadow z-10">
+                    장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가
+                </p>
             </div>
             <button onclick="changeMainSlide(-1)" aria-label="이전 슬라이드" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-white/40 backdrop-blur-sm text-gray-900 rounded-full hover:bg-white/70 transition z-20">
                 <i class="fa-solid fa-chevron-left text-[13px] pr-0.5"></i>
@@ -407,12 +505,27 @@
     </div><!-- /pc-slide -->
 
     <!-- PC 왼쪽 / 모바일 두 번째: 견적 폼 -->
+    <div id="pc-quote-anchor" style="display:none"></div>
     <div class="pc-quote" id="pc-quote">
 
-    <!-- PC 전용 패널 헤더 (여닫기) -->
+    <!-- PC 전용 패널 헤더 (여닫기 / 모달 확대 시 닫기·최소화) -->
     <div id="pc-quote-head" onclick="togglePcQuote()">
         <span><i class="fa-solid fa-calculator mr-1.5"></i> 실시간 견적/예약</span>
+        <span class="pc-quote-modal-controls">
+            <button type="button" onclick="event.stopPropagation(); minimizeQuoteModal()" aria-label="최소화" class="pqm-btn"><i class="fa-solid fa-minus"></i></button>
+            <button type="button" onclick="event.stopPropagation(); closeQuoteModal()" aria-label="닫기" class="pqm-btn"><i class="fa-solid fa-xmark"></i></button>
+        </span>
         <i class="fa-solid fa-chevron-up pqh-chevron text-[12px]"></i>
+    </div>
+
+    <!-- 예약확인/카톡상담 — 헤더 바로 아래 고정, 폼을 끝까지 스크롤하지 않아도 바로 보임 -->
+    <div class="pc-side-right">
+        <a href="#" onclick="openLookup(); return false;" class="bg-[#0f172a] text-white" aria-label="예약 확인하기">
+            <i class="fa-solid fa-magnifying-glass text-[13px]"></i><span class="font-bold">예약확인</span>
+        </a>
+        <a href="http://pf.kakao.com/_DYBbxj/chat" target="_blank" rel="noopener" class="bg-[#FEE500] text-[#3A1D1D]" aria-label="카카오톡 상담">
+            <i class="fa-solid fa-comment text-[14px]"></i><span class="font-bold">카톡상담</span>
+        </a>
     </div>
 
     <!-- 실시간 견적 및 간편 예약 (맨 위 핵심) -->
@@ -680,7 +793,7 @@
         </div>
 
         <!-- 아이콘 메뉴 그리드 (JS에서 menuItems 배열로 자동 생성) -->
-        <div id="menu-grid" class="menu-grid grid grid-cols-3 gap-3"></div>
+        <div id="menu-grid" class="menu-grid grid grid-cols-3 lg:grid-cols-6 gap-3"></div>
 
         <!-- ===== 패널: 리프트권 요금표 ===== -->
         <div id="lift-preview-section" class="hidden mt-3 bg-[#f8fafc] rounded-xl border border-violet-100 shadow-inner overflow-hidden pb-5 pt-4">
@@ -779,7 +892,7 @@
             <div class="px-4 pt-2 pb-1 flex justify-between items-center">
                 <h3 class="font-black text-[#0f172a] text-[15px]"><i class="fa-solid fa-shirt text-[#7c3aed] mr-1.5"></i> 26/27 시즌 의류</h3>
             </div>
-            <div class="grid grid-cols-3 gap-2 px-4 pb-4 pt-2">
+            <div class="grid grid-cols-3 lg:grid-cols-6 gap-2 px-4 pb-4 pt-2">
                 <!-- 의류1 -->
                 <button type="button" onclick="openImgModal('./p/의류1.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#7c3aed] transition">
                     <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류1.jpg" alt="매장 입구 의류·헬멧 진열" class="w-full h-full object-cover"></div>
@@ -828,7 +941,7 @@
             <div class="px-4 pt-2 pb-1 flex justify-between items-center border-t border-gray-100">
                 <h3 class="font-black text-[#0f172a] text-[15px] pt-3"><i class="fa-solid fa-person-skiing text-[#7c3aed] mr-1.5"></i> 장비 소개</h3>
             </div>
-            <div class="grid grid-cols-3 gap-2 px-4 pb-4 pt-2">
+            <div class="grid grid-cols-3 lg:grid-cols-5 gap-2 px-4 pb-4 pt-2">
                 <!-- 장비1 -->
                 <button type="button" onclick="openImgModal('./p/장비1.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#7c3aed] transition">
                     <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비1.jpg" alt="스키·스노보드 판 다수 보유" class="w-full h-full object-cover"></div>
@@ -893,13 +1006,9 @@
                 <h3 class="font-black text-[#0f172a] text-[15px]">제휴 펜션 <span class="text-[#7c3aed]">안내</span></h3>
             </div>
             <div class="px-4 pb-4">
-                <!-- 무곡 (넓은 단독 카드 · 사진 3장) -->
+                <!-- 무곡 (넓은 단독 카드 · 사진+문구가 합쳐진 배너 이미지 1장) -->
                 <a href="https://mugok.co.kr/" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden border border-gray-100 shadow-sm mb-2.5 hover:border-[#1f9a9a] transition">
-                    <div class="grid grid-cols-3 gap-0.5 bg-gray-100">
-                        <div class="aspect-[4/3] bg-gray-100"><img src="./p/무곡1.PNG" alt="무곡 전경" class="w-full h-full object-cover"></div>
-                        <div class="aspect-[4/3] bg-gray-100"><img src="./p/무곡2.PNG" alt="무곡 객실" class="w-full h-full object-cover"></div>
-                        <div class="aspect-[4/3] bg-gray-100"><img src="./p/무곡3.PNG" alt="무곡 내부" class="w-full h-full object-cover"></div>
-                    </div>
+                    <div class="aspect-[1200/440] bg-gray-100"><img src="./p/무곡1.PNG" alt="무곡펜션 — 겨울시즌 30%할인, 곤도라 티켓 혜택" class="w-full h-full object-cover"></div>
                     <div class="bg-[#7c3aed] text-white text-center py-2.5 px-1"><p class="font-bold text-[14px]">무곡</p><p class="text-[11px] opacity-90 mt-0.5">010-9813-3421</p></div>
                 </a>
                 <!-- 나머지 펜션 (3열 그리드) -->
@@ -985,8 +1094,8 @@
     <div class="pc-rest">
 
     <!-- 신뢰 섹션 (신규 오픈 · 리뷰 대체) -->
-    <div class="w-full h-2 bg-gray-100" role="separator"></div>
-    <section class="px-4 py-6 bg-white">
+    <div class="w-full h-2 bg-gray-100 lg:hidden" role="separator"></div>
+    <section class="px-4 py-6 bg-white lg:bg-violet-50/60 lg:rounded-2xl lg:my-4">
         <!-- 헤더 -->
         <div class="flex items-center justify-between mb-4">
             <div>
@@ -1119,18 +1228,11 @@
     </div><!-- /pc-rest -->
     </div><!-- /pc-wrapper -->
 
-    <!-- PC 우측 퀵버튼 -->
-    <div class="pc-side-right">
-        <a href="#" onclick="openQuote(); return false;" class="bg-[#7c3aed] text-white" aria-label="견적 및 예약하기">
-            <i class="fa-solid fa-calculator text-[18px]"></i><span class="text-[10px] font-bold">예약</span>
-        </a>
-        <a href="#" onclick="openLookup(); return false;" class="bg-[#0f172a] text-white" aria-label="예약 확인하기">
-            <i class="fa-solid fa-magnifying-glass text-[16px]"></i><span class="text-[10px] font-bold">예약확인</span>
-        </a>
-        <a href="http://pf.kakao.com/_DYBbxj/chat" target="_blank" rel="noopener" class="bg-[#FEE500] text-[#3A1D1D]" aria-label="카카오톡 상담">
-            <i class="fa-solid fa-comment text-[18px]"></i><span class="text-[10px] font-bold">카톡상담</span>
-        </a>
-    </div>
+    <!-- 카톡상담 플로팅 버튼 (모바일 전용 — PC는 우측 견적 패널 안에 이미 있음) -->
+    <a href="http://pf.kakao.com/_DYBbxj/chat" target="_blank" rel="noopener" aria-label="카카오톡 상담"
+       class="lg:hidden fixed right-4 bottom-[92px] w-14 h-14 rounded-full bg-[#FEE500] text-[#3A1D1D] flex items-center justify-center shadow-lg z-40 hover:brightness-95 transition">
+        <i class="fa-solid fa-comment text-xl"></i>
+    </a>
 
     <!-- 하단 고정 바 (모바일·PC 공통) -->
     <div class="mobile-bottom-bar fixed bottom-0 w-full max-w-[414px] bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 px-3 py-3 flex gap-2 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
@@ -1158,14 +1260,48 @@ const _supabase = createClient(
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmcmVjbGd1Ym14ZHpudWJlZGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NDI2OTIsImV4cCI6MjA5NDMxODY5Mn0.PLb2oy5u5qd7lqFOlbr4UJDIk2okxy3OJZkE1sW6FLY'
 );
 
-// ===== 슬라이드 데이터 (큰 세로 메인 슬라이드) =====
-const mainSlidesData = [
-    { img:'./2.jpg', badge:'오픈 특가', titleHtml:`풀세트 단돈 <span class="text-[#7cc0ff]">40,000원</span>`, desc:'장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가' },
-    { img:'./1.jpg', badge:'26/27 신상', titleHtml:`무주에서 제일 잘 입은 사람 <span class="text-[#7cc0ff]">되기</span>`, desc:'사장이 직접 고른 트렌디한 신상 스키복' },
-    { img:'./4.jpg', badge:'무료 배달', titleHtml:`장비는 <span class="text-[#7cc0ff]">슬로프 앞까지</span>`, desc:'픽업 · 반납도 직접 찾아갑니다' }
+// ===== 구글시트 백업 미러링 (선택) =====
+// 아래 배포된 Apps Script 웹앱 URL을 붙여넣으면, 예약이 성공할 때마다 구글시트에도 자동으로 한 줄씩 기록됩니다.
+// 비워두면(기본값) 이 기능은 그냥 건너뜁니다 — 예약 자체(Supabase)에는 전혀 영향 없습니다.
+const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwZGS561JzcV84T7eiHqCdtogZhB3Y2fb4JSgzRMpmJgjG_cuNrlUY4q0g6-5XxtArIvQ/exec';
+
+function syncToSheet(reservation) {
+    if (!SHEET_WEBHOOK_URL) return;
+    fetch(SHEET_WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(reservation)
+    }).catch(() => {}); // 시트 동기화가 실패해도 예약 자체는 이미 완료된 상태이므로 무시
+}
+
+// ===== 히어로 슬라이드: 관리자가 등록한 슬라이드 목록/문구 위치·색상·크기를 불러와 적용 =====
+// 사진 초점·줌과 문구 위치·색상·크기는 모바일/PC 화면이 서로 다른 비율이라 완전히 따로 저장됨(admin.html과 동일 구조)
+function freshFocal() { return { focalX:50, focalY:50, zoom:1 }; }
+// 관리자가 아직 아무것도 등록 안 했을 때 쓰는 기본 슬라이드 3장(하드코딩) — 항상 이걸로 시작, 실패해도 사이트는 정상 동작
+let mainSlidesData = [
+    { img:'./2.jpg', badge:'오픈 특가', title:'풀세트 단돈 40,000원', desc:'장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가', mobile:freshFocal(), pc:freshFocal() },
+    { img:'./1.jpg', badge:'26/27 신상', title:'무주에서 제일 잘 입은 사람 되기', desc:'사장이 직접 고른 트렌디한 신상 스키복', mobile:freshFocal(), pc:freshFocal() },
+    { img:'./4.jpg', badge:'무료 배달', title:'장비는 슬로프 앞까지', desc:'픽업 · 반납도 직접 찾아갑니다', mobile:freshFocal(), pc:freshFocal() }
 ];
+// 문구(배지/제목/설명) 위치·크기·색상 기본값 — 모바일/PC 각각
+const HERO_TEXT_DEFAULTS = {
+    mobile: {
+        badge: { x:6, y:76, size:11 },
+        title: { x:6, y:84, size:28, color:'#ffffff' },
+        desc:  { x:6, y:92, size:14, color:'rgba(255,255,255,.85)' }
+    },
+    pc: {
+        badge: { x:5, y:16, size:12 },
+        title: { x:5, y:62, size:34, color:'#ffffff' },
+        desc:  { x:5, y:80, size:15, color:'rgba(255,255,255,.85)' }
+    }
+};
+let heroTextStyle = HERO_TEXT_DEFAULTS;
 let currentMainSlide = 0;
 let slideTimer = null;
+
+function isPcMode() { return window.matchMedia('(min-width: 1024px)').matches; }
 
 function renderSlideDots() {
     const wrap = document.getElementById('main-slide-dots');
@@ -1175,34 +1311,91 @@ function renderSlideDots() {
     ).join('');
 }
 
+function fillSlide(d) {
+    const mode = isPcMode() ? 'pc' : 'mobile';
+    const f = d[mode] || freshFocal();
+    const img = document.getElementById('main-slide-img');
+    img.src = d.img;
+    img.style.setProperty('--fx', (f.focalX != null ? f.focalX : 50) + '%');
+    img.style.setProperty('--fy', (f.focalY != null ? f.focalY : 50) + '%');
+    img.style.setProperty('--zoom', f.zoom || 1);
+    document.getElementById('main-slide-badge-text').textContent = d.badge || '';
+    document.getElementById('main-slide-title').textContent = d.title || '';
+    document.getElementById('main-slide-desc').textContent = d.desc || '';
+}
+
 window.changeMainSlide = function(dir) {
     currentMainSlide = (currentMainSlide + dir + mainSlidesData.length) % mainSlidesData.length;
-    const d = mainSlidesData[currentMainSlide];
     const w = document.getElementById('main-slide-wrapper');
     w.style.opacity = '0';
     setTimeout(() => {
-        document.getElementById('main-slide-img').src = d.img;
-        document.getElementById('main-slide-badge').innerHTML = `<i class="fa-regular fa-snowflake mr-1"></i> ${d.badge}`;
-        document.getElementById('main-slide-title').innerHTML = d.titleHtml;
-        document.getElementById('main-slide-desc').innerText = d.desc;
+        fillSlide(mainSlidesData[currentMainSlide]);
         renderSlideDots();
         w.style.opacity = '1';
     }, 200);
     resetSlideTimer();
 };
 function resetSlideTimer() { clearInterval(slideTimer); slideTimer = setInterval(() => changeMainSlide(1), 4000); }
+function initFirstSlide() { fillSlide(mainSlidesData[0]); }
 
-// 첫 슬라이드를 데이터(mainSlidesData[0])에서 즉시 적용 — 액자의 초기 src와 무관하게 항상 일치
-function initFirstSlide() {
-    const d = mainSlidesData[0];
-    document.getElementById('main-slide-img').src = d.img;
-    document.getElementById('main-slide-badge').innerHTML = `<i class="fa-regular fa-snowflake mr-1"></i> ${d.badge}`;
-    document.getElementById('main-slide-title').innerHTML = d.titleHtml;
-    document.getElementById('main-slide-desc').innerText = d.desc;
+// 배지/제목/설명의 위치·크기·색상을 요소에 적용 (모바일/PC 중 지금 화면에 맞는 값 사용)
+function applyHeroTextStyle() {
+    const mode = isPcMode() ? 'pc' : 'mobile';
+    const styleForMode = (heroTextStyle && heroTextStyle[mode]) || HERO_TEXT_DEFAULTS[mode];
+    ['badge','title','desc'].forEach(key => {
+        const d = HERO_TEXT_DEFAULTS[mode][key];
+        const s = styleForMode[key] || d;
+        const el = document.getElementById(`main-slide-${key}`);
+        if (!el) return;
+        el.style.setProperty('--x', (s.x != null ? s.x : d.x) + '%');
+        el.style.setProperty('--y', (s.y != null ? s.y : d.y) + '%');
+        el.style.setProperty('--size', (s.size != null ? s.size : d.size) + 'px');
+        if (d.color) el.style.setProperty('--color', s.color || d.color);
+    });
 }
-initFirstSlide();
-renderSlideDots();
-resetSlideTimer();
+
+// 모바일↔PC 경계(1024px)를 넘나들며 창 크기를 바꾸는 경우까지 대비해 다시 적용
+let heroResizeTimer = null;
+window.addEventListener('resize', () => {
+    clearTimeout(heroResizeTimer);
+    heroResizeTimer = setTimeout(() => {
+        fillSlide(mainSlidesData[currentMainSlide]);
+        applyHeroTextStyle();
+    }, 200);
+});
+
+async function loadHeroConfig() {
+    try {
+        const { data, error } = await _supabase.from('site_content').select('key,value');
+        if (error) throw error;
+        const map = {};
+        (data || []).forEach(row => { map[row.key] = row.value; });
+
+        if (map.hero_slides) {
+            try {
+                const parsed = JSON.parse(map.hero_slides);
+                if (Array.isArray(parsed) && parsed.length) {
+                    mainSlidesData = parsed.map(s => ({ ...s, mobile: s.mobile || freshFocal(), pc: s.pc || freshFocal() }));
+                }
+            } catch (e) { console.error('hero_slides 파싱 실패, 기본 슬라이드 유지:', e); }
+        }
+        if (map.hero_text_style) {
+            try {
+                const parsed = JSON.parse(map.hero_text_style);
+                if (parsed && parsed.mobile && parsed.pc) heroTextStyle = parsed;
+            } catch (e) { console.error('hero_text_style 파싱 실패:', e); }
+        }
+    } catch (err) {
+        console.error('히어로 설정 불러오기 실패, 기본 슬라이드로 표시:', err);
+    } finally {
+        // 불러오기 성공/실패와 무관하게 항상 슬라이드를 시작 (기본값이라도 반드시 뜨도록)
+        initFirstSlide();
+        applyHeroTextStyle();
+        renderSlideDots();
+        resetSlideTimer();
+    }
+}
+loadHeroConfig();
 
 // 슬라이드 높이 CSS로 제어 (모바일 340px / PC 420px)
 
@@ -1320,23 +1513,50 @@ function setQuoteOpen(open) {
     quoteBtn.setAttribute('aria-expanded', String(open));
     quoteIcon.style.transform = open ? 'rotate(45deg)' : 'rotate(0deg)';
 }
-// 견적/예약 열기: PC는 왼쪽 고정 패널 펼치기, 모바일은 본문 견적 섹션 펼치기
+// 견적/예약 열기: PC는 견적 패널을 화면 중앙 모달로 확대, 모바일은 본문 견적 섹션 펼치기
 window.openQuote = function() {
     const isPC = window.matchMedia('(min-width: 1024px)').matches;
     if (isPC) {
-        const panel = document.getElementById('pc-quote');
-        if (panel) {
-            panel.classList.remove('collapsed');
-            panel.scrollTo({ top: 0, behavior: 'smooth' });
-            // 잠깐 강조 효과
-            panel.style.boxShadow = '0 0 0 3px #7c3aed, 0 10px 30px rgba(0,0,0,.12)';
-            setTimeout(() => { panel.style.boxShadow = ''; }, 1200);
-        }
+        maximizeQuoteModal();
     } else {
         setQuoteOpen(true);
         setTimeout(() => quoteBtn.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
     }
 };
+
+// ===== PC 전용: 견적 패널을 모달로 확대/원위치 =====
+// #pc-quote를 새로 그리지 않고, 있던 DOM 요소를 모달 안으로 옮겼다가 닫으면 원래 자리(#pc-quote-anchor)로 되돌린다.
+window.maximizeQuoteModal = function() {
+    const panel = document.getElementById('pc-quote');
+    const modal = document.getElementById('pc-quote-modal');
+    const inner = document.getElementById('pc-quote-modal-inner');
+    if (!panel || !modal || !inner) return;
+    panel.classList.remove('collapsed');
+    inner.appendChild(panel);
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    panel.classList.remove('pqm-in');
+    requestAnimationFrame(() => requestAnimationFrame(() => panel.classList.add('pqm-in')));
+};
+window.closeQuoteModal = function() {
+    const panel  = document.getElementById('pc-quote');
+    const modal  = document.getElementById('pc-quote-modal');
+    const anchor = document.getElementById('pc-quote-anchor');
+    if (!panel || !modal || !anchor) return;
+    if (!modal.classList.contains('open')) return;
+    panel.classList.remove('pqm-in');
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    anchor.parentNode.insertBefore(panel, anchor.nextSibling);
+};
+window.minimizeQuoteModal = function() {
+    closeQuoteModal();
+    const panel = document.getElementById('pc-quote');
+    if (panel) panel.classList.add('collapsed');
+};
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeQuoteModal();
+});
 quoteBtn.addEventListener('click', () => {
     const isOpen = quoteBtn.getAttribute('aria-expanded') === 'true';
     setQuoteOpen(!isOpen);
@@ -1517,6 +1737,7 @@ window.onReserve = async function() {
         const { data, error } = await _supabase.from('reservations').insert([payload]).select().single();
         if (error) throw error;
         openConfirm(data);
+        syncToSheet(data);
         // 폼 초기화
         ['reserver-name','reserver-phone','reserver-memo'].forEach(id => document.getElementById(id).value='');
         document.getElementById('visit-date').value = '';
@@ -1709,6 +1930,8 @@ window.lookupReservation = async function() {
 
 // ===== PC 견적폼 왼쪽 패널 여닫기 =====
 window.togglePcQuote = function() {
+    const modal = document.getElementById('pc-quote-modal');
+    if (modal && modal.classList.contains('open')) return; // 모달로 확대된 동안은 헤더 클릭으로 접히지 않게
     document.getElementById('pc-quote').classList.toggle('collapsed');
 };
 

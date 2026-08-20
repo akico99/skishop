@@ -35,6 +35,64 @@
         /* 카드 호버 */
         .res-card { transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s; }
         .res-card:active { transform: scale(0.99); }
+
+        /* ===== 히어로 슬라이드 미리보기 + 편집기 (index.html과 동일한 스타일 + 드래그/선택) ===== */
+        /* 모바일/PC 모드에 따라 미리보기 틀 비율 자체가 바뀜(세로 3:4 ↔ 가로 1.5:1) */
+        .hero-frame { position:relative; width:min(100%, 45vh); aspect-ratio:3/4; margin:0 auto; border-radius:16px; overflow:hidden; background:#1e293b; user-select:none; }
+        .hero-frame.hf-pc { width:100%; aspect-ratio:1.5/1; }
+        .hero-frame .hf-photo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position: var(--fx,50%) var(--fy,50%); transform:scale(var(--zoom,1)); transform-origin: var(--fx,50%) var(--fy,50%); cursor:crosshair; }
+        .hero-frame.hf-empty .hf-photo { display:none; }
+        .hf-empty-hint { display:none; position:absolute; inset:0; align-items:center; justify-content:center; flex-direction:column; gap:8px; color:#94a3b8; text-align:center; padding:20px; }
+        .hero-frame.hf-empty .hf-empty-hint { display:flex; }
+        .hero-frame .hf-gradient { position:absolute; inset:0; background:linear-gradient(0deg, rgba(0,0,0,.8) 0%, rgba(0,0,0,.25) 45%, transparent 70%); pointer-events:none; }
+        .hero-el { position:absolute; left:var(--x,6%); top:var(--y,80%); max-width:88%; cursor:move; outline:2px solid transparent; outline-offset:4px; transition:outline-color .12s; }
+        .hero-el:hover { outline-color:rgba(124,58,237,.6); }
+        .hero-el.hf-selected { outline-color:#7c3aed; outline-style:dashed; }
+        #hf-badge.hero-el { background:rgba(255,255,255,.9); color:#7c3aed; padding:.35em .7em; border-radius:999px; font-weight:700; font-size:var(--size,11px); white-space:nowrap; }
+        #hf-title.hero-el { font-weight:900; line-height:1.25; font-size:var(--size,28px); color:var(--color,#fff); text-shadow:0 2px 10px rgba(0,0,0,.5); }
+        #hf-desc.hero-el { font-weight:500; font-size:var(--size,14px); color:var(--color,rgba(255,255,255,.85)); text-shadow:0 1px 6px rgba(0,0,0,.5); }
+
+        /* 선택된 글자 요소 편집 바 */
+        #hero-style-bar { display:none; align-items:center; gap:10px; background:#f5f3ff; border:1px solid #e9e2fd; border-radius:12px; padding:10px 12px; margin-top:8px; flex-wrap:wrap; }
+        #hero-style-bar.show { display:flex; }
+        #hero-style-bar label { font-size:11px; color:#7c3aed; font-weight:700; display:flex; align-items:center; gap:5px; }
+        #hero-style-bar input[type=color] { width:28px; height:28px; border:0; border-radius:6px; padding:0; background:none; cursor:pointer; }
+        #hero-style-bar input[type=range] { width:90px; }
+
+        /* 슬라이드 탭 */
+        .hero-tab { padding:7px 14px; border-radius:10px; font-size:12px; font-weight:700; background:#f1f5f9; color:#64748b; cursor:pointer; white-space:nowrap; flex:none; }
+        .hero-tab.active { background:#7c3aed; color:#fff; }
+
+        /* 모바일/PC 모드 전환 탭 */
+        .mode-tab { flex:1; padding:8px 10px; border-radius:10px; font-size:12px; font-weight:800; background:#f1f5f9; color:#64748b; cursor:pointer; text-align:center; }
+        .mode-tab.active { background:#0f172a; color:#fff; }
+
+        /* 사진 위치(초점) 조절 팝업 — 전체 사진을 다 보여주고, 현재 편집 중인 모드(모바일/PC)의 실제 노출 영역을 사각 틀로 표시해 드래그 */
+        #focal-modal { display:none; position:fixed; inset:0; background:rgba(15,23,42,.75); z-index:300; align-items:center; justify-content:center; padding:20px; }
+        #focal-modal.open { display:flex; }
+        #focal-modal-box { background:#fff; border-radius:20px; padding:18px; width:100%; max-width:460px; }
+        #focal-frame { position:relative; width:100%; height:420px; max-height:65vh; margin:0 auto; border-radius:14px; overflow:hidden; background:#0f172a; }
+        #focal-frame img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; pointer-events:none; }
+        #focal-crop-box {
+            position:absolute; border:2px solid #fff; cursor:move; touch-action:none;
+            box-shadow:0 0 0 2000px rgba(0,0,0,.6); /* 틀 바깥은 어둡게 — 실제로 잘려나가는 부분이 한눈에 보이도록 */
+        }
+        #focal-crop-box::after {
+            content:''; position:absolute; inset:0; pointer-events:none;
+            background:
+                linear-gradient(to right, rgba(255,255,255,.55) 1px, transparent 1px) 0 0/33.34% 100%,
+                linear-gradient(to bottom, rgba(255,255,255,.55) 1px, transparent 1px) 0 0/100% 33.34%;
+        }
+        #focal-crop-box-label {
+            position:absolute; top:-22px; left:0; background:#fff; color:#0f172a;
+            font-size:10px; font-weight:800; padding:2px 7px; border-radius:6px 6px 0 0;
+        }
+
+        /* 배너 관리 패널 여닫기 */
+        #banner-panel-body { display:none; }
+        #banner-panel.open #banner-panel-body { display:block; }
+        #banner-panel.open .banner-panel-chevron { transform:rotate(180deg); }
+        .banner-panel-chevron { transition:transform .2s ease; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -93,6 +151,125 @@
     </header>
 
     <div class="max-w-2xl mx-auto w-full px-4 py-5 flex-1">
+
+        <!-- 사진 위치(초점) 조절 팝업 -->
+        <div id="focal-modal" onclick="if(event.target===this) closeFocalModal()">
+            <div id="focal-modal-box">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-bold text-[#0f172a] text-[14px]">사진에서 보여줄 위치 선택</h3>
+                    <button type="button" onclick="closeFocalModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark text-gray-500"></i>
+                    </button>
+                </div>
+                <p class="text-[11px] text-gray-400 mb-3">전체 사진 중 <b class="text-[#7c3aed]">밝은 사각 틀 안쪽</b>이 지금 편집 중인 <b id="focal-mode-label" class="text-[#7c3aed]">모바일</b> 화면에 실제로 보여지는 부분입니다 — 틀을 드래그해서 옮겨보세요</p>
+                <div id="focal-frame">
+                    <img id="focal-img" src="" alt="">
+                    <div id="focal-crop-box"><span id="focal-crop-box-label">모바일</span></div>
+                </div>
+                <div class="flex items-center gap-3 mt-3">
+                    <i class="fa-solid fa-magnifying-glass-minus text-gray-400 text-[12px]"></i>
+                    <input type="range" id="focal-zoom" min="1" max="3" step="0.05" value="1" class="flex-1">
+                    <i class="fa-solid fa-magnifying-glass-plus text-gray-400 text-[12px]"></i>
+                </div>
+                <p class="text-[11px] text-gray-400 text-center mt-1">틀 크기가 확대 배율만큼 좁아져서, 사진에서 더 좁은 영역만 크게 보여줍니다</p>
+                <button type="button" onclick="closeFocalModal()"
+                        class="w-full mt-4 bg-[#7c3aed] text-white rounded-xl py-3 font-bold text-[13px] hover:bg-violet-700 transition">
+                    확인
+                </button>
+            </div>
+        </div>
+
+        <!-- 메인 히어로 슬라이드 관리 -->
+        <div id="banner-panel" class="bg-white rounded-2xl shadow-sm border border-gray-100 mb-5 overflow-hidden">
+            <button type="button" onclick="document.getElementById('banner-panel').classList.toggle('open')"
+                    class="w-full flex items-center justify-between px-4 py-3.5">
+                <h2 class="font-bold text-[#0f172a] text-[13px] flex items-center gap-1.5">
+                    <i class="fa-solid fa-image text-[#7c3aed] text-[12px]"></i> 메인 히어로 슬라이드 관리
+                </h2>
+                <i class="fa-solid fa-chevron-down banner-panel-chevron text-gray-400 text-[12px]"></i>
+            </button>
+            <div id="banner-panel-body" class="px-4 pb-4">
+
+                <!-- 모바일/PC 모드 전환 — 사진 초점·줌·글자 위치·색상·크기를 완전히 따로 설정 -->
+                <div class="flex gap-2 mb-3">
+                    <button type="button" id="mode-tab-mobile" class="mode-tab active" onclick="switchEditMode('mobile')">
+                        <i class="fa-solid fa-mobile-screen-button mr-1"></i> 모바일 화면
+                    </button>
+                    <button type="button" id="mode-tab-pc" class="mode-tab" onclick="switchEditMode('pc')">
+                        <i class="fa-solid fa-desktop mr-1"></i> PC 화면
+                    </button>
+                </div>
+
+                <!-- 슬라이드 탭 -->
+                <div id="hero-tabs" class="flex gap-2 mb-3 overflow-x-auto"></div>
+
+                <!-- 미리보기 겸 편집기 -->
+                <p class="text-[11px] text-gray-400 font-medium mb-1.5">
+                    <b class="text-[#7c3aed]">글자를 드래그</b>해서 위치 이동, 클릭하면 색상·크기 편집 · <b class="text-[#7c3aed]">사진을 클릭</b>하면 그 지점이 중심이 되도록 크롭됩니다
+                </p>
+                <div class="hero-frame mb-2 hf-empty" id="hf-frame">
+                    <img id="hf-photo" class="hf-photo" src="" alt="">
+                    <div class="hf-empty-hint"><i class="fa-solid fa-image text-2xl"></i><span class="text-[12px]">아래에서 사진을 업로드해주세요</span></div>
+                    <div class="hf-gradient"></div>
+                    <div id="hf-badge" class="hero-el" data-key="badge"><i class="fa-regular fa-snowflake mr-1"></i><span id="hf-badge-text"></span></div>
+                    <p id="hf-title" class="hero-el" data-key="title"></p>
+                    <p id="hf-desc" class="hero-el" data-key="desc"></p>
+                </div>
+
+                <!-- 선택된 글자 요소의 색상·크기 편집 바 -->
+                <div id="hero-style-bar">
+                    <span id="hero-style-target" class="text-[11px] font-bold text-[#0f172a]"></span>
+                    <label id="hero-style-color-wrap">색상 <input type="color" id="hero-style-color"></label>
+                    <label>크기 <input type="range" id="hero-style-size" min="9" max="40" step="1"></label>
+                    <button type="button" onclick="deselectHeroEl()" class="ml-auto text-[11px] text-gray-400 hover:text-gray-600">닫기</button>
+                </div>
+
+                <!-- 이미지 업로드 -->
+                <div class="mb-4 mt-3">
+                    <label class="block text-[11px] text-gray-400 font-medium mb-1.5">이 슬라이드의 사진</label>
+                    <input type="file" id="hero-file-input" accept="image/*"
+                           class="w-full text-[12px] border border-gray-200 rounded-xl px-3 py-2.5 bg-white">
+                    <p id="hero-upload-status" class="text-[11px] text-gray-400 mt-1"></p>
+                </div>
+
+                <!-- 문구 입력 (선택된 슬라이드) -->
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-[11px] text-gray-400 font-medium mb-1">배지 문구</label>
+                        <input type="text" id="hero-badge" placeholder="오픈 특가"
+                               class="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-violet-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-gray-400 font-medium mb-1">제목</label>
+                        <input type="text" id="hero-title" placeholder="풀세트 단돈 40,000원"
+                               class="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-violet-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-gray-400 font-medium mb-1">설명</label>
+                        <input type="text" id="hero-desc" placeholder="장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가"
+                               class="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-violet-500">
+                    </div>
+                </div>
+
+                <!-- 슬라이드 추가/삭제 -->
+                <div class="flex gap-2 mt-4">
+                    <button type="button" onclick="addHeroSlide()"
+                            class="flex-1 border border-violet-200 text-[#7c3aed] rounded-xl py-2.5 font-bold text-[12px] hover:bg-violet-50 transition">
+                        <i class="fa-solid fa-plus mr-1"></i> 슬라이드 추가
+                    </button>
+                    <button type="button" onclick="removeCurrentHeroSlide()"
+                            class="flex-1 border border-red-200 text-red-500 rounded-xl py-2.5 font-bold text-[12px] hover:bg-red-50 transition">
+                        <i class="fa-solid fa-trash mr-1"></i> 이 슬라이드 삭제
+                    </button>
+                </div>
+
+                <button type="button" onclick="saveHeroSlides()" id="hero-save-btn"
+                        class="w-full mt-3 bg-[#7c3aed] text-white rounded-xl py-3 font-bold text-[13px] hover:bg-violet-700 transition">
+                    전체 저장
+                </button>
+                <p id="hero-save-status" class="text-[11px] text-center mt-2"></p>
+            </div>
+        </div>
 
         <!-- 요약 통계 -->
         <div class="grid grid-cols-4 gap-2 mb-5">
@@ -362,7 +539,408 @@ function showDashboard() {
     const todayStr = today.toISOString().split('T')[0];
     document.getElementById('filter-start').value = todayStr;
     document.getElementById('filter-end').value   = todayStr;
+
+    initHeroPanel();
 }
+
+// ====================================================
+// 메인 히어로 슬라이드 관리 — 슬라이드 추가/삭제, 사진 초점, 문구 위치·색상·크기
+// ====================================================
+// 모바일/PC 각각 기본 문구 위치·크기·색상 (관리자가 아직 지정 안 했을 때 쓰는 값)
+const HERO_TEXT_DEFAULTS = {
+    mobile: {
+        badge: { x:6, y:76, size:11 },
+        title: { x:6, y:84, size:28, color:'#ffffff' },
+        desc:  { x:6, y:92, size:14, color:'rgba(255,255,255,.85)' }
+    },
+    pc: {
+        badge: { x:5, y:16, size:12 },
+        title: { x:5, y:62, size:34, color:'#ffffff' },
+        desc:  { x:5, y:80, size:15, color:'rgba(255,255,255,.85)' }
+    }
+};
+function freshFocal() { return { focalX:50, focalY:50, zoom:1 }; }
+const HERO_SLIDE_FALLBACK = [
+    { img:'./2.jpg', badge:'오픈 특가', title:'풀세트 단돈 40,000원', desc:'장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가', mobile:freshFocal(), pc:freshFocal() },
+    { img:'./1.jpg', badge:'26/27 신상', title:'무주에서 제일 잘 입은 사람 되기', desc:'사장이 직접 고른 트렌디한 신상 스키복', mobile:freshFocal(), pc:freshFocal() },
+    { img:'./4.jpg', badge:'무료 배달', title:'장비는 슬로프 앞까지', desc:'픽업 · 반납도 직접 찾아갑니다', mobile:freshFocal(), pc:freshFocal() }
+];
+let heroSlides = HERO_SLIDE_FALLBACK.map(s => ({ ...s, mobile:{...s.mobile}, pc:{...s.pc} }));
+let heroTextStyle = {};   // { mobile:{badge,title,desc}, pc:{badge,title,desc} }
+let currentHeroIdx = 0;
+let heroSelectedKey = null; // 'badge' | 'title' | 'desc' | null
+let editMode = 'mobile';    // 'mobile' | 'pc' — 지금 어느 화면 기준으로 편집 중인지
+
+window.switchEditMode = function(mode) {
+    editMode = mode;
+    document.getElementById('mode-tab-mobile').classList.toggle('active', mode === 'mobile');
+    document.getElementById('mode-tab-pc').classList.toggle('active', mode === 'pc');
+    document.getElementById('hf-frame').classList.toggle('hf-pc', mode === 'pc');
+    deselectHeroEl();
+    applyAllHeroStyles();
+    applyCurrentSlidePhotoStyle();
+};
+
+function renderHeroTabs() {
+    const wrap = document.getElementById('hero-tabs');
+    wrap.innerHTML = heroSlides.map((_, i) =>
+        `<button type="button" class="hero-tab ${i === currentHeroIdx ? 'active' : ''}" onclick="switchHeroSlide(${i})">슬라이드 ${i + 1}</button>`
+    ).join('');
+}
+
+function syncEditorFieldsIntoCurrentSlide() {
+    const s = heroSlides[currentHeroIdx];
+    if (!s) return;
+    s.badge = document.getElementById('hero-badge').value;
+    s.title = document.getElementById('hero-title').value;
+    s.desc  = document.getElementById('hero-desc').value;
+}
+
+window.switchHeroSlide = function(i) {
+    syncEditorFieldsIntoCurrentSlide();
+    currentHeroIdx = i;
+    loadCurrentSlideIntoEditor();
+    renderHeroTabs();
+};
+
+// 사진 초점/줌(지금 모드 기준)만 다시 적용 — 모드 전환·슬라이드 전환 시 공통으로 사용
+function applyCurrentSlidePhotoStyle() {
+    const s = heroSlides[currentHeroIdx];
+    const f = s[editMode] || freshFocal();
+    const photo = document.getElementById('hf-photo');
+    photo.style.setProperty('--fx', (f.focalX != null ? f.focalX : 50) + '%');
+    photo.style.setProperty('--fy', (f.focalY != null ? f.focalY : 50) + '%');
+    photo.style.setProperty('--zoom', f.zoom || 1);
+}
+
+function loadCurrentSlideIntoEditor() {
+    const s = heroSlides[currentHeroIdx];
+    document.getElementById('hero-badge').value = s.badge || '';
+    document.getElementById('hero-title').value = s.title || '';
+    document.getElementById('hero-desc').value  = s.desc  || '';
+    document.getElementById('hf-badge-text').textContent = s.badge || '';
+    document.getElementById('hf-title').textContent = s.title || '';
+    document.getElementById('hf-desc').textContent  = s.desc  || '';
+    document.getElementById('hero-upload-status').textContent = '';
+
+    const frame = document.getElementById('hf-frame');
+    const photo = document.getElementById('hf-photo');
+    if (s.img) {
+        photo.src = s.img;
+        frame.classList.remove('hf-empty');
+    } else {
+        photo.src = '';
+        frame.classList.add('hf-empty');
+    }
+    applyCurrentSlidePhotoStyle();
+}
+
+function applyHeroStyleToEl(key) {
+    const el = document.getElementById('hf-' + key);
+    const s = heroTextStyle[editMode][key];
+    if (!el || !s) return;
+    el.style.setProperty('--x', s.x + '%');
+    el.style.setProperty('--y', s.y + '%');
+    el.style.setProperty('--size', s.size + 'px');
+    if (s.color) el.style.setProperty('--color', s.color);
+}
+function applyAllHeroStyles() { Object.keys(heroTextStyle[editMode]).forEach(applyHeroStyleToEl); }
+
+function selectHeroEl(key) {
+    heroSelectedKey = key;
+    document.querySelectorAll('.hero-el').forEach(el => el.classList.toggle('hf-selected', el.dataset.key === key));
+    const s = heroTextStyle[editMode][key];
+    document.getElementById('hero-style-target').textContent = { badge:'배지', title:'제목', desc:'설명' }[key] + (editMode === 'pc' ? ' (PC)' : ' (모바일)');
+    document.getElementById('hero-style-color-wrap').style.display = s.color ? 'flex' : 'none';
+    if (s.color) document.getElementById('hero-style-color').value = s.color;
+    document.getElementById('hero-style-size').value = s.size;
+    document.getElementById('hero-style-bar').classList.add('show');
+}
+window.deselectHeroEl = function() {
+    heroSelectedKey = null;
+    document.querySelectorAll('.hero-el').forEach(el => el.classList.remove('hf-selected'));
+    document.getElementById('hero-style-bar').classList.remove('show');
+};
+
+function initHeroDragAndSelect() {
+    const frame = document.getElementById('hf-frame');
+
+    document.querySelectorAll('.hero-el').forEach(el => {
+        const key = el.dataset.key;
+        let dragging = false;
+
+        el.addEventListener('pointerdown', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            dragging = true;
+            el.setPointerCapture(e.pointerId);
+        });
+        el.addEventListener('pointermove', (e) => {
+            if (!dragging) return;
+            const rect = frame.getBoundingClientRect();
+            let x = ((e.clientX - rect.left) / rect.width) * 100;
+            let y = ((e.clientY - rect.top) / rect.height) * 100;
+            x = Math.max(2, Math.min(90, x));
+            y = Math.max(4, Math.min(96, y));
+            heroTextStyle[editMode][key].x = Math.round(x * 10) / 10;
+            heroTextStyle[editMode][key].y = Math.round(y * 10) / 10;
+            applyHeroStyleToEl(key);
+        });
+        el.addEventListener('pointerup', (e) => {
+            if (!dragging) return;
+            dragging = false;
+            el.releasePointerCapture(e.pointerId);
+            selectHeroEl(key); // 드래그였든 그냥 클릭이었든 선택 상태로 표시
+        });
+    });
+
+    // 사진 클릭 → 큰 팝업창을 열어 거기서 드래그로 조절
+    frame.addEventListener('click', (e) => {
+        if (e.target.closest('.hero-el')) return; // 글자 요소 클릭은 위 핸들러가 처리
+        if (!heroSlides[currentHeroIdx].img) return; // 사진이 아직 없으면 팝업 안 뜸
+        openFocalModal();
+    });
+
+    // 색상/크기 편집 바 (지금 모드(모바일/PC) 기준으로 따로 저장)
+    document.getElementById('hero-style-color').addEventListener('input', (e) => {
+        if (!heroSelectedKey || !heroTextStyle[editMode][heroSelectedKey].color) return;
+        heroTextStyle[editMode][heroSelectedKey].color = e.target.value;
+        applyHeroStyleToEl(heroSelectedKey);
+    });
+    document.getElementById('hero-style-size').addEventListener('input', (e) => {
+        if (!heroSelectedKey) return;
+        heroTextStyle[editMode][heroSelectedKey].size = Number(e.target.value);
+        applyHeroStyleToEl(heroSelectedKey);
+    });
+
+    // 문구 입력할 때마다 미리보기 실시간 갱신
+    document.getElementById('hero-badge').addEventListener('input', (e) => document.getElementById('hf-badge-text').textContent = e.target.value);
+    document.getElementById('hero-title').addEventListener('input', (e) => document.getElementById('hf-title').textContent = e.target.value);
+    document.getElementById('hero-desc').addEventListener('input',  (e) => document.getElementById('hf-desc').textContent  = e.target.value);
+
+    initFocalModal();
+}
+
+// ====================================================
+// 사진 위치(초점) 조절 팝업 — 전체 사진을 다 보여주고, 지금 편집 중인 모드(모바일/PC)의 실제 노출 영역을 사각 틀로 표시해 드래그
+// (인라인 클릭 방식 → "뭐가 보이는지 모르겠다" 피드백으로 팝업+드래그 방식으로 교체.
+//  이후 "PC와 모바일을 각각 설정하게 해달라, 텍스트 위치도 애매하다" 는 지적으로, 사진 초점·줌 뿐 아니라
+//  문구 위치·색상·크기까지 모바일/PC를 완전히 분리해서 저장하도록 확장 — editMode 전역 변수로 어느 화면을 편집 중인지 관리)
+// ====================================================
+let focalPhotoRect = null; // 실제 화면에 그려진(object-fit:contain) 사진의 {left,top,width,height} px
+let focalBoxBase   = null; // 확대 1배(줌 없음) 기준 틀 크기 {w,h} — 지금 모드의 미리보기 비율 기준
+
+// 현재 슬라이드·현재 모드의 줌 배율만큼 축소된 실제 틀 크기
+function currentBoxSize() {
+    const zoom = (heroSlides[currentHeroIdx][editMode] || freshFocal()).zoom || 1;
+    return { w: focalBoxBase.w / zoom, h: focalBoxBase.h / zoom };
+}
+
+// 사진이 담긴 자리(letterbox 포함) 대비, 줌 1배 기준으로 지금 모드에서 잘리지 않고 보이는 영역 크기를 계산
+function computeFocalLayout() {
+    const frame = document.getElementById('focal-frame');
+    const img = document.getElementById('focal-img');
+    const frameRect = frame.getBoundingClientRect();
+    const natW = img.naturalWidth, natH = img.naturalHeight;
+    if (!natW || !natH) return false;
+
+    const photoAR = natW / natH;
+    const frameAR = frameRect.width / frameRect.height;
+    let renderW, renderH;
+    if (photoAR > frameAR) { renderW = frameRect.width; renderH = frameRect.width / photoAR; }
+    else { renderH = frameRect.height; renderW = frameRect.height * photoAR; }
+    focalPhotoRect = { left:(frameRect.width - renderW) / 2, top:(frameRect.height - renderH) / 2, width:renderW, height:renderH };
+
+    // 지금 모드(모바일/PC)의 작은 미리보기 틀(#hf-frame)이 실제 렌더링된 비율을 그대로 사용
+    const hfRect = document.getElementById('hf-frame').getBoundingClientRect();
+    const targetAR = hfRect.width / hfRect.height;
+    let boxW, boxH;
+    if (photoAR > targetAR) { boxH = renderH; boxW = renderH * targetAR; }
+    else { boxW = renderW; boxH = renderW / targetAR; }
+    focalBoxBase = { w: Math.min(boxW, renderW), h: Math.min(boxH, renderH) };
+    return true;
+}
+
+function positionCropBoxFromFocal(fx, fy) {
+    const box = document.getElementById('focal-crop-box');
+    const size = currentBoxSize();
+    const slackW = focalPhotoRect.width - size.w;
+    const slackH = focalPhotoRect.height - size.h;
+    box.style.width  = size.w + 'px';
+    box.style.height = size.h + 'px';
+    box.style.left = (focalPhotoRect.left + Math.max(0, slackW) * (fx / 100)) + 'px';
+    box.style.top  = (focalPhotoRect.top  + Math.max(0, slackH) * (fy / 100)) + 'px';
+}
+
+function updateFocalFromBoxPosition(left, top) {
+    const size = currentBoxSize();
+    const slackW = focalPhotoRect.width - size.w;
+    const slackH = focalPhotoRect.height - size.h;
+    const fx = slackW > 0 ? ((left - focalPhotoRect.left) / slackW) * 100 : 50;
+    const fy = slackH > 0 ? ((top  - focalPhotoRect.top)  / slackH) * 100 : 50;
+    const s = heroSlides[currentHeroIdx];
+    if (!s[editMode]) s[editMode] = freshFocal();
+    s[editMode].focalX = Math.round(Math.max(0, Math.min(100, fx)) * 10) / 10;
+    s[editMode].focalY = Math.round(Math.max(0, Math.min(100, fy)) * 10) / 10;
+    // 작은 미리보기에도 실시간 반영
+    document.getElementById('hf-photo').style.setProperty('--fx', s[editMode].focalX + '%');
+    document.getElementById('hf-photo').style.setProperty('--fy', s[editMode].focalY + '%');
+}
+
+window.openFocalModal = function() {
+    const s = heroSlides[currentHeroIdx];
+    if (!s[editMode]) s[editMode] = freshFocal();
+    const f = s[editMode];
+    const img = document.getElementById('focal-img');
+    document.getElementById('focal-modal').classList.add('open');
+    document.getElementById('focal-zoom').value = f.zoom || 1;
+    document.getElementById('focal-mode-label').textContent = editMode === 'pc' ? 'PC' : '모바일';
+    document.getElementById('focal-crop-box-label').textContent = editMode === 'pc' ? 'PC' : '모바일';
+
+    const doLayout = () => {
+        if (!computeFocalLayout()) return;
+        positionCropBoxFromFocal(f.focalX != null ? f.focalX : 50, f.focalY != null ? f.focalY : 50);
+    };
+    img.onload = doLayout;
+    img.src = s.img;
+    if (img.complete && img.naturalWidth) doLayout();
+};
+window.closeFocalModal = function() {
+    document.getElementById('focal-modal').classList.remove('open');
+};
+
+function initFocalModal() {
+    const box = document.getElementById('focal-crop-box');
+    let dragging = false, startX = 0, startY = 0, boxStartLeft = 0, boxStartTop = 0;
+
+    box.addEventListener('pointerdown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        dragging = true;
+        box.setPointerCapture(e.pointerId);
+        startX = e.clientX; startY = e.clientY;
+        boxStartLeft = parseFloat(box.style.left) || 0;
+        boxStartTop  = parseFloat(box.style.top)  || 0;
+    });
+    box.addEventListener('pointermove', (e) => {
+        if (!dragging || !focalPhotoRect) return;
+        const size = currentBoxSize();
+        let newLeft = boxStartLeft + (e.clientX - startX);
+        let newTop  = boxStartTop  + (e.clientY - startY);
+        newLeft = Math.max(focalPhotoRect.left, Math.min(focalPhotoRect.left + focalPhotoRect.width  - size.w, newLeft));
+        newTop  = Math.max(focalPhotoRect.top,  Math.min(focalPhotoRect.top  + focalPhotoRect.height - size.h, newTop));
+        box.style.left = newLeft + 'px';
+        box.style.top  = newTop + 'px';
+        updateFocalFromBoxPosition(newLeft, newTop);
+    });
+    box.addEventListener('pointerup', (e) => { dragging = false; box.releasePointerCapture(e.pointerId); });
+
+    // 확대(줌) 슬라이더 — 지금 모드(모바일/PC)에 개별 저장
+    document.getElementById('focal-zoom').addEventListener('input', (e) => {
+        const s = heroSlides[currentHeroIdx];
+        if (!s[editMode]) s[editMode] = freshFocal();
+        s[editMode].zoom = Number(e.target.value);
+        document.getElementById('hf-photo').style.setProperty('--zoom', s[editMode].zoom);
+        if (focalPhotoRect) positionCropBoxFromFocal(s[editMode].focalX != null ? s[editMode].focalX : 50, s[editMode].focalY != null ? s[editMode].focalY : 50);
+    });
+}
+
+window.addHeroSlide = function() {
+    syncEditorFieldsIntoCurrentSlide();
+    heroSlides.push({ img:'', badge:'', title:'', desc:'', mobile:freshFocal(), pc:freshFocal() });
+    currentHeroIdx = heroSlides.length - 1;
+    loadCurrentSlideIntoEditor();
+    renderHeroTabs();
+};
+window.removeCurrentHeroSlide = function() {
+    if (heroSlides.length <= 1) { alert('슬라이드는 최소 1개 있어야 합니다.'); return; }
+    heroSlides.splice(currentHeroIdx, 1);
+    currentHeroIdx = Math.max(0, currentHeroIdx - 1);
+    loadCurrentSlideIntoEditor();
+    renderHeroTabs();
+};
+
+async function initHeroPanel() {
+    heroTextStyle = { mobile: JSON.parse(JSON.stringify(HERO_TEXT_DEFAULTS.mobile)), pc: JSON.parse(JSON.stringify(HERO_TEXT_DEFAULTS.pc)) };
+
+    try {
+        const { data, error } = await _supabase.from('site_content').select('key,value');
+        if (error) throw error;
+        const map = {};
+        (data || []).forEach(row => { map[row.key] = row.value; });
+
+        if (map.hero_slides) {
+            try {
+                const parsed = JSON.parse(map.hero_slides);
+                if (Array.isArray(parsed) && parsed.length) {
+                    heroSlides = parsed.map(s => ({ ...s, mobile: s.mobile || freshFocal(), pc: s.pc || freshFocal() }));
+                }
+            } catch (e) { console.error('hero_slides 파싱 실패:', e); }
+        }
+        if (map.hero_text_style) {
+            try {
+                const parsed = JSON.parse(map.hero_text_style);
+                if (parsed && parsed.mobile && parsed.pc) heroTextStyle = parsed;
+            } catch (e) { console.error('hero_text_style 파싱 실패:', e); }
+        }
+    } catch (err) {
+        console.error('히어로 슬라이드 정보 불러오기 실패:', err);
+    }
+
+    renderHeroTabs();
+    loadCurrentSlideIntoEditor();
+    applyAllHeroStyles();
+    initHeroDragAndSelect();
+
+    // 이미지 업로드 → Supabase Storage (현재 선택된 슬라이드에 적용, 모바일/PC 공통 사진)
+    document.getElementById('hero-file-input').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const status = document.getElementById('hero-upload-status');
+        status.textContent = '업로드 중...';
+        status.className = 'text-[11px] text-gray-400 mt-1';
+        try {
+            const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+            const path = `hero-${Date.now()}.${ext}`;
+            const { error: upErr } = await _supabase.storage.from('site-images').upload(path, file, { upsert: true });
+            if (upErr) throw upErr;
+            const { data: pub } = _supabase.storage.from('site-images').getPublicUrl(path);
+            heroSlides[currentHeroIdx].img = pub.publicUrl;
+            document.getElementById('hf-photo').src = pub.publicUrl;
+            document.getElementById('hf-frame').classList.remove('hf-empty');
+            status.textContent = '업로드 완료 — 아래 "전체 저장"을 눌러야 사이트에 반영됩니다';
+            status.className = 'text-[11px] text-green-600 mt-1 font-medium';
+        } catch (err) {
+            status.textContent = '업로드 실패: ' + err.message;
+            status.className = 'text-[11px] text-red-500 mt-1';
+        }
+    });
+}
+
+window.saveHeroSlides = async function() {
+    syncEditorFieldsIntoCurrentSlide();
+
+    const btn = document.getElementById('hero-save-btn');
+    const status = document.getElementById('hero-save-status');
+    btn.disabled = true;
+    btn.textContent = '저장 중...';
+
+    const rows = [
+        { key: 'hero_slides',     value: JSON.stringify(heroSlides) },
+        { key: 'hero_text_style', value: JSON.stringify(heroTextStyle) },
+    ];
+
+    try {
+        const { error } = await _supabase.from('site_content').upsert(rows, { onConflict: 'key' });
+        if (error) throw error;
+        status.textContent = '저장되었습니다. 사이트를 새로고침하면 반영됩니다.';
+        status.className = 'text-[11px] text-center mt-2 text-green-600 font-medium';
+    } catch (err) {
+        status.textContent = '저장 실패: ' + err.message;
+        status.className = 'text-[11px] text-center mt-2 text-red-500';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '전체 저장';
+    }
+};
 
 // 페이지 로드 시 세션 유지
 if (sessionStorage.getItem('muju_admin') === '1') showDashboard();
