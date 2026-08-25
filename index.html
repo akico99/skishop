@@ -93,7 +93,7 @@
                 min-height: 100vh !important;
                 overflow: visible !important;
                 box-shadow: none !important;
-                padding-bottom: 64px !important;
+                padding-bottom: 110px !important; /* 하단 고정 바(.pc-bottom-bar)에 본문이 가리지 않도록 */
                 background: transparent !important;
             }
             .mobile-app > header {
@@ -160,7 +160,7 @@
                 background: #fff;
                 z-index: 25;
             }
-            .pc-side-right a {
+            .pc-side-right a, .pc-side-right button {
                 width: auto; height: auto; flex: 1;
                 flex-direction: row; padding: 10px 6px;
                 border-radius: 12px; box-shadow: none;
@@ -170,12 +170,43 @@
             .lift-qty-grid { grid-template-columns: 1fr !important; }
 
             .mobile-bottom-bar { display: none !important; }
+
+            /* 카톡상담/예약확인/예약신청 — 화면 맨 아래 고정, 3등분으로 크고 눈에 띄게 */
+            /* (본문 padding-bottom은 위쪽 .mobile-app 규칙에서 이 바의 높이를 감안해 조정됨) */
+            .pc-bottom-bar {
+                display: flex !important;
+                position: fixed; left: 0; right: 0; bottom: 0;
+                z-index: 45;
+                background: #fff;
+                border-top: 1px solid #ece7f9;
+                box-shadow: 0 -12px 32px rgba(76,29,149,.15);
+                padding: 14px max(24px, calc(50vw - 620px + 24px));
+                gap: 16px;
+            }
+            .pc-bottom-bar > * {
+                flex: 1 1 0;
+                display: flex; align-items: center; justify-content: center; gap: 8px;
+                padding: 16px 12px;
+                border-radius: 14px;
+                font-weight: 800;
+                font-size: 16px;
+                text-align: center;
+                transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+            }
+            .pc-bottom-bar > *:hover { transform: translateY(-3px); }
+            .pc-bottom-bar a[href*="kakao"] { background: #FEE500; color: #3A1D1D; }
+            .pc-bottom-bar a[href*="kakao"]:hover { filter: brightness(.97); }
+            .pc-bottom-bar a[aria-label="예약 확인하기"] { background: #0f172a; color: #fff; }
+            .pc-bottom-bar a[aria-label="예약 확인하기"]:hover { background: #1e293b; }
+            .pc-bottom-bar button { background: #7c3aed; color: #fff; box-shadow: 0 10px 24px -6px rgba(124,58,237,.55); border: 0; cursor: pointer; }
+            .pc-bottom-bar button:hover { background: #6d28d9; box-shadow: 0 14px 28px -6px rgba(124,58,237,.65); }
         }
         @media (min-width: 1024px) and (max-width: 1360px) {
             .pc-wrapper { grid-template-columns: minmax(0,1fr) 288px; }
         }
         /* 데스크탑 전용 UI는 기본(모바일)에서 숨김 */
         .pc-side-right { display: none; }
+        .pc-bottom-bar { display: none; }
         #pc-quote-head { display: none; }
         #pc-nav { display: none; }
         #pc-quote-modal { display: none !important; }
@@ -248,11 +279,12 @@
         #pc-quote-modal .pc-quote-modal-controls { display:flex; }
 
         /* ===== 예약확인/카톡상담 액션 바 (PC에서는 예약 패널 하단에 인라인 표시) ===== */
-        .pc-side-right a {
+        .pc-side-right a, .pc-side-right button {
             border-radius:12px; display:flex; align-items:center; justify-content:center; gap:6px;
             text-decoration:none; font-size:11px; padding:10px 6px; transition:opacity .15s ease;
+            border:0; cursor:pointer; width:100%;
         }
-        .pc-side-right a:hover { opacity:.85; }
+        .pc-side-right a:hover, .pc-side-right button:hover { opacity:.85; }
 
         /* ===== 데스크탑 상단 내비게이션 ===== */
         #pc-nav a {
@@ -495,14 +527,11 @@
         <i class="fa-solid fa-chevron-up pqh-chevron text-[12px]"></i>
     </div>
 
-    <!-- 예약확인/카톡상담 — 헤더 바로 아래 고정, 폼을 끝까지 스크롤하지 않아도 바로 보임 -->
+    <!-- 전화문의 — PC는 전화 연결이 안 되므로 번호를 그대로 노출 + 클릭하면 복사, 헤더 바로 아래 고정 -->
     <div class="pc-side-right">
-        <a href="#" onclick="openLookup(); return false;" class="bg-[#0f172a] text-white" aria-label="예약 확인하기">
-            <i class="fa-solid fa-magnifying-glass text-[13px]"></i><span class="font-bold">예약확인</span>
-        </a>
-        <a href="http://pf.kakao.com/_DYBbxj/chat" target="_blank" rel="noopener" class="bg-[#FEE500] text-[#3A1D1D]" aria-label="카카오톡 상담">
-            <i class="fa-solid fa-comment text-[14px]"></i><span class="font-bold">카톡상담</span>
-        </a>
+        <button type="button" onclick="copyPhoneNumber('010-3600-1196')" class="bg-[#0f172a] text-white" aria-label="전화번호 복사">
+            <i class="fa-solid fa-phone text-[13px]"></i><span class="font-bold">010-3600-1196</span><i class="fa-regular fa-copy text-[11px] opacity-60"></i>
+        </button>
     </div>
 
     <!-- 실시간 견적 및 간편 예약 (맨 위 핵심) -->
@@ -1205,6 +1234,12 @@
     </div><!-- /pc-rest -->
     </div><!-- /pc-wrapper -->
 
+    <!-- 전화문의 플로팅 버튼 (모바일 전용 — PC는 우측 견적 패널 안에 이미 있음) -->
+    <a href="tel:010-3600-1196" aria-label="전화 문의"
+       class="lg:hidden fixed right-4 bottom-[156px] w-14 h-14 rounded-full bg-[#0f172a] text-white flex items-center justify-center shadow-lg z-40 hover:brightness-110 transition">
+        <i class="fa-solid fa-phone text-xl"></i>
+    </a>
+
     <!-- 카톡상담 플로팅 버튼 (모바일 전용 — PC는 우측 견적 패널 안에 이미 있음) -->
     <a href="http://pf.kakao.com/_DYBbxj/chat" target="_blank" rel="noopener" aria-label="카카오톡 상담"
        class="lg:hidden fixed right-4 bottom-[92px] w-14 h-14 rounded-full bg-[#FEE500] text-[#3A1D1D] flex items-center justify-center shadow-lg z-40 hover:brightness-95 transition">
@@ -1221,6 +1256,19 @@
         </button>
         <button onclick="openQuote()" class="flex-[1.4] bg-[#7c3aed] text-white rounded-xl font-bold text-[14px] py-3 hover:bg-violet-700 transition flex items-center justify-center gap-1">
             예약신청 <i class="fa-solid fa-arrow-right text-[12px]"></i>
+        </button>
+    </div>
+
+    <!-- PC 전용 하단 고정 바 — 카톡상담/예약확인/예약신청을 3등분으로 크고 눈에 띄게 배치 -->
+    <div class="pc-bottom-bar">
+        <a href="http://pf.kakao.com/_DYBbxj/chat" target="_blank" rel="noopener" aria-label="카카오톡 상담">
+            <i class="fa-solid fa-comment"></i> 카톡상담
+        </a>
+        <a href="#" onclick="openLookup(); return false;" aria-label="예약 확인하기">
+            <i class="fa-solid fa-magnifying-glass"></i> 예약확인
+        </a>
+        <button onclick="openQuote()" aria-label="예약 신청하기">
+            예약신청 <i class="fa-solid fa-arrow-right"></i>
         </button>
     </div>
 
@@ -1717,6 +1765,17 @@ window.showToast = function(msg) {
     t.innerText = msg; t.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+};
+
+// ===== 전화번호 복사 (PC에서는 tel: 링크로 실제 전화 연결이 안 되므로, 번호를 보여주고 클릭 시 복사) =====
+window.copyPhoneNumber = function(num) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(num)
+            .then(() => showToast(`전화번호가 복사되었습니다: ${num}`))
+            .catch(() => showToast(`전화문의: ${num}`));
+    } else {
+        showToast(`전화문의: ${num}`);
+    }
 };
 
 // ===== 예약 완료 모달 =====
