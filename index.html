@@ -64,11 +64,13 @@
         /* 큰 세로 슬라이드 — 화면의 약 62%, 아래 견적이 걸쳐 보이도록 */
         #main-slide-container { height: 62vh; max-height: 620px; min-height: 420px; }
 
-        /* ===== 히어로 슬라이드 문구(배지/제목/설명) — 위치/색상/크기를 관리자에서 자유 지정, 말풍선 박스 없이 사진 위에 바로 ===== */
-        .hero-el { position:absolute; left:var(--x,6%); top:var(--y,80%); max-width:88%; }
-        #main-slide-title.hero-el { font-size:var(--size,28px); color:var(--color,#ffffff); }
-        #main-slide-desc.hero-el { font-size:var(--size,14px); color:var(--color,rgba(255,255,255,.85)); }
-        #main-slide-badge.hero-el { font-size:var(--size,11px); }
+        /* ===== 히어로 슬라이드 문구 — 개수/모양/위치/색상/크기를 관리자에서 자유 지정, 링크를 걸면 <a>로 동작 ===== */
+        /* white-space:pre-line → 관리자가 입력한 줄바꿈(Enter) 그대로 반영, word-break:keep-all → 한글 단어 중간에서 어색하게 안 끊김 */
+        /* <a> 태그라서 기본 밑줄/파란색이 붙으므로 text-decoration:none으로 리셋(색은 shape별 규칙이 지정) */
+        .hero-el { position:absolute; left:var(--x,6%); top:var(--y,80%); max-width:88%; font-size:var(--size,16px); font-weight:var(--weight,700); text-align:var(--align,left); line-height:1.3; white-space:pre-line; word-break:keep-all; overflow-wrap:break-word; z-index:10; text-decoration:none; }
+        .hero-el[data-shape="plain"] { color:var(--color,#ffffff); text-shadow:0 2px 10px rgba(0,0,0,.5); }
+        .hero-el[data-shape="pill"]  { background:var(--bg,rgba(255,255,255,.9)); color:var(--color,#7c3aed); padding:.35em .9em; border-radius:999px; }
+        .hero-el[data-shape="box"]   { background:var(--bg,rgba(15,23,42,.55)); color:var(--color,#ffffff); padding:.4em .8em; border-radius:12px; }
 
         /* 단일 컬럼 흐름: 슬라이드 → 견적 → 아이콘 → 룩북 → 후기 */
         .pc-wrapper { display: flex; flex-direction: column; }
@@ -190,10 +192,11 @@
         #promo-overlay.open { display:flex; }
         #promo-box { background:#fff; width:100%; max-width:414px; border-radius:20px 20px 0 0; overflow:hidden; transform:translateY(100%); transition:transform .4s cubic-bezier(.34,1.56,.64,1); }
         #promo-overlay.open #promo-box { transform:translateY(0); }
+        /* PC에서 하단중앙(기본) 이외의 위치를 고르면 바텀시트 대신 카드처럼 사방 둥글게 뜨면서 살짝 확대되며 나타남 */
+        #promo-box.promo-floating { border-radius:20px; transform:scale(.92); opacity:0; transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .25s ease; }
+        #promo-overlay.open #promo-box.promo-floating { transform:scale(1); opacity:1; }
         #promo-track { display:flex; transition:transform .35s ease; }
         #promo-track > div { flex:0 0 100%; }
-        /* PC에서는 진입 팝업 미노출 */
-        @media (min-width: 1024px) { #promo-overlay { display:none !important; } }
 
         /* ===== 이미지 팝업(모달) ===== */
         #img-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:400; justify-content:center; align-items:center; padding:24px; }
@@ -280,30 +283,12 @@
     <div id="pc-quote-modal-inner"></div>
 </div>
 
-<!-- 진입 프로모션 팝업 (모바일 전용) -->
+<!-- 진입 프로모션 팝업 (모바일/PC 공통, admin에서 문구·버튼·색 편집 가능) -->
 <div id="promo-overlay" role="dialog" aria-modal="true" aria-label="이벤트 안내">
     <div id="promo-box">
         <div class="relative">
-            <div id="promo-track">
-                <!-- 슬라이드 1 -->
-                <div class="bg-gradient-to-br from-[#7c3aed] to-[#5b21b6] text-white p-6 pb-8">
-                    <p class="text-[13px] font-bold text-violet-100 mb-1">무주 스키 렌탈 신규 오픈</p>
-                    <h3 class="text-[26px] font-black leading-tight mb-2">풀세트 <span class="text-[#7cc0ff]">40,000원</span></h3>
-                    <p class="text-[13px] text-violet-100 mb-5">장비 + 의류 + 헬멧 + 고글 + 장갑<br>오픈 기념 한정 특가</p>
-                    <button onclick="promoGoReserve()" class="bg-white text-[#7c3aed] font-black text-[14px] px-5 py-2.5 rounded-full inline-flex items-center gap-1.5 hover:bg-violet-50 transition">
-                        지금 예약하기 <i class="fa-solid fa-arrow-right text-[12px]"></i>
-                    </button>
-                </div>
-                <!-- 슬라이드 2 -->
-                <div class="bg-gradient-to-br from-[#0f172a] to-[#334155] text-white p-6 pb-8">
-                    <p class="text-[13px] font-bold text-gray-300 mb-1">26/27 시즌 신상 입고</p>
-                    <h3 class="text-[26px] font-black leading-tight mb-2">올해 제일 <span class="text-[#7cc0ff]">잘 입은 사람</span></h3>
-                    <p class="text-[13px] text-gray-300 mb-5">사장이 직접 고른 트렌디한 신상 스키복<br>슬로프 앞까지 무료 배달</p>
-                    <button onclick="promoGoLookbook()" class="bg-white text-[#0f172a] font-black text-[14px] px-5 py-2.5 rounded-full inline-flex items-center gap-1.5 hover:bg-gray-100 transition">
-                        룩북 구경하기 <i class="fa-solid fa-arrow-right text-[12px]"></i>
-                    </button>
-                </div>
-            </div>
+            <!-- 슬라이드는 admin에서 설정한 내용으로 JS가 동적 생성 (initPromo) -->
+            <div id="promo-track"></div>
             <!-- 인디케이터 -->
             <div id="promo-dots" class="absolute bottom-3 right-5 flex gap-1.5"></div>
         </div>
@@ -482,15 +467,7 @@
             <div id="main-slide-wrapper" class="absolute inset-0 opacity-100">
                 <img id="main-slide-img" src="./2.jpg" alt="배너" class="w-full h-full object-cover" style="object-position:var(--fx,50%) var(--fy,50%); transform:scale(var(--zoom,1)); transform-origin:var(--fx,50%) var(--fy,50%);">
                 <div id="main-slide-gradient" class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
-                <div id="main-slide-badge" class="hero-el bg-white/90 text-[#7c3aed] px-2.5 py-1 rounded-full font-bold text-[11px] shadow-sm inline-flex items-center z-10">
-                    <i class="fa-regular fa-snowflake mr-1"></i> <span id="main-slide-badge-text">신규 OPEN</span>
-                </div>
-                <p id="main-slide-title" class="hero-el text-white font-black leading-tight drop-shadow-lg tracking-tight z-10">
-                    풀세트 단돈 <span class="text-[#7cc0ff]">40,000원</span>
-                </p>
-                <p id="main-slide-desc" class="hero-el text-white/85 font-medium drop-shadow z-10">
-                    장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가
-                </p>
+                <div id="main-slide-texts"></div>
             </div>
             <button onclick="changeMainSlide(-1)" aria-label="이전 슬라이드" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-white/40 backdrop-blur-sm text-gray-900 rounded-full hover:bg-white/70 transition z-20">
                 <i class="fa-solid fa-chevron-left text-[13px] pr-0.5"></i>
@@ -1275,33 +1252,77 @@ function syncToSheet(reservation) {
     }).catch(() => {}); // 시트 동기화가 실패해도 예약 자체는 이미 완료된 상태이므로 무시
 }
 
-// ===== 히어로 슬라이드: 관리자가 등록한 슬라이드 목록/문구 위치·색상·크기를 불러와 적용 =====
-// 사진 초점·줌과 문구 위치·색상·크기는 모바일/PC 화면이 서로 다른 비율이라 완전히 따로 저장됨(admin.html과 동일 구조)
+// ===== 히어로 슬라이드: 관리자가 등록한 슬라이드 목록/문구 위치·모양·색상·크기를 불러와 적용 =====
+// 사진 초점·줌과 문구 위치·모양·색상·크기는 모바일/PC 화면이 서로 다른 비율이라 완전히 따로 저장됨(admin.html과 동일 구조)
+// 문구는 배지/제목/설명 3개 고정이 아니라 admin에서 자유롭게 추가/삭제 가능한 목록(heroTextStyle.order)으로 관리됨
 function freshFocal() { return { focalX:50, focalY:50, zoom:1 }; }
 // 관리자가 아직 아무것도 등록 안 했을 때 쓰는 기본 슬라이드 3장(하드코딩) — 항상 이걸로 시작, 실패해도 사이트는 정상 동작
 let mainSlidesData = [
-    { img:'./2.jpg', badge:'오픈 특가', title:'풀세트 단돈 40,000원', desc:'장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가', mobile:freshFocal(), pc:freshFocal() },
-    { img:'./1.jpg', badge:'26/27 신상', title:'무주에서 제일 잘 입은 사람 되기', desc:'사장이 직접 고른 트렌디한 신상 스키복', mobile:freshFocal(), pc:freshFocal() },
-    { img:'./4.jpg', badge:'무료 배달', title:'장비는 슬로프 앞까지', desc:'픽업 · 반납도 직접 찾아갑니다', mobile:freshFocal(), pc:freshFocal() }
+    { img:'./2.jpg', texts:{ badge:'오픈 특가', title:'풀세트 단돈 40,000원', desc:'장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
+    { img:'./1.jpg', texts:{ badge:'26/27 신상', title:'무주에서 제일 잘 입은 사람 되기', desc:'사장이 직접 고른 트렌디한 신상 스키복' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
+    { img:'./4.jpg', texts:{ badge:'무료 배달', title:'장비는 슬로프 앞까지', desc:'픽업 · 반납도 직접 찾아갑니다' }, links:{}, mobile:freshFocal(), pc:freshFocal() }
 ];
-// 문구(배지/제목/설명) 위치·크기·색상 기본값 — 모바일/PC 각각
+// 문구 위치·모양·크기·색상 기본값 — 모바일/PC 각각 (admin.html의 HERO_TEXT_DEFAULTS와 반드시 동일하게 유지)
 const HERO_TEXT_DEFAULTS = {
     mobile: {
-        badge: { x:6, y:76, size:11 },
-        title: { x:6, y:84, size:28, color:'#ffffff' },
-        desc:  { x:6, y:92, size:14, color:'rgba(255,255,255,.85)' }
+        badge: { x:6, y:76, size:11, color:'#7c3aed', bg:'rgba(255,255,255,.9)', shape:'pill',  weight:700, align:'left' },
+        title: { x:6, y:84, size:28, color:'#ffffff', bg:'rgba(15,23,42,.55)',   shape:'plain', weight:900, align:'left' },
+        desc:  { x:6, y:92, size:14, color:'rgba(255,255,255,.85)', bg:'rgba(15,23,42,.55)', shape:'plain', weight:500, align:'left' }
     },
     pc: {
-        badge: { x:5, y:16, size:12 },
-        title: { x:5, y:62, size:34, color:'#ffffff' },
-        desc:  { x:5, y:80, size:15, color:'rgba(255,255,255,.85)' }
+        badge: { x:5, y:16, size:12, color:'#7c3aed', bg:'rgba(255,255,255,.9)', shape:'pill',  weight:700, align:'left' },
+        title: { x:5, y:62, size:34, color:'#ffffff', bg:'rgba(15,23,42,.55)',   shape:'plain', weight:900, align:'left' },
+        desc:  { x:5, y:80, size:15, color:'rgba(255,255,255,.85)', bg:'rgba(15,23,42,.55)', shape:'plain', weight:500, align:'left' }
     }
 };
-let heroTextStyle = HERO_TEXT_DEFAULTS;
+let heroTextStyle = { order:['badge','title','desc'], mobile:HERO_TEXT_DEFAULTS.mobile, pc:HERO_TEXT_DEFAULTS.pc };
 let currentMainSlide = 0;
 let slideTimer = null;
 
 function isPcMode() { return window.matchMedia('(min-width: 1024px)').matches; }
+
+// 예전 방식(고정 배지/제목/설명 문자열, order/shape 없는 스타일)으로 저장된 데이터를 새 구조로 변환
+function migrateHeroSlide(s) {
+    const texts = s.texts ? { ...s.texts } : { badge: s.badge || '', title: s.title || '', desc: s.desc || '' };
+    const links = s.links ? { ...s.links } : {};
+    return { img: s.img || '', texts, links, mobile: s.mobile || freshFocal(), pc: s.pc || freshFocal() };
+}
+// admin에서 입력한 링크가 javascript: 같은 위험한 스킴이 아닌지 확인 (http(s)/상대경로만 허용)
+function safeHeroUrl(url) {
+    if (!url) return '';
+    const trimmed = String(url).trim();
+    if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('/')) return trimmed;
+    return '';
+}
+function migrateHeroTextStyle(parsed) {
+    const order = Array.isArray(parsed.order) && parsed.order.length ? parsed.order : ['badge','title','desc'];
+    const fillMode = (mode) => {
+        const out = {};
+        order.forEach(id => {
+            const base = parsed[mode] && parsed[mode][id];
+            const def = (HERO_TEXT_DEFAULTS[mode] && HERO_TEXT_DEFAULTS[mode][id]) || { x:10, y:50, size:16, color:'#ffffff', bg:'rgba(15,23,42,.55)', shape:'plain', weight:700, align:'left' };
+            out[id] = {
+                x: base && base.x != null ? base.x : def.x,
+                y: base && base.y != null ? base.y : def.y,
+                size: base && base.size != null ? base.size : def.size,
+                color: (base && base.color) || def.color,
+                bg: (base && base.bg) || def.bg,
+                shape: (base && base.shape) || def.shape,
+                weight: (base && base.weight) || def.weight,
+                align: (base && base.align) || def.align
+            };
+        });
+        return out;
+    };
+    return { order, mobile: fillMode('mobile'), pc: fillMode('pc') };
+}
+
+// 지금 문구 목록(heroTextStyle.order)에 맞춰 실제 문구 DOM을 다시 생성 (개수가 admin에서 바뀔 수 있으므로)
+// <a> 태그로 만들어서, admin에서 링크를 걸어둔 문구는 클릭 시 실제로 이동하게 함(링크 없으면 href가 없어 그냥 문구처럼 동작)
+function renderHeroTextEls() {
+    const wrap = document.getElementById('main-slide-texts');
+    wrap.innerHTML = heroTextStyle.order.map(id => `<a class="hero-el" id="main-slide-${id}"></a>`).join('');
+}
 
 function renderSlideDots() {
     const wrap = document.getElementById('main-slide-dots');
@@ -1319,9 +1340,27 @@ function fillSlide(d) {
     img.style.setProperty('--fx', (f.focalX != null ? f.focalX : 50) + '%');
     img.style.setProperty('--fy', (f.focalY != null ? f.focalY : 50) + '%');
     img.style.setProperty('--zoom', f.zoom || 1);
-    document.getElementById('main-slide-badge-text').textContent = d.badge || '';
-    document.getElementById('main-slide-title').textContent = d.title || '';
-    document.getElementById('main-slide-desc').textContent = d.desc || '';
+    const texts = d.texts || {};
+    const links = d.links || {};
+    heroTextStyle.order.forEach(id => {
+        const el = document.getElementById('main-slide-' + id);
+        if (!el) return;
+        const val = texts[id] || '';
+        el.textContent = val;
+        el.style.display = val ? '' : 'none'; // 문구가 비어있으면 빈 배지/박스가 보이지 않도록 완전히 숨김
+        const url = safeHeroUrl(links[id]);
+        if (url) {
+            el.setAttribute('href', url);
+            el.setAttribute('target', '_blank');
+            el.setAttribute('rel', 'noopener noreferrer');
+            el.style.cursor = 'pointer';
+        } else {
+            el.removeAttribute('href');
+            el.removeAttribute('target');
+            el.removeAttribute('rel');
+            el.style.cursor = '';
+        }
+    });
 }
 
 window.changeMainSlide = function(dir) {
@@ -1338,19 +1377,22 @@ window.changeMainSlide = function(dir) {
 function resetSlideTimer() { clearInterval(slideTimer); slideTimer = setInterval(() => changeMainSlide(1), 4000); }
 function initFirstSlide() { fillSlide(mainSlidesData[0]); }
 
-// 배지/제목/설명의 위치·크기·색상을 요소에 적용 (모바일/PC 중 지금 화면에 맞는 값 사용)
+// 문구별 위치·모양·크기·색상을 요소에 적용 (모바일/PC 중 지금 화면에 맞는 값 사용)
 function applyHeroTextStyle() {
     const mode = isPcMode() ? 'pc' : 'mobile';
-    const styleForMode = (heroTextStyle && heroTextStyle[mode]) || HERO_TEXT_DEFAULTS[mode];
-    ['badge','title','desc'].forEach(key => {
-        const d = HERO_TEXT_DEFAULTS[mode][key];
-        const s = styleForMode[key] || d;
-        const el = document.getElementById(`main-slide-${key}`);
-        if (!el) return;
-        el.style.setProperty('--x', (s.x != null ? s.x : d.x) + '%');
-        el.style.setProperty('--y', (s.y != null ? s.y : d.y) + '%');
-        el.style.setProperty('--size', (s.size != null ? s.size : d.size) + 'px');
-        if (d.color) el.style.setProperty('--color', s.color || d.color);
+    const styleForMode = heroTextStyle[mode] || {};
+    heroTextStyle.order.forEach(id => {
+        const s = styleForMode[id];
+        const el = document.getElementById('main-slide-' + id);
+        if (!el || !s) return;
+        el.style.setProperty('--x', s.x + '%');
+        el.style.setProperty('--y', s.y + '%');
+        el.style.setProperty('--size', s.size + 'px');
+        el.style.setProperty('--color', s.color || '#ffffff');
+        el.style.setProperty('--bg', s.bg || 'rgba(15,23,42,.55)');
+        el.style.setProperty('--weight', s.weight || 700);
+        el.style.setProperty('--align', s.align || 'left');
+        el.dataset.shape = s.shape || 'plain';
     });
 }
 
@@ -1375,20 +1417,21 @@ async function loadHeroConfig() {
             try {
                 const parsed = JSON.parse(map.hero_slides);
                 if (Array.isArray(parsed) && parsed.length) {
-                    mainSlidesData = parsed.map(s => ({ ...s, mobile: s.mobile || freshFocal(), pc: s.pc || freshFocal() }));
+                    mainSlidesData = parsed.map(migrateHeroSlide);
                 }
             } catch (e) { console.error('hero_slides 파싱 실패, 기본 슬라이드 유지:', e); }
         }
         if (map.hero_text_style) {
             try {
                 const parsed = JSON.parse(map.hero_text_style);
-                if (parsed && parsed.mobile && parsed.pc) heroTextStyle = parsed;
+                if (parsed && parsed.mobile && parsed.pc) heroTextStyle = migrateHeroTextStyle(parsed);
             } catch (e) { console.error('hero_text_style 파싱 실패:', e); }
         }
     } catch (err) {
         console.error('히어로 설정 불러오기 실패, 기본 슬라이드로 표시:', err);
     } finally {
         // 불러오기 성공/실패와 무관하게 항상 슬라이드를 시작 (기본값이라도 반드시 뜨도록)
+        renderHeroTextEls();
         initFirstSlide();
         applyHeroTextStyle();
         renderSlideDots();
@@ -1812,15 +1855,220 @@ window.lookupReservation = async function() {
     }
 };
 
-// ===== 진입 프로모션 팝업 (모바일 전용, '오늘 그만보기' = 하루 숨김) =====
-(function initPromo() {
+// ===== 진입 프로모션 팝업 (모바일/PC 공통, admin에서 문구 위치·모양·크기·링크까지 히어로 슬라이드와 동일하게 편집 가능, '오늘 그만보기' = 하루 숨김) =====
+// 관리자가 아직 설정 안 했을 때 쓰는 기본값 — 기존 하드코딩 문구 그대로. admin.html의 PROMO_TEXT_DEFAULTS와 반드시 동일하게 유지.
+const PROMO_TEXT_DEFAULTS = {
+    mobile: {
+        eyebrow:    { x:8, y:8,  size:13, color:'rgba(255,255,255,.8)', bg:'rgba(15,23,42,.55)', shape:'plain', weight:700, align:'left' },
+        title:      { x:8, y:20, size:24, color:'#ffffff', bg:'rgba(15,23,42,.55)', shape:'plain', weight:900, align:'left' },
+        desc:       { x:8, y:44, size:13, color:'rgba(255,255,255,.8)', bg:'rgba(15,23,42,.55)', shape:'plain', weight:500, align:'left' },
+        buttonText: { x:8, y:76, size:14, color:'#0f172a', bg:'#ffffff', shape:'pill', weight:900, align:'left' }
+    },
+    pc: {
+        eyebrow:    { x:6, y:8,  size:13, color:'rgba(255,255,255,.8)', bg:'rgba(15,23,42,.55)', shape:'plain', weight:700, align:'left' },
+        title:      { x:6, y:22, size:27, color:'#ffffff', bg:'rgba(15,23,42,.55)', shape:'plain', weight:900, align:'left' },
+        desc:       { x:6, y:46, size:14, color:'rgba(255,255,255,.8)', bg:'rgba(15,23,42,.55)', shape:'plain', weight:500, align:'left' },
+        buttonText: { x:6, y:76, size:14, color:'#0f172a', bg:'#ffffff', shape:'pill', weight:900, align:'left' }
+    }
+};
+const PROMO_DEFAULT = {
+    enabledMobile: true,
+    enabledPc: true,
+    size: { mobile:{width:414,height:280}, pc:{width:480,height:320} }, // 팝업 박스 너비·높이(px) — 모바일/PC 각각
+    pcPosition: { v:'bottom', h:'center' }, // PC에서 팝업이 뜨는 위치 — 모바일은 항상 하단 고정(바텀시트)
+    slides: [
+        { texts:{ eyebrow:'무주 스키 렌탈 신규 오픈', title:'풀세트 {{40,000원}}', desc:'장비 + 의류 + 헬멧 + 고글 + 장갑\n오픈 기념 한정 특가', buttonText:'지금 예약하기' }, links:{}, actionType:'quote', actionValue:'', gradFrom:'', gradTo:'', img:'', mobile:freshFocal(), pc:freshFocal() },
+        { texts:{ eyebrow:'26/27 시즌 신상 입고', title:'올해 제일 {{잘 입은 사람}}', desc:'사장이 직접 고른 트렌디한 신상 스키복\n슬로프 앞까지 무료 배달', buttonText:'룩북 구경하기' }, links:{}, actionType:'section', actionValue:'outfit-section', gradFrom:'', gradTo:'', img:'', mobile:freshFocal(), pc:freshFocal() }
+    ]
+};
+let promoTextStyle = { order:['eyebrow','title','desc','buttonText'], mobile:PROMO_TEXT_DEFAULTS.mobile, pc:PROMO_TEXT_DEFAULTS.pc };
+// 예전 방식(enabled 하나만 있거나, size가 숫자 하나뿐이거나, texts 없이 평평했거나, img/mobile/pc 없는 데이터)으로 저장됐어도 안전하게 채워 넣음
+function promoNormalizeSize(v, defW, defH) {
+    if (v && typeof v === 'object') return { width: v.width || defW, height: v.height || defH };
+    if (typeof v === 'number') return { width: v, height: defH };
+    return { width: defW, height: defH };
+}
+function promoMigrateConfig(parsed) {
+    const size = {
+        mobile: promoNormalizeSize(parsed.size && parsed.size.mobile, 414, 280),
+        pc: promoNormalizeSize(parsed.size && parsed.size.pc, 480, 320)
+    };
+    const legacyEnabled = parsed.enabled !== false;
+    const enabledMobile = parsed.enabledMobile != null ? parsed.enabledMobile !== false : legacyEnabled;
+    const enabledPc = parsed.enabledPc != null ? parsed.enabledPc !== false : legacyEnabled;
+    const slides = parsed.slides.map(s => ({
+        ...s,
+        texts: s.texts ? { ...s.texts } : { eyebrow: s.eyebrow || '', title: s.title || '', desc: s.desc || '', buttonText: s.buttonText || '' },
+        links: s.links ? { ...s.links } : {},
+        img: s.img || '',
+        mobile: s.mobile || freshFocal(),
+        pc: s.pc || freshFocal()
+    }));
+    const pcPosition = {
+        v: (parsed.pcPosition && parsed.pcPosition.v) || 'bottom',
+        h: (parsed.pcPosition && parsed.pcPosition.h) || 'center'
+    };
+    return { enabledMobile, enabledPc, size, pcPosition, slides };
+}
+function promoMigrateTextStyle(parsed) {
+    const order = Array.isArray(parsed.order) && parsed.order.length ? parsed.order : ['eyebrow','title','desc','buttonText'];
+    const fillMode = (mode) => {
+        const out = {};
+        order.forEach(id => {
+            const base = parsed[mode] && parsed[mode][id];
+            const def = (PROMO_TEXT_DEFAULTS[mode] && PROMO_TEXT_DEFAULTS[mode][id]) || { x:10, y:50, size:16, color:'#ffffff', bg:'rgba(15,23,42,.55)', shape:'plain', weight:700, align:'left' };
+            out[id] = {
+                x: base && base.x != null ? base.x : def.x,
+                y: base && base.y != null ? base.y : def.y,
+                size: base && base.size != null ? base.size : def.size,
+                color: (base && base.color) || def.color,
+                bg: (base && base.bg) || def.bg,
+                shape: (base && base.shape) || def.shape,
+                weight: (base && base.weight) || def.weight,
+                align: (base && base.align) || def.align
+            };
+        });
+        return out;
+    };
+    return { order, mobile: fillMode('mobile'), pc: fillMode('pc') };
+}
+function promoEscapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+// 제목 안에 {{강조할 부분}}을 적으면 하늘색으로 강조 표시됨 (admin 입력 안내와 짝을 이룸)
+function promoRenderTitle(raw) {
+    return promoEscapeHtml(raw).replace(/\{\{(.+?)\}\}/g, '<span class="text-[#7cc0ff]">$1</span>');
+}
+// 사진 위에 브랜드 색을 은은하게 얹기 위해 hex를 반투명 rgba로 변환
+function promoHexToRgba(hex, alpha) {
+    const h = String(hex || '#0f172a').replace('#', '');
+    const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+    const n = parseInt(full, 16) || 0;
+    return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+
+(async function initPromo() {
     const PROMO_KEY = 'muju_promo_hide_until';
     const overlay = document.getElementById('promo-overlay');
+    const box     = document.getElementById('promo-box');
     const track   = document.getElementById('promo-track');
     const dotsWrap = document.getElementById('promo-dots');
     if (!overlay || !track) return;
 
-    const slideCount = track.children.length;
+    let config = PROMO_DEFAULT;
+    try {
+        const { data, error } = await _supabase.from('site_content').select('key,value').in('key', ['promo_popup', 'promo_text_style']);
+        if (!error) {
+            const map = {};
+            (data || []).forEach(row => { map[row.key] = row.value; });
+            if (map.promo_popup) {
+                const parsed = JSON.parse(map.promo_popup);
+                if (parsed && Array.isArray(parsed.slides) && parsed.slides.length) config = promoMigrateConfig(parsed);
+            }
+            if (map.promo_text_style) {
+                const parsed = JSON.parse(map.promo_text_style);
+                if (parsed && parsed.mobile && parsed.pc) promoTextStyle = promoMigrateTextStyle(parsed);
+            }
+        }
+    } catch (e) { console.error('진입 팝업 설정 불러오기 실패, 기본값 유지:', e); }
+
+    // 모바일/PC 각각 따로 켜고 끌 수 있음 — 지금 화면 기준으로 꺼져 있으면 팝업 자체를 띄우지 않음
+    if ((isPcMode() ? config.enabledPc : config.enabledMobile) === false) return;
+
+    const slides = config.slides;
+
+    // 모바일/PC에 따라 팝업 박스 너비·높이(비율 유지) + 각 슬라이드 사진의 초점(모바일/PC 각각 저장된 값)을 반영
+    function applyPromoSize() {
+        const sz = (isPcMode() ? config.size.pc : config.size.mobile) || { width:414, height:280 };
+        box.style.maxWidth = sz.width + 'px';
+        track.style.aspectRatio = `${sz.width} / ${sz.height}`;
+    }
+    // PC에서는 관리자가 고른 위치(상/중/하 × 좌/중/우)로 팝업을 띄움 — 모바일은 항상 하단 고정(바텀시트) 그대로
+    function applyPromoPosition() {
+        const alignMap   = { top:'flex-start', center:'center', bottom:'flex-end' };
+        const justifyMap = { left:'flex-start', center:'center', right:'flex-end' };
+        if (isPcMode()) {
+            const pos = config.pcPosition || { v:'bottom', h:'center' };
+            overlay.style.alignItems = alignMap[pos.v] || 'flex-end';
+            overlay.style.justifyContent = justifyMap[pos.h] || 'center';
+            overlay.style.padding = '24px';
+            // 기본값(하단중앙)이면 기존 바텀시트 느낌 그대로, 그 외 위치를 고르면 사방 둥근 카드로 떠오르게
+            box.classList.toggle('promo-floating', !(pos.v === 'bottom' && pos.h === 'center'));
+        } else {
+            overlay.style.alignItems = 'flex-end';
+            overlay.style.justifyContent = 'center';
+            overlay.style.padding = '';
+            box.classList.remove('promo-floating');
+        }
+    }
+    // 문구 하나(eyebrow/title/desc/buttonText 등)를 히어로 슬라이드와 동일한 위치·모양 시스템으로 렌더링
+    function renderPromoTextEl(id, slideIdx, s, mode) {
+        const style = (promoTextStyle[mode] && promoTextStyle[mode][id]) || { x:10, y:50, size:16, color:'#ffffff', bg:'rgba(15,23,42,.55)', shape:'plain', weight:700, align:'left' };
+        const val = (s.texts && s.texts[id]) || '';
+        if (!val) return ''; // 빈 문구는 렌더하지 않음 (히어로 슬라이드와 동일)
+        const html = id === 'title' ? promoRenderTitle(val) : promoEscapeHtml(val);
+        const isButton = id === 'buttonText';
+        const url = !isButton ? safeHeroUrl(s.links && s.links[id]) : '';
+        const attrs = [
+            `class="hero-el${isButton ? ' promo-btn' : ''}"`,
+            `data-key="${id}"`,
+            isButton ? `data-promo-i="${slideIdx}"` : '',
+            url ? `href="${promoEscapeHtml(url)}" target="_blank" rel="noopener noreferrer"` : '',
+            `data-shape="${style.shape || 'plain'}"`,
+            `style="--x:${style.x}%; --y:${style.y}%; --size:${style.size}px; --color:${style.color}; --bg:${style.bg}; --weight:${style.weight}; --align:${style.align};"`
+        ].filter(Boolean).join(' ');
+        return `<a ${attrs}>${html}</a>`;
+    }
+    function renderPromoSlides() {
+        const mode = isPcMode() ? 'pc' : 'mobile';
+        track.innerHTML = slides.map((s, i) => {
+            const hasColor = !!s.gradFrom;
+            const gradient = hasColor ? `linear-gradient(to bottom right, ${promoEscapeHtml(s.gradFrom)}, ${promoEscapeHtml(s.gradTo || s.gradFrom)})` : '';
+            const textsHtml = promoTextStyle.order.map(id => renderPromoTextEl(id, i, s, mode)).join('');
+            if (s.img) {
+                const f = s[mode] || { focalX:50, focalY:50, zoom:1 };
+                const tint = hasColor ? `linear-gradient(to bottom right, ${promoHexToRgba(s.gradFrom, .68)}, ${promoHexToRgba(s.gradTo || s.gradFrom, .68)})` : 'transparent';
+                return `
+        <div class="relative h-full" style="background:#1e293b;">
+            <img src="${promoEscapeHtml(s.img)}" alt="" class="absolute inset-0 w-full h-full object-cover" style="object-position:${f.focalX ?? 50}% ${f.focalY ?? 50}%; transform:scale(${f.zoom || 1}); transform-origin:${f.focalX ?? 50}% ${f.focalY ?? 50}%;">
+            <div class="absolute inset-0" style="background:${tint}; pointer-events:none;"></div>
+            ${textsHtml}
+        </div>`;
+            }
+            return `
+        <div class="relative h-full" style="background:${hasColor ? gradient : '#0f172a'};">
+            ${textsHtml}
+        </div>`;
+        }).join('');
+        track.querySelectorAll('.promo-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const s = slides[Number(btn.dataset.promoI)];
+                e.preventDefault();
+                promoClose();
+                if (s.actionType === 'section') { if (window.openPanelFromMenu) openPanelFromMenu(s.actionValue); }
+                else if (s.actionType === 'url' && s.actionValue) { window.open(s.actionValue, '_blank', 'noopener,noreferrer'); }
+                else { if (window.openQuote) openQuote(); } // 기본값: 예약폼 열기
+            });
+        });
+    }
+
+    applyPromoSize();
+    applyPromoPosition();
+    renderPromoSlides();
+
+    // 모바일↔PC 경계를 넘나들며 창 크기를 바꾸는 경우까지 대비해 다시 적용 (히어로 슬라이드와 동일한 패턴)
+    let promoResizeTimer = null;
+    window.addEventListener('resize', () => {
+        clearTimeout(promoResizeTimer);
+        promoResizeTimer = setTimeout(() => {
+            applyPromoSize();
+            applyPromoPosition();
+            renderPromoSlides();
+            track.style.transform = `translateX(-${promoIdx * 100}%)`;
+        }, 200);
+    });
+
+    const slideCount = slides.length;
     let promoIdx = 0;
     let promoTimer = null;
 
@@ -1835,7 +2083,11 @@ window.lookupReservation = async function() {
         track.style.transform = `translateX(-${promoIdx * 100}%)`;
         renderDots();
     }
-    function startPromoTimer() { clearInterval(promoTimer); promoTimer = setInterval(() => goPromo(promoIdx + 1), 3500); }
+    function startPromoTimer() {
+        if (slideCount <= 1) return;
+        clearInterval(promoTimer);
+        promoTimer = setInterval(() => goPromo(promoIdx + 1), 3500);
+    }
 
     window.promoClose = function() {
         overlay.classList.remove('open');
@@ -1846,10 +2098,8 @@ window.lookupReservation = async function() {
         try { localStorage.setItem(PROMO_KEY, String(tomorrow.getTime())); } catch (e) {}
         promoClose();
     };
-    window.promoGoReserve = function() { promoClose(); if (window.openQuote) openQuote(); };
-    window.promoGoLookbook = function() { promoClose(); if (window.openPanelFromMenu) openPanelFromMenu('outfit-section'); };
 
-    // 노출 판단: PC는 CSS로 숨김 / 하루 숨김 기간이면 미노출
+    // 노출 판단: 이제 모바일/PC 모두 노출 (하루 숨김 기간이면 미노출)
     let hideUntil = 0;
     try { hideUntil = parseInt(localStorage.getItem(PROMO_KEY) || '0', 10); } catch (e) {}
     if (Date.now() < hideUntil) return;

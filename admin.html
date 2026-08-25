@@ -45,17 +45,27 @@
         .hf-empty-hint { display:none; position:absolute; inset:0; align-items:center; justify-content:center; flex-direction:column; gap:8px; color:#94a3b8; text-align:center; padding:20px; }
         .hero-frame.hf-empty .hf-empty-hint { display:flex; }
         .hero-frame .hf-gradient { position:absolute; inset:0; background:linear-gradient(0deg, rgba(0,0,0,.8) 0%, rgba(0,0,0,.25) 45%, transparent 70%); pointer-events:none; }
-        .hero-el { position:absolute; left:var(--x,6%); top:var(--y,80%); max-width:88%; cursor:move; outline:2px solid transparent; outline-offset:4px; transition:outline-color .12s; }
+        /* white-space:pre-line → Enter로 입력한 줄바꿈 그대로 반영, word-break:keep-all → 한글 단어 중간에서 어색하게 안 끊김 */
+        .hero-el { position:absolute; left:var(--x,6%); top:var(--y,80%); max-width:88%; cursor:move; outline:2px solid transparent; outline-offset:4px; transition:outline-color .12s; font-size:var(--size,16px); font-weight:var(--weight,700); text-align:var(--align,left); line-height:1.3; white-space:pre-line; word-break:keep-all; overflow-wrap:break-word; z-index:10; }
         .hero-el:hover { outline-color:rgba(124,58,237,.6); }
         .hero-el.hf-selected { outline-color:#7c3aed; outline-style:dashed; }
-        #hf-badge.hero-el { background:rgba(255,255,255,.9); color:#7c3aed; padding:.35em .7em; border-radius:999px; font-weight:700; font-size:var(--size,11px); white-space:nowrap; }
-        #hf-title.hero-el { font-weight:900; line-height:1.25; font-size:var(--size,28px); color:var(--color,#fff); text-shadow:0 2px 10px rgba(0,0,0,.5); }
-        #hf-desc.hero-el { font-weight:500; font-size:var(--size,14px); color:var(--color,rgba(255,255,255,.85)); text-shadow:0 1px 6px rgba(0,0,0,.5); }
+        .hero-el.hf-empty-text { opacity:.35; font-style:italic; }
+        /* 드래그로 문구 위치를 옮길 때, 다른 문구나 프레임 중앙과 위치가 맞으면 뜨는 안내선(스냅) */
+        .hf-guide { position:absolute; background:#ec4899; pointer-events:none; z-index:50; display:none; }
+        .hf-guide.show { display:block; }
+        .hf-guide-v { top:0; bottom:0; width:1px; }
+        .hf-guide-h { left:0; right:0; height:1px; }
+        /* 문구 모양: 플레인(배경 없음)/알약 배지/박스 — admin에서 자유롭게 선택 */
+        .hero-el[data-shape="plain"] { color:var(--color,#fff); text-shadow:0 2px 10px rgba(0,0,0,.5); }
+        .hero-el[data-shape="pill"]  { background:var(--bg,rgba(255,255,255,.9)); color:var(--color,#7c3aed); padding:.35em .9em; border-radius:999px; }
+        .hero-el[data-shape="box"]   { background:var(--bg,rgba(15,23,42,.55)); color:var(--color,#fff); padding:.4em .8em; border-radius:12px; }
 
         /* 선택된 글자 요소 편집 바 */
-        #hero-style-bar { display:none; align-items:center; gap:10px; background:#f5f3ff; border:1px solid #e9e2fd; border-radius:12px; padding:10px 12px; margin-top:8px; flex-wrap:wrap; }
+        /* 접히는 패널 안이 아니라 화면에 고정된 바 — 히어로 패널을 접어두고 진입 팝업만 펼친 상태에서도 항상 보이도록 */
+        #hero-style-bar { display:none; position:fixed; left:12px; right:12px; bottom:12px; z-index:500; max-width:600px; margin:0 auto; align-items:center; gap:10px; background:#f5f3ff; border:1px solid #e9e2fd; border-radius:12px; padding:10px 12px; flex-wrap:wrap; box-shadow:0 10px 30px rgba(15,23,42,.25); }
         #hero-style-bar.show { display:flex; }
         #hero-style-bar label { font-size:11px; color:#7c3aed; font-weight:700; display:flex; align-items:center; gap:5px; }
+        #hero-style-bar select { font-size:11px; border:1px solid #e9e2fd; border-radius:6px; padding:4px 6px; background:#fff; color:#0f172a; }
         #hero-style-bar input[type=color] { width:28px; height:28px; border:0; border-radius:6px; padding:0; background:none; cursor:pointer; }
         #hero-style-bar input[type=range] { width:90px; }
 
@@ -93,6 +103,11 @@
         #banner-panel.open #banner-panel-body { display:block; }
         #banner-panel.open .banner-panel-chevron { transform:rotate(180deg); }
         .banner-panel-chevron { transition:transform .2s ease; }
+
+        #promo-panel-body { display:none; }
+        #promo-panel.open #promo-panel-body { display:block; }
+        #promo-panel.open .promo-panel-chevron { transform:rotate(180deg); }
+        .promo-panel-chevron { transition:transform .2s ease; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -179,6 +194,32 @@
             </div>
         </div>
 
+        <!-- 선택된 글자 요소의 모양·색상·크기 편집 바 — 히어로/진입 팝업 어느 쪽 문구를 선택해도 이 하나를 공용으로 씀.
+             화면 하단 고정(fixed)이라 히어로 패널이 접혀있어도(진입 팝업만 펼친 상태여도) 항상 보임 -->
+        <div id="hero-style-bar">
+            <span id="hero-style-target" class="text-[11px] font-bold text-[#0f172a]"></span>
+            <label>모양 <select id="hero-style-shape">
+                <option value="plain">플레인</option>
+                <option value="pill">알약 배지</option>
+                <option value="box">박스</option>
+            </select></label>
+            <label>굵기 <select id="hero-style-weight">
+                <option value="400">보통</option>
+                <option value="700">굵게</option>
+                <option value="900">매우굵게</option>
+            </select></label>
+            <label>정렬 <select id="hero-style-align">
+                <option value="left">왼쪽</option>
+                <option value="center">가운데</option>
+                <option value="right">오른쪽</option>
+            </select></label>
+            <label>글자색 <input type="color" id="hero-style-color"></label>
+            <label id="hero-style-bg-wrap">배경색 <input type="color" id="hero-style-bg"></label>
+            <label>크기 <input type="range" id="hero-style-size" min="8" max="90" step="1"></label>
+            <input type="number" id="hero-style-size-num" min="8" max="200" step="1" style="width:52px;" class="border border-[#e9e2fd] rounded-md px-1.5 py-1 text-[12px] text-[#0f172a]">
+            <button type="button" onclick="deselectTextEl()" class="ml-auto text-[11px] text-gray-400 hover:text-gray-600">닫기</button>
+        </div>
+
         <!-- 메인 히어로 슬라이드 관리 -->
         <div id="banner-panel" class="bg-white rounded-2xl shadow-sm border border-gray-100 mb-5 overflow-hidden">
             <button type="button" onclick="document.getElementById('banner-panel').classList.toggle('open')"
@@ -205,23 +246,16 @@
 
                 <!-- 미리보기 겸 편집기 -->
                 <p class="text-[11px] text-gray-400 font-medium mb-1.5">
-                    <b class="text-[#7c3aed]">글자를 드래그</b>해서 위치 이동, 클릭하면 색상·크기 편집 · <b class="text-[#7c3aed]">사진을 클릭</b>하면 그 지점이 중심이 되도록 크롭됩니다
+                    <b class="text-[#7c3aed]">글자를 드래그</b>해서 위치 이동(다른 문구·화면 중앙과 맞으면 분홍 안내선과 함께 자동 정렬), 클릭하면 색상·크기 편집 · <b class="text-[#7c3aed]">사진을 클릭</b>하면 그 지점이 중심이 되도록 크롭됩니다
                 </p>
                 <div class="hero-frame mb-2 hf-empty" id="hf-frame">
                     <img id="hf-photo" class="hf-photo" src="" alt="">
                     <div class="hf-empty-hint"><i class="fa-solid fa-image text-2xl"></i><span class="text-[12px]">아래에서 사진을 업로드해주세요</span></div>
                     <div class="hf-gradient"></div>
-                    <div id="hf-badge" class="hero-el" data-key="badge"><i class="fa-regular fa-snowflake mr-1"></i><span id="hf-badge-text"></span></div>
-                    <p id="hf-title" class="hero-el" data-key="title"></p>
-                    <p id="hf-desc" class="hero-el" data-key="desc"></p>
-                </div>
-
-                <!-- 선택된 글자 요소의 색상·크기 편집 바 -->
-                <div id="hero-style-bar">
-                    <span id="hero-style-target" class="text-[11px] font-bold text-[#0f172a]"></span>
-                    <label id="hero-style-color-wrap">색상 <input type="color" id="hero-style-color"></label>
-                    <label>크기 <input type="range" id="hero-style-size" min="9" max="40" step="1"></label>
-                    <button type="button" onclick="deselectHeroEl()" class="ml-auto text-[11px] text-gray-400 hover:text-gray-600">닫기</button>
+                    <!-- 문구 요소들은 heroTextStyle.order에 맞춰 JS가 동적으로 생성 (renderTextEls) -->
+                    <!-- 드래그 중 다른 문구와 위치가 맞으면 나타나는 정렬 안내선 -->
+                    <div class="hf-guide hf-guide-v" id="hf-guide-v"></div>
+                    <div class="hf-guide hf-guide-h" id="hf-guide-h"></div>
                 </div>
 
                 <!-- 이미지 업로드 -->
@@ -232,24 +266,14 @@
                     <p id="hero-upload-status" class="text-[11px] text-gray-400 mt-1"></p>
                 </div>
 
-                <!-- 문구 입력 (선택된 슬라이드) -->
-                <div class="space-y-3">
-                    <div>
-                        <label class="block text-[11px] text-gray-400 font-medium mb-1">배지 문구</label>
-                        <input type="text" id="hero-badge" placeholder="오픈 특가"
-                               class="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-violet-500">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] text-gray-400 font-medium mb-1">제목</label>
-                        <input type="text" id="hero-title" placeholder="풀세트 단돈 40,000원"
-                               class="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-violet-500">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] text-gray-400 font-medium mb-1">설명</label>
-                        <input type="text" id="hero-desc" placeholder="장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가"
-                               class="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-violet-500">
-                    </div>
-                </div>
+                <!-- 문구 입력 (선택된 슬라이드) — 목록/개수는 heroTextStyle.order 기준, 자유롭게 추가/삭제 가능 -->
+                <div id="hero-text-fields" class="space-y-2.5"></div>
+                <button type="button" onclick="addTextSlotFor('hero')"
+                        class="w-full mt-2 border border-violet-200 text-[#7c3aed] rounded-xl py-2 font-bold text-[12px] hover:bg-violet-50 transition">
+                    <i class="fa-solid fa-plus mr-1"></i> 문구 추가
+                </button>
+                <!-- 방금 삭제한 문구를 되돌릴 수 있는 목록 (배지 등 기본 문구를 실수로 지워도 복구 가능) -->
+                <div id="hero-deleted-list" class="mt-2 space-y-1"></div>
 
                 <!-- 슬라이드 추가/삭제 -->
                 <div class="flex gap-2 mt-4">
@@ -268,6 +292,164 @@
                     전체 저장
                 </button>
                 <p id="hero-save-status" class="text-[11px] text-center mt-2"></p>
+            </div>
+        </div>
+
+        <!-- 진입 프로모션 팝업 관리 (모바일/PC 공통으로 사이트 진입 시 뜨는 팝업) -->
+        <div id="promo-panel" class="bg-white rounded-2xl shadow-sm border border-gray-100 mb-5 overflow-hidden">
+            <button type="button" onclick="document.getElementById('promo-panel').classList.toggle('open')"
+                    class="w-full flex items-center justify-between px-4 py-3.5">
+                <h2 class="font-bold text-[#0f172a] text-[13px] flex items-center gap-1.5">
+                    <i class="fa-solid fa-bell text-[#7c3aed] text-[12px]"></i> 진입 팝업 관리
+                </h2>
+                <i class="fa-solid fa-chevron-down promo-panel-chevron text-gray-400 text-[12px]"></i>
+            </button>
+            <div id="promo-panel-body" class="px-4 pb-4">
+
+                <!-- 표시 여부 — 모바일/PC 따로 -->
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <label class="flex items-center gap-2 text-[12px] font-bold text-[#0f172a] border border-gray-100 rounded-xl px-3 py-2.5">
+                        <input type="checkbox" id="promo-enabled-mobile" class="w-4 h-4 accent-[#7c3aed]"> 모바일에 표시
+                    </label>
+                    <label class="flex items-center gap-2 text-[12px] font-bold text-[#0f172a] border border-gray-100 rounded-xl px-3 py-2.5">
+                        <input type="checkbox" id="promo-enabled-pc" class="w-4 h-4 accent-[#7c3aed]"> PC에 표시
+                    </label>
+                </div>
+
+                <!-- 모바일/PC 모드 전환 — 사진 초점·줌·팝업 크기를 완전히 따로 설정 (히어로 슬라이드와 동일한 방식) -->
+                <div class="flex gap-2 mb-3">
+                    <button type="button" id="promo-mode-tab-mobile" class="mode-tab active" onclick="switchPromoEditMode('mobile')">
+                        <i class="fa-solid fa-mobile-screen-button mr-1"></i> 모바일 화면
+                    </button>
+                    <button type="button" id="promo-mode-tab-pc" class="mode-tab" onclick="switchPromoEditMode('pc')">
+                        <i class="fa-solid fa-desktop mr-1"></i> PC 화면
+                    </button>
+                </div>
+
+                <!-- 슬라이드 탭 -->
+                <div id="promo-tabs" class="flex gap-2 mb-3 overflow-x-auto"></div>
+
+                <!-- 미리보기 (이미지가 있으면 배경 사진 위에 색 틴트 오버레이, 없으면 단색 배경) -->
+                <p class="text-[11px] text-gray-400 font-medium mb-1.5">
+                    사진이 있으면 <b class="text-[#7c3aed]">사진을 클릭</b>해서 위치·확대 조절 · 우측 하단 모서리를 <b class="text-[#7c3aed]">드래그</b>하면 크기 조절
+                    (<span id="promo-size-mode-label" class="text-[#7c3aed] font-bold">모바일</span> 기준)
+                </p>
+                <p class="text-[11px] text-gray-400 font-medium mb-1.5"><b class="text-[#7c3aed]">글자를 드래그</b>해서 위치 이동, 클릭하면 모양·색상·크기 편집</p>
+                <div id="promo-preview" class="relative rounded-2xl overflow-hidden mb-2" style="width:100%;">
+                    <img id="promo-prev-img" class="absolute inset-0 w-full h-full object-cover" style="display:none; cursor:crosshair; object-position:var(--fx,50%) var(--fy,50%); transform:scale(var(--zoom,1)); transform-origin:var(--fx,50%) var(--fy,50%);" alt="">
+                    <!-- pointer-events:none 필수 — 없으면 이 오버레이가 사진 클릭을 가로채서 초점 조절 팝업이 안 열림 -->
+                    <div id="promo-prev-overlay" class="absolute inset-0" style="pointer-events:none;"></div>
+                    <!-- 문구 요소들은 promoTextStyle.order에 맞춰 JS가 동적으로 생성 (renderTextEls) -->
+                    <!-- 드래그 중 다른 문구와 위치가 맞으면 나타나는 정렬 안내선 -->
+                    <div class="hf-guide hf-guide-v" id="promo-guide-v"></div>
+                    <div class="hf-guide hf-guide-h" id="promo-guide-h"></div>
+                    <div id="promo-resize-handle" class="absolute bottom-1.5 right-1.5 w-7 h-7 rounded-md bg-black/30 hover:bg-black/50 flex items-center justify-center transition" style="cursor:nwse-resize; z-index:60;" title="드래그해서 크기 조절">
+                        <i class="fa-solid fa-up-right-and-down-left-from-center text-white text-[11px]"></i>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="block text-[11px] text-gray-400 font-medium mb-1">너비(px)</label>
+                        <input type="number" id="promo-width" min="280" max="900" step="1"
+                               class="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-violet-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-gray-400 font-medium mb-1">높이(px)</label>
+                        <input type="number" id="promo-height" min="160" max="600" step="1"
+                               class="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-violet-500">
+                    </div>
+                </div>
+
+                <!-- PC 화면에서 팝업이 뜨는 위치 — 모바일은 항상 하단 고정(바텀시트) -->
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="block text-[11px] text-gray-400 font-medium mb-1">PC 팝업 위치 (세로)</label>
+                        <select id="promo-pos-v" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-violet-500 bg-white">
+                            <option value="top">위</option>
+                            <option value="center">중앙</option>
+                            <option value="bottom">아래</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-gray-400 font-medium mb-1">PC 팝업 위치 (가로)</label>
+                        <select id="promo-pos-h" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-violet-500 bg-white">
+                            <option value="left">왼쪽</option>
+                            <option value="center">가운데</option>
+                            <option value="right">오른쪽</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="text-[11px] text-gray-400 -mt-2 mb-3">모바일은 항상 화면 하단에 고정됩니다 (바텀시트)</p>
+
+                <!-- 이미지 업로드 -->
+                <div class="mb-3">
+                    <label class="block text-[11px] text-gray-400 font-medium mb-1.5">이 슬라이드의 배경 사진 (선택 — 없으면 아래 배경색만 사용)</label>
+                    <div class="flex gap-2">
+                        <input type="file" id="promo-file-input" accept="image/*"
+                               class="flex-1 text-[12px] border border-gray-200 rounded-xl px-3 py-2.5 bg-white">
+                        <button type="button" onclick="removePromoImage()"
+                                class="border border-red-200 text-red-500 rounded-xl px-3 text-[12px] font-bold hover:bg-red-50 transition">삭제</button>
+                    </div>
+                    <p id="promo-upload-status" class="text-[11px] text-gray-400 mt-1"></p>
+                </div>
+
+                <!-- 문구 입력 (선택된 슬라이드) — 목록/개수는 promoTextStyle.order 기준, 히어로 슬라이드와 동일하게 자유롭게 추가/삭제·위치·모양 지정 가능 -->
+                <div id="promo-text-fields" class="space-y-2.5"></div>
+                <button type="button" onclick="addTextSlotFor('promo')"
+                        class="w-full mt-2 border border-violet-200 text-[#7c3aed] rounded-xl py-2 font-bold text-[12px] hover:bg-violet-50 transition">
+                    <i class="fa-solid fa-plus mr-1"></i> 문구 추가
+                </button>
+                <!-- 방금 삭제한 문구를 되돌릴 수 있는 목록 -->
+                <div id="promo-deleted-list" class="mt-2 space-y-1"></div>
+                <p class="text-[11px] text-gray-400 mt-1.5">문구 안에 <b class="text-[#7c3aed]">{{이렇게}}</b> 감싸면 하늘색으로 강조됩니다 (제목 등에 활용)</p>
+
+                <div class="space-y-3 mt-3">
+                    <div>
+                        <label class="block text-[11px] text-gray-400 font-medium mb-1">"버튼" 문구를 누르면</label>
+                        <select id="promo-action-type"
+                                class="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-violet-500 bg-white">
+                            <option value="quote">예약폼 열기</option>
+                            <option value="section">사이트 안의 특정 섹션으로 이동</option>
+                            <option value="url">외부 링크로 이동</option>
+                        </select>
+                        <select id="promo-action-section"
+                                class="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-violet-500 bg-white mt-1.5" style="display:none">
+                            <option value="lift-preview-section">리프트권</option>
+                            <option value="outfit-section">의류·장비</option>
+                            <option value="lesson-section">강습</option>
+                            <option value="pension-section">펜션</option>
+                            <option value="guide-section">가이드</option>
+                            <option value="map-section">오시는길</option>
+                        </select>
+                        <input type="text" id="promo-action-url" placeholder="https://blog.naver.com/..."
+                               class="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-violet-500 mt-1.5" style="display:none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-gray-400 font-medium mb-1">배경색 (기본은 없음 — 사진만으로도 충분하면 그대로 두세요)</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="color" id="promo-grad-from" class="w-full h-10 border border-gray-200 rounded-xl">
+                            <input type="color" id="promo-grad-to" class="w-full h-10 border border-gray-200 rounded-xl">
+                        </div>
+                        <button type="button" onclick="clearPromoColor()" class="text-[11px] text-gray-400 hover:text-gray-600 underline mt-1.5">배경색 없음으로 되돌리기</button>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 mt-4">
+                    <button type="button" onclick="addPromoSlide()"
+                            class="flex-1 border border-violet-200 text-[#7c3aed] rounded-xl py-2.5 font-bold text-[12px] hover:bg-violet-50 transition">
+                        <i class="fa-solid fa-plus mr-1"></i> 슬라이드 추가
+                    </button>
+                    <button type="button" onclick="removeCurrentPromoSlide()"
+                            class="flex-1 border border-red-200 text-red-500 rounded-xl py-2.5 font-bold text-[12px] hover:bg-red-50 transition">
+                        <i class="fa-solid fa-trash mr-1"></i> 이 슬라이드 삭제
+                    </button>
+                </div>
+
+                <button type="button" onclick="savePromoPopup()" id="promo-save-btn"
+                        class="w-full mt-3 bg-[#7c3aed] text-white rounded-xl py-3 font-bold text-[13px] hover:bg-violet-700 transition">
+                    전체 저장
+                </button>
+                <p id="promo-save-status" class="text-[11px] text-center mt-2"></p>
             </div>
         </div>
 
@@ -541,43 +723,374 @@ function showDashboard() {
     document.getElementById('filter-end').value   = todayStr;
 
     initHeroPanel();
+    initPromoPanel();
 }
 
 // ====================================================
-// 메인 히어로 슬라이드 관리 — 슬라이드 추가/삭제, 사진 초점, 문구 위치·색상·크기
+// 문구(텍스트) 오버레이 공통 엔진 — 히어로 슬라이드와 진입 팝업이 완전히 같은 로직을 공유함
+// ctx(컨텍스트) 객체 하나로 "어떤 프레임/어떤 데이터를 다루는지"만 다르게 넘겨서, 드래그·정렬 스냅·모양/크기 편집 바·
+// 문구 추가/삭제/복구·링크 지정까지 전부 동일한 코드로 동작 (히어로에서 검증된 로직을 진입 팝업에도 그대로 재사용)
 // ====================================================
-// 모바일/PC 각각 기본 문구 위치·크기·색상 (관리자가 아직 지정 안 했을 때 쓰는 값)
+const TEXT_STYLE_DEFAULT = { x:10, y:50, size:16, color:'#ffffff', bg:'rgba(15,23,42,.55)', shape:'plain', weight:700, align:'left' };
+const TEXT_CTX_REGISTRY = {}; // { hero: heroCtx, promo: promoCtx } — onclick 속성에서 ctx.key로 찾아 씀
+let activeTextCtx = null;  // 지금 공용 스타일 바가 편집 중인 대상 컨텍스트
+let activeTextKey  = null; // 지금 선택된 문구 id
+
+function freshFocal() { return { focalX:50, focalY:50, zoom:1 }; }
+
+function textLabel(ctx, id) {
+    const known = ctx.knownLabels || {};
+    if (known[id]) return known[id];
+    const idx = ctx.getTextStyle().order.indexOf(id);
+    return `문구 ${idx + 1}`;
+}
+
+// 지금 문구 목록(ctx의 order)에 맞춰 프레임 안의 문구 DOM을 다시 생성 (추가/삭제 시마다 호출)
+function renderTextEls(ctx) {
+    const frame = ctx.frameEl();
+    frame.querySelectorAll('.hero-el').forEach(el => el.remove());
+    ctx.getTextStyle().order.forEach(id => {
+        const el = document.createElement('a'); // 링크를 걸 수 있으므로 <a>로 통일 (admin에서는 클릭 시 이동 막고 드래그만)
+        el.className = 'hero-el';
+        el.id = ctx.elId(id);
+        el.dataset.key = id;
+        el.addEventListener('click', (e) => e.preventDefault());
+        frame.appendChild(el);
+        bindTextElDrag(ctx, el);
+    });
+}
+
+// 사이드바의 문구 입력칸(+옵션 링크) 목록을 다시 그림
+function renderTextFields(ctx) {
+    const wrap = document.getElementById(ctx.fieldsWrapId);
+    const slide = ctx.getSlide();
+    if (!slide.texts) slide.texts = {};
+    if (!slide.links) slide.links = {};
+    const noLink = ctx.noLinkIds || [];
+    wrap.innerHTML = ctx.getTextStyle().order.map(id => `
+        <div class="border border-gray-100 rounded-xl p-2.5">
+            <div class="flex items-center justify-between mb-1">
+                <label class="text-[11px] text-gray-400 font-medium">${textLabel(ctx, id)}</label>
+                <button type="button" onclick="removeTextSlotFor('${ctx.key}','${id}')" class="text-[11px] text-red-400 hover:text-red-600" aria-label="문구 삭제"><i class="fa-solid fa-trash"></i></button>
+            </div>
+            <textarea data-text-id="${id}" rows="2" placeholder="문구 입력 (Enter로 줄바꿈)"
+                class="text-slot-input w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-[13px] outline-none focus:border-violet-500 resize-none${noLink.includes(id) ? '' : ' mb-1.5'}"></textarea>
+            ${noLink.includes(id) ? '' : `<input type="text" data-link-id="${id}" placeholder="연결할 링크(선택) — 예: https://blog.naver.com/..."
+                class="text-link-input w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-[12px] outline-none focus:border-violet-500">`}
+        </div>
+    `).join('');
+    wrap.querySelectorAll('.text-slot-input').forEach(ta => {
+        const id = ta.dataset.textId;
+        ta.value = slide.texts[id] || '';
+        ta.addEventListener('input', () => {
+            slide.texts[id] = ta.value;
+            updateTextElContent(ctx, id);
+        });
+    });
+    wrap.querySelectorAll('.text-link-input').forEach(inp => {
+        const id = inp.dataset.linkId;
+        inp.value = slide.links[id] || '';
+        inp.addEventListener('input', () => { slide.links[id] = inp.value.trim(); });
+    });
+}
+
+// 프레임 안 문구 요소 내용(빈 문구는 흐리게 표시해서 위치는 계속 잡을 수 있게)
+function updateTextElContent(ctx, id) {
+    const el = document.getElementById(ctx.elId(id));
+    if (!el) return;
+    const slide = ctx.getSlide();
+    const val = (slide.texts && slide.texts[id]) || '';
+    if (val && ctx.renderContentHtml) {
+        el.innerHTML = ctx.renderContentHtml(id, val); // 예: 진입 팝업 제목의 {{강조}} 표시
+    } else {
+        el.textContent = val || '(빈 문구)';
+    }
+    el.classList.toggle('hf-empty-text', !val);
+}
+
+window.addTextSlotFor = function(ctxKey) {
+    const ctx = TEXT_CTX_REGISTRY[ctxKey];
+    const id = 'text_' + Date.now();
+    const ts = ctx.getTextStyle();
+    ts.order.push(id);
+    ['mobile', 'pc'].forEach(m => { ts[m][id] = { ...TEXT_STYLE_DEFAULT }; });
+    renderTextEls(ctx);
+    renderTextFields(ctx);
+    ts.order.forEach(i => updateTextElContent(ctx, i));
+    applyAllTextStyles(ctx);
+};
+
+// 방금 삭제한 문구를 임시 보관해서 되돌릴 수 있게 함(기본 문구를 실수로 지워도 복구 가능) — 컨텍스트별로 따로 유지
+function renderDeletedList(ctx) {
+    const wrap = document.getElementById(ctx.deletedListWrapId);
+    if (!wrap) return;
+    wrap.innerHTML = ctx.deletedStack.map((d, i) => `
+        <div class="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-lg px-2.5 py-1.5">
+            <span class="text-[11px] text-gray-400">삭제됨: <b class="text-gray-600">${(ctx.knownLabels && ctx.knownLabels[d.id]) || '커스텀 문구'}</b></span>
+            <button type="button" onclick="restoreTextSlotFor('${ctx.key}', ${i})" class="text-[11px] font-bold text-[#7c3aed] hover:text-violet-800">
+                <i class="fa-solid fa-rotate-left mr-1"></i>복구
+            </button>
+        </div>
+    `).join('');
+}
+window.restoreTextSlotFor = function(ctxKey, stackIdx) {
+    const ctx = TEXT_CTX_REGISTRY[ctxKey];
+    const d = ctx.deletedStack[stackIdx];
+    if (!d) return;
+    const ts = ctx.getTextStyle();
+    const insertAt = Math.min(d.index, ts.order.length);
+    ts.order.splice(insertAt, 0, d.id);
+    ts.mobile[d.id] = { ...d.mobile };
+    ts.pc[d.id] = { ...d.pc };
+    ctx.getAllSlides().forEach((s, i) => {
+        if (!s.texts) s.texts = {};
+        if (!s.links) s.links = {};
+        s.texts[d.id] = d.slideTexts[i] || '';
+        s.links[d.id] = d.slideLinks[i] || '';
+    });
+    ctx.deletedStack.splice(stackIdx, 1);
+    renderTextEls(ctx);
+    renderTextFields(ctx);
+    ts.order.forEach(id => updateTextElContent(ctx, id));
+    renderDeletedList(ctx);
+    applyAllTextStyles(ctx);
+};
+
+window.removeTextSlotFor = function(ctxKey, id) {
+    const ctx = TEXT_CTX_REGISTRY[ctxKey];
+    const ts = ctx.getTextStyle();
+    if (ts.order.length <= 1) { alert('문구는 최소 1개 있어야 합니다.'); return; }
+    ctx.deletedStack.push({
+        id,
+        index: ts.order.indexOf(id),
+        mobile: { ...ts.mobile[id] },
+        pc: { ...ts.pc[id] },
+        slideTexts: ctx.getAllSlides().map(s => (s.texts && s.texts[id]) || ''),
+        slideLinks: ctx.getAllSlides().map(s => (s.links && s.links[id]) || '')
+    });
+    ts.order = ts.order.filter(k => k !== id);
+    delete ts.mobile[id];
+    delete ts.pc[id];
+    ctx.getAllSlides().forEach(s => { if (s.texts) delete s.texts[id]; if (s.links) delete s.links[id]; });
+    if (activeTextCtx === ctx && activeTextKey === id) deselectTextEl();
+    renderTextEls(ctx);
+    renderTextFields(ctx);
+    ts.order.forEach(i => updateTextElContent(ctx, i));
+    renderDeletedList(ctx);
+    applyAllTextStyles(ctx);
+};
+
+function applyTextStyleToEl(ctx, key) {
+    const el = document.getElementById(ctx.elId(key));
+    const s = ctx.getTextStyle()[ctx.getMode()][key];
+    if (!el || !s) return;
+    el.style.setProperty('--x', s.x + '%');
+    el.style.setProperty('--y', s.y + '%');
+    el.style.setProperty('--size', s.size + 'px');
+    el.style.setProperty('--color', s.color || '#ffffff');
+    el.style.setProperty('--bg', s.bg || 'rgba(15,23,42,.55)');
+    el.style.setProperty('--weight', s.weight || 700);
+    el.style.setProperty('--align', s.align || 'left');
+    el.dataset.shape = s.shape || 'plain';
+}
+function applyAllTextStyles(ctx) { ctx.getTextStyle().order.forEach(id => applyTextStyleToEl(ctx, id)); }
+
+function selectTextEl(ctx, key) {
+    activeTextCtx = ctx;
+    activeTextKey = key;
+    ctx.frameEl().querySelectorAll('.hero-el').forEach(el => el.classList.toggle('hf-selected', el.dataset.key === key));
+    const s = ctx.getTextStyle()[ctx.getMode()][key];
+    document.getElementById('hero-style-target').textContent = textLabel(ctx, key) + (ctx.getMode() === 'pc' ? ' (PC)' : ' (모바일)');
+    document.getElementById('hero-style-shape').value = s.shape || 'plain';
+    document.getElementById('hero-style-weight').value = String(s.weight || 700);
+    document.getElementById('hero-style-align').value = s.align || 'left';
+    document.getElementById('hero-style-color').value = s.color || '#ffffff';
+    document.getElementById('hero-style-bg').value = toHexColor(s.bg) || '#0f172a';
+    document.getElementById('hero-style-bg-wrap').style.display = (s.shape && s.shape !== 'plain') ? 'flex' : 'none';
+    document.getElementById('hero-style-size').value = Math.min(s.size, 90);
+    document.getElementById('hero-style-size-num').value = s.size;
+    document.getElementById('hero-style-bar').classList.add('show');
+}
+window.deselectTextEl = function() {
+    if (activeTextCtx) activeTextCtx.frameEl().querySelectorAll('.hero-el').forEach(el => el.classList.remove('hf-selected'));
+    activeTextCtx = null;
+    activeTextKey = null;
+    document.getElementById('hero-style-bar').classList.remove('show');
+};
+
+// <input type=color>는 #rrggbb만 받으므로, rgba(...) 배경값을 넣어둔 기존 데이터를 위해 대략 변환
+function toHexColor(v) {
+    if (!v) return null;
+    if (v[0] === '#') return v;
+    const m = v.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+    if (!m) return null;
+    return '#' + [1,2,3].map(i => Number(m[i]).toString(16).padStart(2, '0')).join('');
+}
+
+// 드래그 중인 문구를 다른 문구·이미지(프레임) 정중앙과 위치가 비슷하면 딱 맞춰주는 정렬 스냅
+const TEXT_SNAP_THRESHOLD = 1.2; // % 단위 — 이 거리 이내로 가까워지면 스냅
+// sizePct: 지금 드래그 중인 요소 자신의 가로(또는 세로) 크기(프레임 대비 %) — 요소의 "가운데"가 이미지 정중앙(50%)에 오도록
+// 왼쪽위 기준 좌표(x,y)를 역산하기 위해 필요 (그냥 x를 50에 맞추면 왼쪽 끝이 중앙에 붙어버려서 실제로는 안 가운데가 됨)
+function textSnapValue(ctx, axis, value, excludeKey, sizePct) {
+    const centerValue = 50 - (sizePct || 0) / 2; // 요소 중심을 이미지 정중앙에 맞추려면 x/y가 이 값이어야 함
+    const candidates = [{ value: centerValue, guideAt: 50 }];
+    const ts = ctx.getTextStyle();
+    ts.order.forEach(id => {
+        if (id === excludeKey) return;
+        const s = ts[ctx.getMode()][id];
+        if (s) candidates.push({ value: s[axis], guideAt: s[axis] });
+    });
+    let best = null, bestDist = TEXT_SNAP_THRESHOLD;
+    candidates.forEach(c => {
+        const d = Math.abs(c.value - value);
+        if (d < bestDist) { bestDist = d; best = c; }
+    });
+    return best; // 스냅 안 되면 null, 되면 {value, guideAt}
+}
+function showTextGuides(ctx, x, y) {
+    const gv = document.getElementById(ctx.guideVId);
+    const gh = document.getElementById(ctx.guideHId);
+    if (x != null) { gv.style.left = x + '%'; gv.classList.add('show'); } else { gv.classList.remove('show'); }
+    if (y != null) { gh.style.top = y + '%'; gh.classList.add('show'); } else { gh.classList.remove('show'); }
+}
+function hideTextGuides(ctx) {
+    document.getElementById(ctx.guideVId).classList.remove('show');
+    document.getElementById(ctx.guideHId).classList.remove('show');
+}
+
+// 문구 요소 하나에 드래그(위치 이동) + 클릭(선택) 동작을 연결 — renderTextEls가 새 요소를 만들 때마다 호출
+function bindTextElDrag(ctx, el) {
+    const key = el.dataset.key;
+    let dragging = false;
+    let startPX = 0, startPY = 0, startElX = 0, startElY = 0, frameW = 0, frameH = 0, sizeWPct = 0, sizeHPct = 0;
+
+    el.addEventListener('pointerdown', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const frame = ctx.frameEl();
+        dragging = true;
+        el.setPointerCapture(e.pointerId);
+        const rect = frame.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+        const ts = ctx.getTextStyle();
+        startPX = e.clientX;
+        startPY = e.clientY;
+        startElX = ts[ctx.getMode()][key].x;
+        startElY = ts[ctx.getMode()][key].y;
+        frameW = rect.width;
+        frameH = rect.height;
+        sizeWPct = (elRect.width / rect.width) * 100;
+        sizeHPct = (elRect.height / rect.height) * 100;
+    });
+    el.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const dx = ((e.clientX - startPX) / frameW) * 100;
+        const dy = ((e.clientY - startPY) / frameH) * 100;
+        let x = startElX + dx;
+        let y = startElY + dy;
+        x = Math.max(2, Math.min(90, x));
+        y = Math.max(4, Math.min(96, y));
+
+        const snapX = textSnapValue(ctx, 'x', x, key, sizeWPct);
+        const snapY = textSnapValue(ctx, 'y', y, key, sizeHPct);
+        if (snapX) x = snapX.value;
+        if (snapY) y = snapY.value;
+        showTextGuides(ctx, snapX ? snapX.guideAt : null, snapY ? snapY.guideAt : null);
+
+        const ts = ctx.getTextStyle();
+        ts[ctx.getMode()][key].x = Math.round(x * 10) / 10;
+        ts[ctx.getMode()][key].y = Math.round(y * 10) / 10;
+        applyTextStyleToEl(ctx, key);
+    });
+    el.addEventListener('pointerup', (e) => {
+        if (!dragging) return;
+        dragging = false;
+        el.releasePointerCapture(e.pointerId);
+        hideTextGuides(ctx);
+        selectTextEl(ctx, key); // 드래그였든 그냥 클릭이었든 선택 상태로 표시
+    });
+}
+
+// 공용 스타일 바(모양·굵기·정렬·색상·배경색·크기) 컨트롤 — 한 번만 바인딩, 지금 활성화된 컨텍스트(activeTextCtx)를 기준으로 동작
+function initTextStyleBarOnce() {
+    function withActive(fn) {
+        return (e) => {
+            if (!activeTextCtx || !activeTextKey) return;
+            fn(activeTextCtx.getTextStyle()[activeTextCtx.getMode()][activeTextKey], e);
+            applyTextStyleToEl(activeTextCtx, activeTextKey);
+        };
+    }
+    document.getElementById('hero-style-shape').addEventListener('change', withActive((s, e) => {
+        s.shape = e.target.value;
+        document.getElementById('hero-style-bg-wrap').style.display = e.target.value !== 'plain' ? 'flex' : 'none';
+    }));
+    document.getElementById('hero-style-weight').addEventListener('change', withActive((s, e) => { s.weight = Number(e.target.value); }));
+    document.getElementById('hero-style-align').addEventListener('change', withActive((s, e) => { s.align = e.target.value; }));
+    document.getElementById('hero-style-color').addEventListener('input', withActive((s, e) => { s.color = e.target.value; }));
+    document.getElementById('hero-style-bg').addEventListener('input', withActive((s, e) => { s.bg = e.target.value; }));
+    document.getElementById('hero-style-size').addEventListener('input', withActive((s, e) => {
+        s.size = Number(e.target.value);
+        document.getElementById('hero-style-size-num').value = e.target.value;
+    }));
+    document.getElementById('hero-style-size-num').addEventListener('input', (e) => {
+        if (!activeTextCtx || !activeTextKey || e.target.value === '') return;
+        const v = Number(e.target.value);
+        activeTextCtx.getTextStyle()[activeTextCtx.getMode()][activeTextKey].size = v;
+        document.getElementById('hero-style-size').value = Math.min(v, 90);
+        applyTextStyleToEl(activeTextCtx, activeTextKey);
+    });
+}
+initTextStyleBarOnce();
+
+// ====================================================
+// 메인 히어로 슬라이드 관리 — 슬라이드 추가/삭제, 사진 초점, 문구(위 공용 엔진으로 위치·모양·색상·크기·링크 관리)
+// ====================================================
+// 모바일/PC 각각 기본 문구 위치·모양·크기·색상 (관리자가 아직 지정 안 했을 때 쓰는 값). index.html의 HERO_TEXT_DEFAULTS와 반드시 동일하게 유지.
 const HERO_TEXT_DEFAULTS = {
     mobile: {
-        badge: { x:6, y:76, size:11 },
-        title: { x:6, y:84, size:28, color:'#ffffff' },
-        desc:  { x:6, y:92, size:14, color:'rgba(255,255,255,.85)' }
+        badge: { x:6, y:76, size:11, color:'#7c3aed', bg:'rgba(255,255,255,.9)', shape:'pill',  weight:700, align:'left' },
+        title: { x:6, y:84, size:28, color:'#ffffff', bg:'rgba(15,23,42,.55)',   shape:'plain', weight:900, align:'left' },
+        desc:  { x:6, y:92, size:14, color:'rgba(255,255,255,.85)', bg:'rgba(15,23,42,.55)', shape:'plain', weight:500, align:'left' }
     },
     pc: {
-        badge: { x:5, y:16, size:12 },
-        title: { x:5, y:62, size:34, color:'#ffffff' },
-        desc:  { x:5, y:80, size:15, color:'rgba(255,255,255,.85)' }
+        badge: { x:5, y:16, size:12, color:'#7c3aed', bg:'rgba(255,255,255,.9)', shape:'pill',  weight:700, align:'left' },
+        title: { x:5, y:62, size:34, color:'#ffffff', bg:'rgba(15,23,42,.55)',   shape:'plain', weight:900, align:'left' },
+        desc:  { x:5, y:80, size:15, color:'rgba(255,255,255,.85)', bg:'rgba(15,23,42,.55)', shape:'plain', weight:500, align:'left' }
     }
 };
-function freshFocal() { return { focalX:50, focalY:50, zoom:1 }; }
 const HERO_SLIDE_FALLBACK = [
-    { img:'./2.jpg', badge:'오픈 특가', title:'풀세트 단돈 40,000원', desc:'장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가', mobile:freshFocal(), pc:freshFocal() },
-    { img:'./1.jpg', badge:'26/27 신상', title:'무주에서 제일 잘 입은 사람 되기', desc:'사장이 직접 고른 트렌디한 신상 스키복', mobile:freshFocal(), pc:freshFocal() },
-    { img:'./4.jpg', badge:'무료 배달', title:'장비는 슬로프 앞까지', desc:'픽업 · 반납도 직접 찾아갑니다', mobile:freshFocal(), pc:freshFocal() }
+    { img:'./2.jpg', texts:{ badge:'오픈 특가', title:'풀세트 단돈 40,000원', desc:'장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
+    { img:'./1.jpg', texts:{ badge:'26/27 신상', title:'무주에서 제일 잘 입은 사람 되기', desc:'사장이 직접 고른 트렌디한 신상 스키복' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
+    { img:'./4.jpg', texts:{ badge:'무료 배달', title:'장비는 슬로프 앞까지', desc:'픽업 · 반납도 직접 찾아갑니다' }, links:{}, mobile:freshFocal(), pc:freshFocal() }
 ];
-let heroSlides = HERO_SLIDE_FALLBACK.map(s => ({ ...s, mobile:{...s.mobile}, pc:{...s.pc} }));
-let heroTextStyle = {};   // { mobile:{badge,title,desc}, pc:{badge,title,desc} }
+let heroSlides = HERO_SLIDE_FALLBACK.map(s => ({ ...s, texts:{...s.texts}, links:{...s.links}, mobile:{...s.mobile}, pc:{...s.pc} }));
+let heroTextStyle = { order:['badge','title','desc'], mobile:{}, pc:{} }; // { order:[id...], mobile:{id:{x,y,size,color,bg,shape,weight,align}}, pc:{...} }
 let currentHeroIdx = 0;
-let heroSelectedKey = null; // 'badge' | 'title' | 'desc' | null
-let editMode = 'mobile';    // 'mobile' | 'pc' — 지금 어느 화면 기준으로 편집 중인지
+let editMode = 'mobile'; // 'mobile' | 'pc' — 지금 어느 화면 기준으로 편집 중인지
+
+const heroCtx = {
+    key: 'hero',
+    knownLabels: { badge:'배지', title:'제목', desc:'설명' },
+    getTextStyle: () => heroTextStyle,
+    getMode: () => editMode,
+    getSlide: () => heroSlides[currentHeroIdx],
+    getAllSlides: () => heroSlides,
+    frameEl: () => document.getElementById('hf-frame'),
+    elId: (id) => 'hf-' + id,
+    fieldsWrapId: 'hero-text-fields',
+    deletedListWrapId: 'hero-deleted-list',
+    guideVId: 'hf-guide-v',
+    guideHId: 'hf-guide-h',
+    deletedStack: []
+};
+TEXT_CTX_REGISTRY.hero = heroCtx;
 
 window.switchEditMode = function(mode) {
     editMode = mode;
     document.getElementById('mode-tab-mobile').classList.toggle('active', mode === 'mobile');
     document.getElementById('mode-tab-pc').classList.toggle('active', mode === 'pc');
     document.getElementById('hf-frame').classList.toggle('hf-pc', mode === 'pc');
-    deselectHeroEl();
-    applyAllHeroStyles();
+    deselectTextEl();
+    applyAllTextStyles(heroCtx);
     applyCurrentSlidePhotoStyle();
 };
 
@@ -588,16 +1101,7 @@ function renderHeroTabs() {
     ).join('');
 }
 
-function syncEditorFieldsIntoCurrentSlide() {
-    const s = heroSlides[currentHeroIdx];
-    if (!s) return;
-    s.badge = document.getElementById('hero-badge').value;
-    s.title = document.getElementById('hero-title').value;
-    s.desc  = document.getElementById('hero-desc').value;
-}
-
 window.switchHeroSlide = function(i) {
-    syncEditorFieldsIntoCurrentSlide();
     currentHeroIdx = i;
     loadCurrentSlideIntoEditor();
     renderHeroTabs();
@@ -615,13 +1119,11 @@ function applyCurrentSlidePhotoStyle() {
 
 function loadCurrentSlideIntoEditor() {
     const s = heroSlides[currentHeroIdx];
-    document.getElementById('hero-badge').value = s.badge || '';
-    document.getElementById('hero-title').value = s.title || '';
-    document.getElementById('hero-desc').value  = s.desc  || '';
-    document.getElementById('hf-badge-text').textContent = s.badge || '';
-    document.getElementById('hf-title').textContent = s.title || '';
-    document.getElementById('hf-desc').textContent  = s.desc  || '';
+    if (!s.texts) s.texts = {};
+    if (!s.links) s.links = {};
     document.getElementById('hero-upload-status').textContent = '';
+    renderTextFields(heroCtx);
+    heroTextStyle.order.forEach(id => updateTextElContent(heroCtx, id));
 
     const frame = document.getElementById('hf-frame');
     const photo = document.getElementById('hf-photo');
@@ -635,87 +1137,31 @@ function loadCurrentSlideIntoEditor() {
     applyCurrentSlidePhotoStyle();
 }
 
-function applyHeroStyleToEl(key) {
-    const el = document.getElementById('hf-' + key);
-    const s = heroTextStyle[editMode][key];
-    if (!el || !s) return;
-    el.style.setProperty('--x', s.x + '%');
-    el.style.setProperty('--y', s.y + '%');
-    el.style.setProperty('--size', s.size + 'px');
-    if (s.color) el.style.setProperty('--color', s.color);
-}
-function applyAllHeroStyles() { Object.keys(heroTextStyle[editMode]).forEach(applyHeroStyleToEl); }
-
-function selectHeroEl(key) {
-    heroSelectedKey = key;
-    document.querySelectorAll('.hero-el').forEach(el => el.classList.toggle('hf-selected', el.dataset.key === key));
-    const s = heroTextStyle[editMode][key];
-    document.getElementById('hero-style-target').textContent = { badge:'배지', title:'제목', desc:'설명' }[key] + (editMode === 'pc' ? ' (PC)' : ' (모바일)');
-    document.getElementById('hero-style-color-wrap').style.display = s.color ? 'flex' : 'none';
-    if (s.color) document.getElementById('hero-style-color').value = s.color;
-    document.getElementById('hero-style-size').value = s.size;
-    document.getElementById('hero-style-bar').classList.add('show');
-}
-window.deselectHeroEl = function() {
-    heroSelectedKey = null;
-    document.querySelectorAll('.hero-el').forEach(el => el.classList.remove('hf-selected'));
-    document.getElementById('hero-style-bar').classList.remove('show');
-};
-
-function initHeroDragAndSelect() {
+// 한 번만 실행하면 되는 이벤트 바인딩(사진 클릭 → 초점 조절 팝업)
+function initHeroPanelStatic() {
     const frame = document.getElementById('hf-frame');
 
-    document.querySelectorAll('.hero-el').forEach(el => {
-        const key = el.dataset.key;
-        let dragging = false;
-
-        el.addEventListener('pointerdown', (e) => {
-            e.preventDefault(); e.stopPropagation();
-            dragging = true;
-            el.setPointerCapture(e.pointerId);
-        });
-        el.addEventListener('pointermove', (e) => {
-            if (!dragging) return;
-            const rect = frame.getBoundingClientRect();
-            let x = ((e.clientX - rect.left) / rect.width) * 100;
-            let y = ((e.clientY - rect.top) / rect.height) * 100;
-            x = Math.max(2, Math.min(90, x));
-            y = Math.max(4, Math.min(96, y));
-            heroTextStyle[editMode][key].x = Math.round(x * 10) / 10;
-            heroTextStyle[editMode][key].y = Math.round(y * 10) / 10;
-            applyHeroStyleToEl(key);
-        });
-        el.addEventListener('pointerup', (e) => {
-            if (!dragging) return;
-            dragging = false;
-            el.releasePointerCapture(e.pointerId);
-            selectHeroEl(key); // 드래그였든 그냥 클릭이었든 선택 상태로 표시
-        });
-    });
-
-    // 사진 클릭 → 큰 팝업창을 열어 거기서 드래그로 조절
     frame.addEventListener('click', (e) => {
-        if (e.target.closest('.hero-el')) return; // 글자 요소 클릭은 위 핸들러가 처리
+        if (e.target.closest('.hero-el')) return; // 글자 요소 클릭은 각 요소의 핸들러가 처리
         if (!heroSlides[currentHeroIdx].img) return; // 사진이 아직 없으면 팝업 안 뜸
-        openFocalModal();
+        openFocalModalFor({
+            getFocal: () => {
+                const s = heroSlides[currentHeroIdx];
+                if (!s[editMode]) s[editMode] = freshFocal();
+                return s[editMode];
+            },
+            imgSrc: heroSlides[currentHeroIdx].img,
+            frameEl: document.getElementById('hf-frame'),
+            modeLabel: editMode === 'pc' ? 'PC' : '모바일',
+            onFocalChange: () => {
+                const f = heroSlides[currentHeroIdx][editMode];
+                const photo = document.getElementById('hf-photo');
+                photo.style.setProperty('--fx', f.focalX + '%');
+                photo.style.setProperty('--fy', f.focalY + '%');
+                photo.style.setProperty('--zoom', f.zoom || 1);
+            }
+        });
     });
-
-    // 색상/크기 편집 바 (지금 모드(모바일/PC) 기준으로 따로 저장)
-    document.getElementById('hero-style-color').addEventListener('input', (e) => {
-        if (!heroSelectedKey || !heroTextStyle[editMode][heroSelectedKey].color) return;
-        heroTextStyle[editMode][heroSelectedKey].color = e.target.value;
-        applyHeroStyleToEl(heroSelectedKey);
-    });
-    document.getElementById('hero-style-size').addEventListener('input', (e) => {
-        if (!heroSelectedKey) return;
-        heroTextStyle[editMode][heroSelectedKey].size = Number(e.target.value);
-        applyHeroStyleToEl(heroSelectedKey);
-    });
-
-    // 문구 입력할 때마다 미리보기 실시간 갱신
-    document.getElementById('hero-badge').addEventListener('input', (e) => document.getElementById('hf-badge-text').textContent = e.target.value);
-    document.getElementById('hero-title').addEventListener('input', (e) => document.getElementById('hf-title').textContent = e.target.value);
-    document.getElementById('hero-desc').addEventListener('input',  (e) => document.getElementById('hf-desc').textContent  = e.target.value);
 
     initFocalModal();
 }
@@ -727,15 +1173,18 @@ function initHeroDragAndSelect() {
 //  문구 위치·색상·크기까지 모바일/PC를 완전히 분리해서 저장하도록 확장 — editMode 전역 변수로 어느 화면을 편집 중인지 관리)
 // ====================================================
 let focalPhotoRect = null; // 실제 화면에 그려진(object-fit:contain) 사진의 {left,top,width,height} px
-let focalBoxBase   = null; // 확대 1배(줌 없음) 기준 틀 크기 {w,h} — 지금 모드의 미리보기 비율 기준
+let focalBoxBase   = null; // 확대 1배(줌 없음) 기준 틀 크기 {w,h} — 지금 대상의 미리보기 비율 기준
+// 이 팝업은 히어로 슬라이드 사진 / 진입 팝업 사진 등 여러 곳에서 재사용됨 — 지금 무엇을 조절 중인지 담는 대상 객체
+// { getFocal:()=>{focalX,focalY,zoom}(직접 수정되는 참조), imgSrc, frameEl(비율 기준이 될 실제 렌더 요소), modeLabel, onFocalChange:()=>{} }
+let focalTarget = null;
 
-// 현재 슬라이드·현재 모드의 줌 배율만큼 축소된 실제 틀 크기
+// 현재 대상·현재 모드의 줌 배율만큼 축소된 실제 틀 크기
 function currentBoxSize() {
-    const zoom = (heroSlides[currentHeroIdx][editMode] || freshFocal()).zoom || 1;
+    const zoom = focalTarget.getFocal().zoom || 1;
     return { w: focalBoxBase.w / zoom, h: focalBoxBase.h / zoom };
 }
 
-// 사진이 담긴 자리(letterbox 포함) 대비, 줌 1배 기준으로 지금 모드에서 잘리지 않고 보이는 영역 크기를 계산
+// 사진이 담긴 자리(letterbox 포함) 대비, 줌 1배 기준으로 대상 프레임 비율에서 잘리지 않고 보이는 영역 크기를 계산
 function computeFocalLayout() {
     const frame = document.getElementById('focal-frame');
     const img = document.getElementById('focal-img');
@@ -750,9 +1199,9 @@ function computeFocalLayout() {
     else { renderH = frameRect.height; renderW = frameRect.height * photoAR; }
     focalPhotoRect = { left:(frameRect.width - renderW) / 2, top:(frameRect.height - renderH) / 2, width:renderW, height:renderH };
 
-    // 지금 모드(모바일/PC)의 작은 미리보기 틀(#hf-frame)이 실제 렌더링된 비율을 그대로 사용
-    const hfRect = document.getElementById('hf-frame').getBoundingClientRect();
-    const targetAR = hfRect.width / hfRect.height;
+    // 지금 대상의 실제 미리보기 요소가 렌더링된 비율을 그대로 사용 (히어로는 #hf-frame, 진입 팝업은 #promo-preview 등)
+    const targetRect = focalTarget.frameEl.getBoundingClientRect();
+    const targetAR = targetRect.width / targetRect.height;
     let boxW, boxH;
     if (photoAR > targetAR) { boxH = renderH; boxW = renderH * targetAR; }
     else { boxW = renderW; boxH = renderW / targetAR; }
@@ -777,31 +1226,28 @@ function updateFocalFromBoxPosition(left, top) {
     const slackH = focalPhotoRect.height - size.h;
     const fx = slackW > 0 ? ((left - focalPhotoRect.left) / slackW) * 100 : 50;
     const fy = slackH > 0 ? ((top  - focalPhotoRect.top)  / slackH) * 100 : 50;
-    const s = heroSlides[currentHeroIdx];
-    if (!s[editMode]) s[editMode] = freshFocal();
-    s[editMode].focalX = Math.round(Math.max(0, Math.min(100, fx)) * 10) / 10;
-    s[editMode].focalY = Math.round(Math.max(0, Math.min(100, fy)) * 10) / 10;
-    // 작은 미리보기에도 실시간 반영
-    document.getElementById('hf-photo').style.setProperty('--fx', s[editMode].focalX + '%');
-    document.getElementById('hf-photo').style.setProperty('--fy', s[editMode].focalY + '%');
+    const f = focalTarget.getFocal();
+    f.focalX = Math.round(Math.max(0, Math.min(100, fx)) * 10) / 10;
+    f.focalY = Math.round(Math.max(0, Math.min(100, fy)) * 10) / 10;
+    focalTarget.onFocalChange();
 }
 
-window.openFocalModal = function() {
-    const s = heroSlides[currentHeroIdx];
-    if (!s[editMode]) s[editMode] = freshFocal();
-    const f = s[editMode];
+// target = { getFocal, imgSrc, frameEl, modeLabel, onFocalChange } — 사진 조절이 필요한 곳마다 이 형태로 호출
+window.openFocalModalFor = function(target) {
+    focalTarget = target;
+    const f = target.getFocal();
     const img = document.getElementById('focal-img');
     document.getElementById('focal-modal').classList.add('open');
     document.getElementById('focal-zoom').value = f.zoom || 1;
-    document.getElementById('focal-mode-label').textContent = editMode === 'pc' ? 'PC' : '모바일';
-    document.getElementById('focal-crop-box-label').textContent = editMode === 'pc' ? 'PC' : '모바일';
+    document.getElementById('focal-mode-label').textContent = target.modeLabel;
+    document.getElementById('focal-crop-box-label').textContent = target.modeLabel;
 
     const doLayout = () => {
         if (!computeFocalLayout()) return;
         positionCropBoxFromFocal(f.focalX != null ? f.focalX : 50, f.focalY != null ? f.focalY : 50);
     };
     img.onload = doLayout;
-    img.src = s.img;
+    img.src = target.imgSrc;
     if (img.complete && img.naturalWidth) doLayout();
 };
 window.closeFocalModal = function() {
@@ -833,19 +1279,17 @@ function initFocalModal() {
     });
     box.addEventListener('pointerup', (e) => { dragging = false; box.releasePointerCapture(e.pointerId); });
 
-    // 확대(줌) 슬라이더 — 지금 모드(모바일/PC)에 개별 저장
+    // 확대(줌) 슬라이더
     document.getElementById('focal-zoom').addEventListener('input', (e) => {
-        const s = heroSlides[currentHeroIdx];
-        if (!s[editMode]) s[editMode] = freshFocal();
-        s[editMode].zoom = Number(e.target.value);
-        document.getElementById('hf-photo').style.setProperty('--zoom', s[editMode].zoom);
-        if (focalPhotoRect) positionCropBoxFromFocal(s[editMode].focalX != null ? s[editMode].focalX : 50, s[editMode].focalY != null ? s[editMode].focalY : 50);
+        const f = focalTarget.getFocal();
+        f.zoom = Number(e.target.value);
+        focalTarget.onFocalChange();
+        if (focalPhotoRect) positionCropBoxFromFocal(f.focalX != null ? f.focalX : 50, f.focalY != null ? f.focalY : 50);
     });
 }
 
 window.addHeroSlide = function() {
-    syncEditorFieldsIntoCurrentSlide();
-    heroSlides.push({ img:'', badge:'', title:'', desc:'', mobile:freshFocal(), pc:freshFocal() });
+    heroSlides.push({ img:'', texts:{}, links:{}, mobile:freshFocal(), pc:freshFocal() });
     currentHeroIdx = heroSlides.length - 1;
     loadCurrentSlideIntoEditor();
     renderHeroTabs();
@@ -858,8 +1302,38 @@ window.removeCurrentHeroSlide = function() {
     renderHeroTabs();
 };
 
+// 예전 방식(고정 배지/제목/설명 문자열, order/모양 없는 스타일, 링크 없음)으로 저장된 데이터를 새 구조로 변환
+function migrateHeroSlide(s) {
+    const texts = s.texts ? { ...s.texts } : { badge: s.badge || '', title: s.title || '', desc: s.desc || '' };
+    const links = s.links ? { ...s.links } : {};
+    return { img: s.img || '', texts, links, mobile: s.mobile || freshFocal(), pc: s.pc || freshFocal() };
+}
+function migrateHeroTextStyle(parsed) {
+    const order = Array.isArray(parsed.order) && parsed.order.length ? parsed.order : ['badge','title','desc'];
+    const fillMode = (mode) => {
+        const out = {};
+        order.forEach(id => {
+            const base = parsed[mode] && parsed[mode][id];
+            const def = (HERO_TEXT_DEFAULTS[mode] && HERO_TEXT_DEFAULTS[mode][id]) || { x:10, y:50, size:16, color:'#ffffff', bg:'rgba(15,23,42,.55)', shape:'plain', weight:700, align:'left' };
+            out[id] = {
+                x: base && base.x != null ? base.x : def.x,
+                y: base && base.y != null ? base.y : def.y,
+                size: base && base.size != null ? base.size : def.size,
+                color: (base && base.color) || def.color,
+                bg: (base && base.bg) || def.bg,
+                shape: (base && base.shape) || def.shape,
+                weight: (base && base.weight) || def.weight,
+                align: (base && base.align) || def.align
+            };
+        });
+        return out;
+    };
+    return { order, mobile: fillMode('mobile'), pc: fillMode('pc') };
+}
+
 async function initHeroPanel() {
-    heroTextStyle = { mobile: JSON.parse(JSON.stringify(HERO_TEXT_DEFAULTS.mobile)), pc: JSON.parse(JSON.stringify(HERO_TEXT_DEFAULTS.pc)) };
+    heroTextStyle = { order:['badge','title','desc'], mobile: JSON.parse(JSON.stringify(HERO_TEXT_DEFAULTS.mobile)), pc: JSON.parse(JSON.stringify(HERO_TEXT_DEFAULTS.pc)) };
+    heroCtx.deletedStack = [];
 
     try {
         const { data, error } = await _supabase.from('site_content').select('key,value');
@@ -871,24 +1345,25 @@ async function initHeroPanel() {
             try {
                 const parsed = JSON.parse(map.hero_slides);
                 if (Array.isArray(parsed) && parsed.length) {
-                    heroSlides = parsed.map(s => ({ ...s, mobile: s.mobile || freshFocal(), pc: s.pc || freshFocal() }));
+                    heroSlides = parsed.map(migrateHeroSlide);
                 }
             } catch (e) { console.error('hero_slides 파싱 실패:', e); }
         }
         if (map.hero_text_style) {
             try {
                 const parsed = JSON.parse(map.hero_text_style);
-                if (parsed && parsed.mobile && parsed.pc) heroTextStyle = parsed;
+                if (parsed && parsed.mobile && parsed.pc) heroTextStyle = migrateHeroTextStyle(parsed);
             } catch (e) { console.error('hero_text_style 파싱 실패:', e); }
         }
     } catch (err) {
         console.error('히어로 슬라이드 정보 불러오기 실패:', err);
     }
 
+    renderTextEls(heroCtx);
     renderHeroTabs();
     loadCurrentSlideIntoEditor();
-    applyAllHeroStyles();
-    initHeroDragAndSelect();
+    applyAllTextStyles(heroCtx);
+    initHeroPanelStatic();
 
     // 이미지 업로드 → Supabase Storage (현재 선택된 슬라이드에 적용, 모바일/PC 공통 사진)
     document.getElementById('hero-file-input').addEventListener('change', async (e) => {
@@ -916,8 +1391,6 @@ async function initHeroPanel() {
 }
 
 window.saveHeroSlides = async function() {
-    syncEditorFieldsIntoCurrentSlide();
-
     const btn = document.getElementById('hero-save-btn');
     const status = document.getElementById('hero-save-status');
     btn.disabled = true;
@@ -929,6 +1402,408 @@ window.saveHeroSlides = async function() {
     ];
 
     try {
+        const { error } = await _supabase.from('site_content').upsert(rows, { onConflict: 'key' });
+        if (error) throw error;
+        status.textContent = '저장되었습니다. 사이트를 새로고침하면 반영됩니다.';
+        status.className = 'text-[11px] text-center mt-2 text-green-600 font-medium';
+    } catch (err) {
+        status.textContent = '저장 실패: ' + err.message;
+        status.className = 'text-[11px] text-center mt-2 text-red-500';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '전체 저장';
+    }
+};
+
+// ====================================================
+// 진입 프로모션 팝업 관리 — 사이트 진입 시 뜨는 팝업(모바일/PC 공통)의 슬라이드별 문구·버튼·배경색 편집
+// ====================================================
+// 모바일/PC 각각 기본 문구 위치·모양·크기·색상. index.html의 PROMO_TEXT_DEFAULTS와 반드시 동일하게 유지.
+const PROMO_TEXT_DEFAULTS = {
+    mobile: {
+        eyebrow:    { x:8, y:8,  size:13, color:'rgba(255,255,255,.8)', bg:'rgba(15,23,42,.55)', shape:'plain', weight:700, align:'left' },
+        title:      { x:8, y:20, size:24, color:'#ffffff', bg:'rgba(15,23,42,.55)', shape:'plain', weight:900, align:'left' },
+        desc:       { x:8, y:44, size:13, color:'rgba(255,255,255,.8)', bg:'rgba(15,23,42,.55)', shape:'plain', weight:500, align:'left' },
+        buttonText: { x:8, y:76, size:14, color:'#0f172a', bg:'#ffffff', shape:'pill', weight:900, align:'left' }
+    },
+    pc: {
+        eyebrow:    { x:6, y:8,  size:13, color:'rgba(255,255,255,.8)', bg:'rgba(15,23,42,.55)', shape:'plain', weight:700, align:'left' },
+        title:      { x:6, y:22, size:27, color:'#ffffff', bg:'rgba(15,23,42,.55)', shape:'plain', weight:900, align:'left' },
+        desc:       { x:6, y:46, size:14, color:'rgba(255,255,255,.8)', bg:'rgba(15,23,42,.55)', shape:'plain', weight:500, align:'left' },
+        buttonText: { x:6, y:76, size:14, color:'#0f172a', bg:'#ffffff', shape:'pill', weight:900, align:'left' }
+    }
+};
+const PROMO_DEFAULT = {
+    enabledMobile: true,
+    enabledPc: true,
+    size: { mobile:{width:414,height:280}, pc:{width:480,height:320} },
+    pcPosition: { v:'bottom', h:'center' }, // PC에서 팝업이 뜨는 위치 — 모바일은 항상 하단 고정(바텀시트)이라 별도 설정 없음
+    slides: [
+        { texts:{ eyebrow:'무주 스키 렌탈 신규 오픈', title:'풀세트 {{40,000원}}', desc:'장비 + 의류 + 헬멧 + 고글 + 장갑\n오픈 기념 한정 특가', buttonText:'지금 예약하기' }, links:{}, actionType:'quote', actionValue:'', gradFrom:'', gradTo:'', img:'', mobile:freshFocal(), pc:freshFocal() },
+        { texts:{ eyebrow:'26/27 시즌 신상 입고', title:'올해 제일 {{잘 입은 사람}}', desc:'사장이 직접 고른 트렌디한 신상 스키복\n슬로프 앞까지 무료 배달', buttonText:'룩북 구경하기' }, links:{}, actionType:'section', actionValue:'outfit-section', gradFrom:'', gradTo:'', img:'', mobile:freshFocal(), pc:freshFocal() }
+    ]
+};
+let promoConfig = JSON.parse(JSON.stringify(PROMO_DEFAULT));
+let promoTextStyle = { order:['eyebrow','title','desc','buttonText'], mobile:{}, pc:{} };
+let currentPromoIdx = 0;
+let promoEditMode = 'mobile'; // 'mobile' | 'pc' — 팝업 사진 초점·문구·크기를 어느 화면 기준으로 편집 중인지
+
+const promoCtx = {
+    key: 'promo',
+    knownLabels: { eyebrow:'작은 라벨', title:'제목', desc:'설명', buttonText:'버튼' },
+    noLinkIds: ['buttonText'], // 버튼은 이미 "누르면" 액션이 있으므로 별도 링크 입력은 생략
+    renderContentHtml: (id, val) => id === 'title' ? promoRenderTitleHighlight(val) : promoEscapeHtml(val), // .hero-el의 white-space:pre-line이 줄바꿈을 처리
+    getTextStyle: () => promoTextStyle,
+    getMode: () => promoEditMode,
+    getSlide: () => promoConfig.slides[currentPromoIdx],
+    getAllSlides: () => promoConfig.slides,
+    frameEl: () => document.getElementById('promo-preview'),
+    elId: (id) => 'promo-el-' + id,
+    fieldsWrapId: 'promo-text-fields',
+    deletedListWrapId: 'promo-deleted-list',
+    guideVId: 'promo-guide-v',
+    guideHId: 'promo-guide-h',
+    deletedStack: []
+};
+TEXT_CTX_REGISTRY.promo = promoCtx;
+
+// 예전 방식(enabled 하나만 있거나, size가 숫자 하나뿐이거나, texts 없이 eyebrow/title/desc/buttonText가 평평했거나, img/mobile/pc 없는 데이터)으로
+// 저장됐어도 안전하게 채워 넣음
+function promoNormalizeSize(v, defW, defH) {
+    if (v && typeof v === 'object') return { width: v.width || defW, height: v.height || defH };
+    if (typeof v === 'number') return { width: v, height: defH }; // 예전엔 너비 숫자 하나만 저장했음
+    return { width: defW, height: defH };
+}
+function promoMigrateConfig(parsed) {
+    const size = {
+        mobile: promoNormalizeSize(parsed.size && parsed.size.mobile, 414, 280),
+        pc: promoNormalizeSize(parsed.size && parsed.size.pc, 480, 320)
+    };
+    const legacyEnabled = parsed.enabled !== false;
+    const enabledMobile = parsed.enabledMobile != null ? parsed.enabledMobile !== false : legacyEnabled;
+    const enabledPc = parsed.enabledPc != null ? parsed.enabledPc !== false : legacyEnabled;
+    const slides = parsed.slides.map(s => ({
+        ...s,
+        texts: s.texts ? { ...s.texts } : { eyebrow: s.eyebrow || '', title: s.title || '', desc: s.desc || '', buttonText: s.buttonText || '' },
+        links: s.links ? { ...s.links } : {},
+        img: s.img || '',
+        mobile: s.mobile || freshFocal(),
+        pc: s.pc || freshFocal()
+    }));
+    const pcPosition = {
+        v: (parsed.pcPosition && parsed.pcPosition.v) || 'bottom',
+        h: (parsed.pcPosition && parsed.pcPosition.h) || 'center'
+    };
+    return { enabledMobile, enabledPc, size, pcPosition, slides };
+}
+function promoMigrateTextStyle(parsed) {
+    const order = Array.isArray(parsed.order) && parsed.order.length ? parsed.order : ['eyebrow','title','desc','buttonText'];
+    const fillMode = (mode) => {
+        const out = {};
+        order.forEach(id => {
+            const base = parsed[mode] && parsed[mode][id];
+            const def = (PROMO_TEXT_DEFAULTS[mode] && PROMO_TEXT_DEFAULTS[mode][id]) || TEXT_STYLE_DEFAULT;
+            out[id] = {
+                x: base && base.x != null ? base.x : def.x,
+                y: base && base.y != null ? base.y : def.y,
+                size: base && base.size != null ? base.size : def.size,
+                color: (base && base.color) || def.color,
+                bg: (base && base.bg) || def.bg,
+                shape: (base && base.shape) || def.shape,
+                weight: (base && base.weight) || def.weight,
+                align: (base && base.align) || def.align
+            };
+        });
+        return out;
+    };
+    return { order, mobile: fillMode('mobile'), pc: fillMode('pc') };
+}
+
+function promoEscapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+// 제목 안에 {{강조할 부분}}을 적으면 하늘색으로 강조 표시됨
+function promoRenderTitleHighlight(raw) {
+    return promoEscapeHtml(raw).replace(/\{\{(.+?)\}\}/g, '<span class="text-[#7cc0ff]">$1</span>');
+}
+// 사진 위에 브랜드 색을 은은하게 얹기 위해 hex를 반투명 rgba로 변환
+function promoHexToRgba(hex, alpha) {
+    const h = String(hex || '#0f172a').replace('#', '');
+    const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+    const n = parseInt(full, 16) || 0;
+    return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+
+function renderPromoTabs() {
+    const wrap = document.getElementById('promo-tabs');
+    wrap.innerHTML = promoConfig.slides.map((_, i) =>
+        `<button type="button" class="hero-tab ${i === currentPromoIdx ? 'active' : ''}" onclick="switchPromoSlide(${i})">슬라이드 ${i + 1}</button>`
+    ).join('');
+}
+
+// 지금 모드(모바일/PC)의 크기를 미리보기·입력칸에 반영 — aspect-ratio로 실제 비율을 유지하면서 좁은 관리자 화면에도 맞게 축소 표시
+function applyPromoPreviewSize() {
+    const sz = promoConfig.size[promoEditMode];
+    const preview = document.getElementById('promo-preview');
+    preview.style.maxWidth = sz.width + 'px';
+    preview.style.aspectRatio = `${sz.width} / ${sz.height}`;
+    document.getElementById('promo-width').value = sz.width;
+    document.getElementById('promo-height').value = sz.height;
+    document.getElementById('promo-size-mode-label').textContent = promoEditMode === 'pc' ? 'PC' : '모바일';
+}
+
+window.switchPromoEditMode = function(mode) {
+    promoEditMode = mode;
+    document.getElementById('promo-mode-tab-mobile').classList.toggle('active', mode === 'mobile');
+    document.getElementById('promo-mode-tab-pc').classList.toggle('active', mode === 'pc');
+    deselectTextEl();
+    applyPromoPreviewSize();
+    applyAllTextStyles(promoCtx);
+    renderPromoPreview();
+};
+
+// 배경(사진/색) 갱신 — 문구 자체의 위치·모양은 공용 텍스트 엔진(renderTextEls/applyAllTextStyles)이 담당
+function renderPromoPreview() {
+    const s = promoConfig.slides[currentPromoIdx];
+    if (!s) return;
+    const img = document.getElementById('promo-prev-img');
+    const overlay = document.getElementById('promo-prev-overlay');
+    const preview = document.getElementById('promo-preview');
+    const hasColor = !!s.gradFrom;
+    const gradient = hasColor ? `linear-gradient(to bottom right, ${s.gradFrom}, ${s.gradTo || s.gradFrom})` : '';
+
+    if (s.img) {
+        const f = s[promoEditMode] || freshFocal();
+        img.src = s.img;
+        img.style.display = 'block';
+        img.style.setProperty('--fx', (f.focalX != null ? f.focalX : 50) + '%');
+        img.style.setProperty('--fy', (f.focalY != null ? f.focalY : 50) + '%');
+        img.style.setProperty('--zoom', f.zoom || 1);
+        // 색을 지정했을 때만 반투명 틴트를 사진 위에 얹음 — 기본은 사진 그대로
+        overlay.style.background = hasColor
+            ? `linear-gradient(to bottom right, ${promoHexToRgba(s.gradFrom, .68)}, ${promoHexToRgba(s.gradTo || s.gradFrom, .68)})`
+            : 'transparent';
+        preview.style.background = '#1e293b';
+    } else {
+        img.style.display = 'none';
+        img.removeAttribute('src');
+        overlay.style.background = 'transparent';
+        // 사진도 색도 없으면 글자가 안 보이지 않도록 중립 남색으로 최소한의 가독성 확보
+        preview.style.background = hasColor ? gradient : '#0f172a';
+    }
+}
+
+function loadCurrentPromoIntoEditor() {
+    const s = promoConfig.slides[currentPromoIdx];
+    if (!s.texts) s.texts = {};
+    if (!s.links) s.links = {};
+    document.getElementById('promo-action-type').value = s.actionType || 'quote';
+    document.getElementById('promo-action-section').value = s.actionType === 'section' ? (s.actionValue || 'outfit-section') : 'outfit-section';
+    document.getElementById('promo-action-url').value = s.actionType === 'url' ? (s.actionValue || '') : '';
+    document.getElementById('promo-grad-from').value = s.gradFrom || '#0f172a';
+    document.getElementById('promo-grad-to').value = s.gradTo || s.gradFrom || '#0f172a';
+    document.getElementById('promo-upload-status').textContent = '';
+    promoUpdateActionFieldVisibility();
+    applyPromoPreviewSize();
+    renderPromoPreview();
+    renderTextFields(promoCtx);
+    promoTextStyle.order.forEach(id => updateTextElContent(promoCtx, id));
+}
+
+function promoUpdateActionFieldVisibility() {
+    const type = document.getElementById('promo-action-type').value;
+    document.getElementById('promo-action-section').style.display = type === 'section' ? 'block' : 'none';
+    document.getElementById('promo-action-url').style.display = type === 'url' ? 'block' : 'none';
+}
+
+window.switchPromoSlide = function(i) {
+    currentPromoIdx = i;
+    loadCurrentPromoIntoEditor();
+    renderPromoTabs();
+};
+
+window.addPromoSlide = function() {
+    promoConfig.slides.push({ texts:{}, links:{}, actionType:'quote', actionValue:'', gradFrom:'', gradTo:'', img:'', mobile:freshFocal(), pc:freshFocal() });
+    currentPromoIdx = promoConfig.slides.length - 1;
+    loadCurrentPromoIntoEditor();
+    renderPromoTabs();
+};
+window.removeCurrentPromoSlide = function() {
+    if (promoConfig.slides.length <= 1) { alert('슬라이드는 최소 1개 있어야 합니다.'); return; }
+    promoConfig.slides.splice(currentPromoIdx, 1);
+    currentPromoIdx = Math.max(0, currentPromoIdx - 1);
+    loadCurrentPromoIntoEditor();
+    renderPromoTabs();
+};
+
+window.removePromoImage = function() {
+    promoConfig.slides[currentPromoIdx].img = '';
+    document.getElementById('promo-file-input').value = '';
+    renderPromoPreview();
+};
+
+window.clearPromoColor = function() {
+    const s = promoConfig.slides[currentPromoIdx];
+    s.gradFrom = '';
+    s.gradTo = '';
+    document.getElementById('promo-grad-from').value = '#0f172a';
+    document.getElementById('promo-grad-to').value = '#0f172a';
+    renderPromoPreview();
+};
+
+async function initPromoPanel() {
+    promoConfig = JSON.parse(JSON.stringify(PROMO_DEFAULT));
+    promoTextStyle = { order:['eyebrow','title','desc','buttonText'], mobile: JSON.parse(JSON.stringify(PROMO_TEXT_DEFAULTS.mobile)), pc: JSON.parse(JSON.stringify(PROMO_TEXT_DEFAULTS.pc)) };
+    promoCtx.deletedStack = [];
+    currentPromoIdx = 0;
+    promoEditMode = 'mobile';
+    document.getElementById('promo-mode-tab-mobile').classList.add('active');
+    document.getElementById('promo-mode-tab-pc').classList.remove('active');
+
+    try {
+        const { data, error } = await _supabase.from('site_content').select('key,value').in('key', ['promo_popup', 'promo_text_style']);
+        if (error) throw error;
+        const map = {};
+        (data || []).forEach(row => { map[row.key] = row.value; });
+        if (map.promo_popup) {
+            const parsed = JSON.parse(map.promo_popup);
+            if (parsed && Array.isArray(parsed.slides) && parsed.slides.length) promoConfig = promoMigrateConfig(parsed);
+        }
+        if (map.promo_text_style) {
+            const parsed = JSON.parse(map.promo_text_style);
+            if (parsed && parsed.mobile && parsed.pc) promoTextStyle = promoMigrateTextStyle(parsed);
+        }
+    } catch (err) {
+        console.error('진입 팝업 설정 불러오기 실패:', err);
+    }
+
+    document.getElementById('promo-enabled-mobile').checked = promoConfig.enabledMobile !== false;
+    document.getElementById('promo-enabled-pc').checked = promoConfig.enabledPc !== false;
+    if (!promoConfig.pcPosition) promoConfig.pcPosition = { v:'bottom', h:'center' };
+    document.getElementById('promo-pos-v').value = promoConfig.pcPosition.v;
+    document.getElementById('promo-pos-h').value = promoConfig.pcPosition.h;
+    renderTextEls(promoCtx);
+    renderPromoTabs();
+    loadCurrentPromoIntoEditor();
+    applyAllTextStyles(promoCtx);
+
+    document.getElementById('promo-width').addEventListener('input', (e) => {
+        promoConfig.size[promoEditMode].width = Number(e.target.value) || 414;
+        applyPromoPreviewSize();
+    });
+    document.getElementById('promo-height').addEventListener('input', (e) => {
+        promoConfig.size[promoEditMode].height = Number(e.target.value) || 280;
+        applyPromoPreviewSize();
+    });
+    document.getElementById('promo-pos-v').addEventListener('change', (e) => { promoConfig.pcPosition.v = e.target.value; });
+    document.getElementById('promo-pos-h').addEventListener('change', (e) => { promoConfig.pcPosition.h = e.target.value; });
+
+    // 미리보기 우측 하단 모서리 드래그로 크기 조절 (지금 모드(모바일/PC)에 개별 저장)
+    (function initPromoResizeHandle() {
+        const handle = document.getElementById('promo-resize-handle');
+        const preview = document.getElementById('promo-preview');
+        let dragging = false, startX = 0, startY = 0, startW = 0, startH = 0, scale = 1;
+        handle.addEventListener('pointerdown', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            dragging = true;
+            handle.setPointerCapture(e.pointerId);
+            const rect = preview.getBoundingClientRect();
+            const sz = promoConfig.size[promoEditMode];
+            scale = sz.width / rect.width; // 화면엔 축소돼 보일 수 있으니, 드래그 픽셀을 실제 논리적 px로 환산
+            startX = e.clientX; startY = e.clientY;
+            startW = sz.width; startH = sz.height;
+        });
+        handle.addEventListener('pointermove', (e) => {
+            if (!dragging) return;
+            const sz = promoConfig.size[promoEditMode];
+            sz.width = Math.max(280, Math.min(900, Math.round(startW + (e.clientX - startX) * scale)));
+            sz.height = Math.max(160, Math.min(600, Math.round(startH + (e.clientY - startY) * scale)));
+            applyPromoPreviewSize();
+        });
+        handle.addEventListener('pointerup', (e) => {
+            if (!dragging) return;
+            dragging = false;
+            handle.releasePointerCapture(e.pointerId);
+        });
+    })();
+
+    document.getElementById('promo-action-type').addEventListener('change', (e) => {
+        const s = promoConfig.slides[currentPromoIdx];
+        s.actionType = e.target.value;
+        s.actionValue = s.actionType === 'section' ? document.getElementById('promo-action-section').value
+                       : s.actionType === 'url' ? document.getElementById('promo-action-url').value
+                       : '';
+        promoUpdateActionFieldVisibility();
+    });
+    document.getElementById('promo-action-section').addEventListener('change', (e) => {
+        promoConfig.slides[currentPromoIdx].actionValue = e.target.value;
+    });
+    document.getElementById('promo-action-url').addEventListener('input', (e) => {
+        promoConfig.slides[currentPromoIdx].actionValue = e.target.value;
+    });
+    document.getElementById('promo-grad-from').addEventListener('input', (e) => {
+        promoConfig.slides[currentPromoIdx].gradFrom = e.target.value;
+        renderPromoPreview();
+    });
+    document.getElementById('promo-grad-to').addEventListener('input', (e) => {
+        promoConfig.slides[currentPromoIdx].gradTo = e.target.value;
+        renderPromoPreview();
+    });
+
+    // 사진 업로드 → Supabase Storage (히어로와 같은 site-images 버킷 공유)
+    document.getElementById('promo-file-input').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const status = document.getElementById('promo-upload-status');
+        status.textContent = '업로드 중...';
+        status.className = 'text-[11px] text-gray-400 mt-1';
+        try {
+            const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+            const path = `promo-${Date.now()}.${ext}`;
+            const { error: upErr } = await _supabase.storage.from('site-images').upload(path, file, { upsert: true });
+            if (upErr) throw upErr;
+            const { data: pub } = _supabase.storage.from('site-images').getPublicUrl(path);
+            promoConfig.slides[currentPromoIdx].img = pub.publicUrl;
+            renderPromoPreview();
+            status.textContent = '업로드 완료 — 아래 "전체 저장"을 눌러야 사이트에 반영됩니다';
+            status.className = 'text-[11px] text-green-600 mt-1 font-medium';
+        } catch (err) {
+            status.textContent = '업로드 실패: ' + err.message;
+            status.className = 'text-[11px] text-red-500 mt-1';
+        }
+    });
+
+    // 미리보기 사진 클릭 → 히어로와 같은 초점 조절 팝업을 이 슬라이드 대상으로 열기
+    document.getElementById('promo-prev-img').addEventListener('click', () => {
+        const s = promoConfig.slides[currentPromoIdx];
+        if (!s.img) return;
+        openFocalModalFor({
+            getFocal: () => {
+                if (!s[promoEditMode]) s[promoEditMode] = freshFocal();
+                return s[promoEditMode];
+            },
+            imgSrc: s.img,
+            frameEl: document.getElementById('promo-preview'),
+            modeLabel: promoEditMode === 'pc' ? 'PC' : '모바일',
+            onFocalChange: () => renderPromoPreview()
+        });
+    });
+}
+
+window.savePromoPopup = async function() {
+    promoConfig.enabledMobile = document.getElementById('promo-enabled-mobile').checked;
+    promoConfig.enabledPc = document.getElementById('promo-enabled-pc').checked;
+
+    const btn = document.getElementById('promo-save-btn');
+    const status = document.getElementById('promo-save-status');
+    btn.disabled = true;
+    btn.textContent = '저장 중...';
+
+    try {
+        const rows = [
+            { key: 'promo_popup', value: JSON.stringify(promoConfig) },
+            { key: 'promo_text_style', value: JSON.stringify(promoTextStyle) }
+        ];
         const { error } = await _supabase.from('site_content').upsert(rows, { onConflict: 'key' });
         if (error) throw error;
         status.textContent = '저장되었습니다. 사이트를 새로고침하면 반영됩니다.';
