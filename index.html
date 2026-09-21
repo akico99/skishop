@@ -926,9 +926,19 @@
                     <p>· 리프트권 당일 취소 시 환불 불가, 익일 17시 전 취소 시 100% 환불</p>
                     <p>· 의류 심각한 오염 시 보상 책임 있음</p>
                 </div>
+                <!-- 개인정보 수집·이용 고지 — 개인정보보호법 제15조에 따라 수집 항목·목적·
+                     보유기간·거부권을 예약 전에 알려야 합니다. 내용을 바꾸면 privacy.html 도 함께 고치세요. -->
+                <div class="bg-gray-100 rounded-xl p-3 text-[11px] text-gray-500 leading-relaxed space-y-1">
+                    <p class="font-bold text-gray-600">개인정보 수집·이용 안내</p>
+                    <p>· 수집 항목: 이름, 연락처, 방문 일시, 예약 내역 (요청사항은 선택)</p>
+                    <p>· 이용 목적: 예약 접수·확인 및 관련 연락</p>
+                    <p>· 보유 기간: 방문 예정일로부터 1년 (법령상 보존 의무가 있는 경우 그 기간)</p>
+                    <p>· 동의를 거부하실 수 있으며, 이 경우 온라인 예약 대신 전화로 예약하실 수 있습니다.</p>
+                    <p class="pt-1"><a href="privacy.html" target="_blank" rel="noopener" class="text-[#7c3aed] font-bold underline">개인정보처리방침 전문 보기</a></p>
+                </div>
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" id="reserver-agree" class="w-4 h-4 accent-[#7c3aed]">
-                    <span class="text-[12px] text-gray-600 font-medium">위 이용약관에 동의합니다 <span class="text-red-400">*</span></span>
+                    <span class="text-[12px] text-gray-600 font-medium">위 이용약관 및 개인정보 수집·이용에 동의합니다 <span class="text-red-400">*</span></span>
                 </label>
 
                 <!-- 합계 -->
@@ -1387,13 +1397,16 @@
                 <p>이메일: jahyeon7886@naver.com</p>
             </div>
         </div>
-        <div class="pt-4 border-t border-gray-800 flex justify-between items-center">
-            <p class="text-[11px] text-gray-600">© 2026 놀러와. All rights reserved.</p>
+        <div class="pt-4 border-t border-gray-800">
+            <a href="privacy.html" class="text-[12px] text-gray-300 hover:text-white font-bold underline">개인정보처리방침</a>
+            <div class="flex justify-between items-center mt-3">
+            <p class="text-[11px] text-gray-600">© 2026 놀러와스키샵. All rights reserved.</p>
             <a href="admin.html"
                class="text-[11px] text-gray-400 hover:text-white flex items-center gap-1 transition"
                aria-label="관리자 페이지">
                 <i class="fa-solid fa-lock text-[10px]" aria-hidden="true"></i> 관리자
             </a>
+            </div>
         </div>
     </footer>
 
@@ -1984,7 +1997,7 @@ window.onReserve = async function() {
         setTimeout(() => document.getElementById('visit-date').focus(), 300); return;
     }
     if (!anyQty) { showToast('항목을 1개 이상 선택해주세요'); return; }
-    if (!agree)  { showToast('이용약관에 동의해주세요'); return; }
+    if (!agree)  { showToast('이용약관 및 개인정보 수집·이용에 동의해주세요'); return; }
 
     // 로딩
     const btn     = document.getElementById('reserve-submit-btn');
