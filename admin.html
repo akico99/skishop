@@ -127,15 +127,22 @@
 
         <div class="space-y-3">
             <div>
-                <label for="admin-pw" class="block text-[12px] font-bold text-gray-500 mb-1.5">관리자 비밀번호</label>
-                <input type="password" id="admin-pw" placeholder="비밀번호 입력"
+                <label for="admin-email" class="block text-[12px] font-bold text-gray-500 mb-1.5">이메일</label>
+                <input type="email" id="admin-email" placeholder="관리자 이메일" autocomplete="username"
                        class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#004de6] text-[14px] transition"
-                       onkeydown="if(event.key==='Enter') checkAdminPw()">
+                       onkeydown="if(event.key==='Enter') document.getElementById('admin-pw').focus()">
+            </div>
+            <div>
+                <label for="admin-pw" class="block text-[12px] font-bold text-gray-500 mb-1.5">비밀번호</label>
+                <input type="password" id="admin-pw" placeholder="비밀번호 입력"
+                       autocomplete="current-password"
+                       class="w-full border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#004de6] text-[14px] transition"
+                       onkeydown="if(event.key==='Enter') adminLogin()">
             </div>
             <p id="login-error" class="text-red-500 text-[12px] hidden">
-                <i class="fa-solid fa-circle-exclamation mr-1"></i>비밀번호가 틀렸습니다.
+                <i class="fa-solid fa-circle-exclamation mr-1"></i><span id="login-error-text">이메일 또는 비밀번호가 올바르지 않습니다.</span>
             </p>
-            <button onclick="checkAdminPw()"
+            <button id="login-btn" onclick="adminLogin()"
                     class="w-full bg-[#004de6] text-white rounded-xl py-3.5 font-bold text-[15px] hover:bg-blue-700 transition shadow-sm shadow-blue-200">
                 로그인
             </button>
@@ -674,7 +681,6 @@
 // ====================================================
 // 설정
 // ====================================================
-const ADMIN_PASSWORD = 'admin1234'; // ← 원하는 비밀번호로 변경하세요
 const SUPABASE_URL   = 'https://ffreclgubmxdznubedam.supabase.co';
 const SUPABASE_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmcmVjbGd1Ym14ZHpudWJlZGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NDI2OTIsImV4cCI6MjA5NDMxODY5Mn0.PLb2oy5u5qd7lqFOlbr4UJDIk2okxy3OJZkE1sW6FLY';
 
@@ -686,24 +692,53 @@ let currentId = null;     // 현재 열린 상세 id
 
 
 // ====================================================
-// 로그인
+// 로그인 — Supabase Auth
 // ====================================================
-function checkAdminPw() {
-    const pw  = document.getElementById('admin-pw').value;
-    const err = document.getElementById('login-error');
-    if (pw === ADMIN_PASSWORD) {
-        sessionStorage.setItem('muju_admin', '1');
-        err.classList.add('hidden');
-        showDashboard();
-    } else {
+// 비밀번호를 이 파일에 적어두지 않습니다.
+// Supabase 서버가 검사하고, 성공해야만 예약 데이터를 읽을 수 있는 토큰이 발급됩니다.
+// 관리자 계정은 Supabase 대시보드 > Authentication > Users 에서 직접 만듭니다.
+// (사이트에 가입 기능이 없으므로 외부인이 계정을 만들 방법이 없습니다)
+async function adminLogin() {
+    const email = document.getElementById('admin-email').value.trim();
+    const pw    = document.getElementById('admin-pw').value;
+    const err   = document.getElementById('login-error');
+    const errTx = document.getElementById('login-error-text');
+    const btn   = document.getElementById('login-btn');
+
+    if (!email || !pw) {
+        errTx.innerText = '이메일과 비밀번호를 모두 입력해주세요.';
+        err.classList.remove('hidden');
+        return;
+    }
+
+    btn.disabled  = true;
+    btn.innerText = '로그인 중...';
+
+    const { error } = await _supabase.auth.signInWithPassword({ email: email, password: pw });
+
+    btn.disabled  = false;
+    btn.innerText = '로그인';
+
+    if (error) {
+        const msg = error.message || '';
+        if (msg.indexOf('Email not confirmed') >= 0) {
+            errTx.innerText = '이메일 인증이 안 된 계정입니다. Supabase > Authentication > Users 에서 해당 계정을 Confirm 처리해주세요.';
+        } else {
+            errTx.innerText = '이메일 또는 비밀번호가 올바르지 않습니다.';
+        }
         err.classList.remove('hidden');
         document.getElementById('admin-pw').value = '';
         document.getElementById('admin-pw').focus();
+        return;
     }
+
+    err.classList.add('hidden');
+    document.getElementById('admin-pw').value = '';
+    showDashboard();
 }
 
-function adminLogout() {
-    sessionStorage.removeItem('muju_admin');
+async function adminLogout() {
+    await _supabase.auth.signOut();
     document.getElementById('dashboard').classList.add('hidden');
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('admin-pw').value = '';
@@ -1817,8 +1852,10 @@ window.savePromoPopup = async function() {
     }
 };
 
-// 페이지 로드 시 세션 유지
-if (sessionStorage.getItem('muju_admin') === '1') showDashboard();
+// 페이지 로드 시 세션 유지 — Supabase가 토큰을 자동으로 보관하고 갱신합니다.
+_supabase.auth.getSession().then(function (res) {
+    if (res && res.data && res.data.session) showDashboard();
+});
 
 
 // ====================================================

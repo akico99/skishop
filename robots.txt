@@ -1,0 +1,13 @@
+# 놀러와 — 무주 스키 렌탈 (https://www.nolleowaski.com)
+# 이 파일은 도메인 루트(https://www.nolleowaski.com/robots.txt)에서 열려야 효력이 있습니다.
+
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+# 네이버 검색로봇
+User-agent: Yeti
+Allow: /
+Disallow: /admin.html
+
+Sitemap: https://www.nolleowaski.com/sitemap.xml

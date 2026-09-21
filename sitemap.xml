@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 단일 페이지 사이트라 주소는 하나입니다.
+     페이지를 추가하면 <url> 블록을 똑같이 복사해서 늘리고,
+     내용을 크게 고칠 때마다 <lastmod> 날짜를 갱신하세요. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.nolleowaski.com/</loc>
+    <lastmod>2026-09-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
