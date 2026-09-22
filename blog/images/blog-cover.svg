@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-labelledby="title desc">
+  <title id="title">무주리조트 스키장 정보</title>
+  <desc id="desc">무주 스키샵과 렌탈샵 정보를 소개하는 카드뉴스 표지</desc>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#171b38"/><stop offset="1" stop-color="#6d5acd"/></linearGradient></defs>
+  <rect width="1200" height="1200" rx="56" fill="url(#bg)"/>
+  <circle cx="1010" cy="185" r="120" fill="#b8f35b" opacity=".9"/>
+  <path d="M0 870 280 610l180 170 190-230 360 340 190-180v290H0Z" fill="#f7f8fb" opacity=".95"/>
+  <path d="m80 910 230-215 110 105 220-270 330 330" fill="none" stroke="#b8f35b" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="90" y="145" fill="#b8f35b" font-family="Arial,'Malgun Gothic',sans-serif" font-size="34" font-weight="700" letter-spacing="5">NOLLEOWA GUIDE</text>
+  <text x="90" y="330" fill="#fff" font-family="Arial,'Malgun Gothic',sans-serif" font-size="92" font-weight="900">무주리조트</text>
+  <text x="90" y="435" fill="#fff" font-family="Arial,'Malgun Gothic',sans-serif" font-size="92" font-weight="900">스키장 정보</text>
+  <text x="94" y="515" fill="#e6e4ff" font-family="Arial,'Malgun Gothic',sans-serif" font-size="38" font-weight="700">무주 스키샵 · 렌탈샵 · 리프트권</text>
+  <rect x="90" y="1030" width="420" height="70" rx="35" fill="#b8f35b"/>
+  <text x="125" y="1077" fill="#171b38" font-family="Arial,'Malgun Gothic',sans-serif" font-size="31" font-weight="900">무주놀러와스키샵&amp;렌탈샵</text>
+</svg>
