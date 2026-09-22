@@ -1583,11 +1583,19 @@
 if (history.scrollRestoration) { history.scrollRestoration = 'manual'; }
 window.scrollTo(0, 0);
 
-const { createClient } = supabase;
-const _supabase = createClient(
-    'https://ffreclgubmxdznubedam.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmcmVjbGd1Ym14ZHpudWJlZGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NDI2OTIsImV4cCI6MjA5NDMxODY5Mn0.PLb2oy5u5qd7lqFOlbr4UJDIk2okxy3OJZkE1sW6FLY'
-);
+// 예약 저장·조회에 쓰는 Supabase 라이브러리는 외부 CDN에서 불러옵니다.
+// 이 라이브러리가 로드되지 않았을 때 그대로 두면 여기서 스크립트 전체가 멈춰
+// 메뉴·슬라이드·가격 계산까지 모두 동작하지 않게 됩니다. 그래서 감싸두고,
+// 실패하면 예약 서버가 필요한 기능만 비활성화합니다.
+let _supabase = null;
+try {
+    _supabase = supabase.createClient(
+        'https://ffreclgubmxdznubedam.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmcmVjbGd1Ym14ZHpudWJlZGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NDI2OTIsImV4cCI6MjA5NDMxODY5Mn0.PLb2oy5u5qd7lqFOlbr4UJDIk2okxy3OJZkE1sW6FLY'
+    );
+} catch (err) {
+    console.error('[놀러와] 예약 서버 연결 실패 — 온라인 예약 기능만 비활성화됩니다.', err);
+}
 
 // ===== 구글시트 백업 미러링 (선택) =====
 // 아래 배포된 Apps Script 웹앱 URL을 붙여넣으면, 예약이 성공할 때마다 구글시트에도 자동으로 한 줄씩 기록됩니다.
@@ -2211,6 +2219,7 @@ window.sqSubmit = function() {
         return fail('리프트권·장비·의류·보호장비 중 최소 한 가지는 선택해주세요.');
     }
     if (!sqAns.agree) return fail('개인정보 수집·이용 및 이용약관 동의가 필요합니다.');
+    if (!_supabase) return fail('지금 예약 서버에 연결할 수 없습니다. 잠시 후 다시 시도하시거나 010-7720-5333으로 전화 주세요.');
 
     const agreeEl = document.getElementById('reserver-agree');
     if (agreeEl) agreeEl.checked = true;
@@ -2424,6 +2433,7 @@ window.onReserve = async function() {
     }
     if (!anyQty) { showToast('항목을 1개 이상 선택해주세요'); return; }
     if (!agree)  { showToast('이용약관 및 개인정보 수집·이용에 동의해주세요'); return; }
+    if (!_supabase) { showToast('예약 서버에 연결할 수 없습니다. 010-7720-5333으로 전화 주세요'); return; }
 
     // 로딩
     const btn     = document.getElementById('reserve-submit-btn');
@@ -2480,6 +2490,7 @@ window.lookupReservation = async function() {
     if (!isValidName(name)) { showToast('이름을 올바르게 입력해주세요'); document.getElementById('lookup-name').focus(); return; }
     if (!phone) { showToast('연락처를 입력해주세요'); document.getElementById('lookup-phone').focus(); return; }
     if (!isValidPhone(phone)) { showToast('휴대폰 번호를 올바르게 입력해주세요 (010-0000-0000)'); document.getElementById('lookup-phone').focus(); return; }
+    if (!_supabase) { showToast('예약 서버에 연결할 수 없습니다. 010-7720-5333으로 전화 주세요'); return; }
 
     btn.disabled = true;
     btnText.innerHTML = '<span class="spinner"></span> 조회 중...';
