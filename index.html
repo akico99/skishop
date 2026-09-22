@@ -418,8 +418,8 @@
 
         /* ===== "빠른예약" 등을 눌렀을 때 견적 패널을 화면 중앙으로 확대하는 모달 ===== */
         #pc-quote-modal {
-            position:fixed; inset:0; z-index:200; padding:56px 40px 40px;
-            align-items:flex-start; justify-content:center;
+            position:fixed; inset:0; z-index:200; padding:48px 40px;
+            align-items:center; justify-content:center;
             overflow-y:auto;
             background:rgba(15,10,35,.55);
             visibility:hidden; opacity:0; pointer-events:none;
@@ -429,8 +429,8 @@
             visibility:visible; opacity:1; pointer-events:auto;
             transition:opacity .25s ease, visibility 0s linear 0s;
         }
-        /* 폼 내용이 길어서(스크롤 필요) 화면 정중앙에 맞추면 오히려 애매하게 낮아 보이므로,
-           화면 위쪽에 붙여서 항상 헤더(닫기·최소화 버튼)부터 바로 보이게 함 */
+        /* #pc-quote 자체에 overflow-y:auto가 있어 폼이 길어도 내부에서만 스크롤되므로,
+           화면 정중앙에 놓아도 아래쪽이 잘리지 않음. 화면 한가운데에서 커지는 느낌을 위해 정중앙 정렬. */
         #pc-quote-modal-inner { width:480px; max-width:100%; max-height:calc(100vh - 96px); }
         .pc-quote { transition:transform .32s cubic-bezier(.34,1.15,.64,1), opacity .22s ease; }
         #pc-quote-modal #pc-quote {
