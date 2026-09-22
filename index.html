@@ -503,7 +503,7 @@
         }
         .sq-chip:hover { border-color:#c4b5fd; }
         .sq-chip.on { border-color:#6d5acd; background:#f5f3ff; color:#5b4bb3; }
-        .sq-chip.num { min-width:44px; text-align:center; padding:9px 11px; }
+        .sq-chip.num { min-width:37px; text-align:center; padding:9px 7px; }
 
         .sq-row { display:flex; gap:8px; }
         .sq-row input, .sq-row select, .sq-row textarea {
@@ -2147,7 +2147,11 @@ function renderStepForm() {
 
     const upTo = Math.min(Math.max(sqIdx, sqFurthest), SQ_TOTAL - 1);
     let html = '';
-    for (let i = 0; i <= upTo; i++) html += sqBlock(i);
+    for (let i = 0; i <= upTo; i++) {
+        // 앞 질문을 수정하러 돌아간 동안, 아직 답하지 않은 뒤쪽 질문은 감춥니다.
+        if (i > sqIdx && i >= sqFurthest) continue;
+        html += sqBlock(i);
+    }
     if (sqFurthest >= SQ_TOTAL) html += sqFinalBlock();
     body.innerHTML = html;
 
