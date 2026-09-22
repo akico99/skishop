@@ -1679,6 +1679,17 @@ window.formatPhone = function(input) {
     else                     input.value = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11);
 };
 
+// 이름: 2자 이상 + 한글 또는 영문이 하나 이상 포함 (숫자·기호만 입력한 경우 실수로 간주)
+function isValidName(v) {
+    return v.length >= 2 && /[가-힣a-zA-Z]/.test(v);
+}
+// 연락처: 국내 휴대폰 번호만 허용. 010은 항상 11자리(010+8자리),
+// 011/016/017/018/019는 과거 발급된 10자리 번호도 있어 10~11자리 모두 허용.
+function isValidPhone(v) {
+    const digits = v.replace(/\D/g, '');
+    return /^(010\d{8}|01[16789]\d{7,8})$/.test(digits);
+}
+
 // ===== 가격표 =====
 const PRICES = {
     lift: {
@@ -1988,7 +1999,9 @@ window.onReserve = async function() {
 
     // 유효성 검사
     if (!name) { showToast('예약자 이름을 입력해주세요'); document.getElementById('reserver-name').focus(); return; }
-    if (!phone || phone.length < 12) { showToast('연락처를 올바르게 입력해주세요'); document.getElementById('reserver-phone').focus(); return; }
+    if (!isValidName(name)) { showToast('이름을 올바르게 입력해주세요 (2자 이상)'); document.getElementById('reserver-name').focus(); return; }
+    if (!phone) { showToast('연락처를 입력해주세요'); document.getElementById('reserver-phone').focus(); return; }
+    if (!isValidPhone(phone)) { showToast('휴대폰 번호를 올바르게 입력해주세요 (010-0000-0000)'); document.getElementById('reserver-phone').focus(); return; }
     if (!date) {
         if (quoteSection.classList.contains('hidden')) { quoteSection.classList.remove('hidden'); quoteBtn.setAttribute('aria-expanded','true'); quoteIcon.style.transform='rotate(-180deg)'; }
         showToast('방문 날짜를 선택해주세요');
@@ -2049,7 +2062,9 @@ window.lookupReservation = async function() {
     const btnText= document.getElementById('lookup-btn-text');
 
     if (!name)  { showToast('이름을 입력해주세요'); document.getElementById('lookup-name').focus(); return; }
+    if (!isValidName(name)) { showToast('이름을 올바르게 입력해주세요'); document.getElementById('lookup-name').focus(); return; }
     if (!phone) { showToast('연락처를 입력해주세요'); document.getElementById('lookup-phone').focus(); return; }
+    if (!isValidPhone(phone)) { showToast('휴대폰 번호를 올바르게 입력해주세요 (010-0000-0000)'); document.getElementById('lookup-phone').focus(); return; }
 
     btn.disabled = true;
     btnText.innerHTML = '<span class="spinner"></span> 조회 중...';
