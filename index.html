@@ -442,6 +442,107 @@
         #pc-quote-modal .pqh-chevron { display:none; }
         #pc-quote-modal .pc-quote-modal-controls { display:flex; }
 
+        /* ===== 단계형 예약 신청 창 =====
+           한 번에 한 가지만 묻고, 답하면 체크 표시와 함께 위에 남고 다음 질문이 아래에 나타납니다.
+           잘못 입력하면 그 질문 자리에 바로 안내가 뜨고 다음으로 넘어가지 않습니다.
+           수집한 답은 기존 견적 폼과 같은 상태(qtys·폼 필드)에 넣고 같은 제출 함수를 씁니다. */
+        #step-modal {
+            position:fixed; inset:0; z-index:400; display:none;
+            align-items:center; justify-content:center; padding:20px 14px;
+            background:rgba(15,10,35,.62);
+        }
+        #step-modal.open { display:flex; }
+        #step-box {
+            width:100%; max-width:460px; max-height:calc(100dvh - 40px);
+            background:#fff; border-radius:22px; overflow:hidden;
+            display:flex; flex-direction:column;
+            box-shadow:0 30px 60px -12px rgba(15,23,42,.45);
+            transform:scale(.93); opacity:0;
+            transition:transform .32s cubic-bezier(.34,1.15,.64,1), opacity .22s ease;
+        }
+        #step-modal.open #step-box { transform:scale(1); opacity:1; }
+
+        #step-head { flex:none; padding:16px 18px 14px; border-bottom:1px solid #f1f5f9; }
+        #step-head-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+        #step-head h3 { font-size:16px; font-weight:800; color:#0f172a; margin:0; letter-spacing:-.01em; }
+        #step-head p { font-size:11.5px; color:#94a3b8; font-weight:600; margin:4px 0 0; }
+        #step-close {
+            flex:none; width:30px; height:30px; border-radius:10px; border:0; cursor:pointer;
+            background:#f1f5f9; color:#64748b; font-size:14px;
+            display:flex; align-items:center; justify-content:center; transition:background .15s;
+        }
+        #step-close:hover { background:#e2e8f0; }
+        #step-progress { display:flex; align-items:center; gap:10px; margin-top:13px; }
+        #step-bar-track { flex:1; height:5px; border-radius:999px; background:#eef2f7; overflow:hidden; }
+        #step-bar { height:100%; width:0%; background:#6d5acd; border-radius:999px; transition:width .35s ease; }
+        #step-count { flex:none; font-size:11.5px; font-weight:800; color:#64748b; }
+        #step-count b { color:#6d5acd; }
+
+        #step-body { flex:1; overflow-y:auto; padding:4px 18px 18px; }
+
+        .sq { padding:16px 0 4px; border-bottom:1px dashed #eef2f7; }
+        .sq-label { display:flex; align-items:center; gap:8px; margin-bottom:11px; }
+        .sq-num {
+            flex:none; width:21px; height:21px; border-radius:50%;
+            background:#e2e8f0; color:#64748b; font-size:11px; font-weight:800;
+            display:flex; align-items:center; justify-content:center;
+        }
+        .sq.active .sq-num { background:#6d5acd; color:#fff; }
+        .sq.done   .sq-num { background:#ddd6fe; color:#5b4bb3; }
+        .sq-text { font-size:13.5px; font-weight:700; color:#0f172a; }
+        .sq.done .sq-text { color:#64748b; font-weight:600; }
+        .sq-check { display:none; font-size:10.5px; color:#6d5acd; }
+        .sq.done .sq-check { display:inline; }
+
+        .sq-chips { display:flex; flex-wrap:wrap; gap:7px; }
+        .sq-chip {
+            border:1.5px solid #e2e8f0; background:#fff; color:#475569;
+            border-radius:11px; padding:9px 14px; font-size:13px; font-weight:700;
+            cursor:pointer; transition:border-color .15s, background .15s, color .15s;
+            font-family:inherit;
+        }
+        .sq-chip:hover { border-color:#c4b5fd; }
+        .sq-chip.on { border-color:#6d5acd; background:#f5f3ff; color:#5b4bb3; }
+        .sq-chip.num { min-width:44px; text-align:center; padding:9px 11px; }
+
+        .sq-row { display:flex; gap:8px; }
+        .sq-row input, .sq-row select, .sq-row textarea {
+            flex:1; min-width:0; border:1.5px solid #e2e8f0; border-radius:11px;
+            padding:11px 13px; font-size:14px; color:#0f172a; background:#fff;
+            outline:none; font-family:inherit;
+        }
+        .sq-row input:focus, .sq-row select:focus, .sq-row textarea:focus { border-color:#6d5acd; }
+        .sq-ok {
+            flex:none; border:0; border-radius:11px; background:#6d5acd; color:#fff;
+            font-size:13px; font-weight:800; padding:0 17px; cursor:pointer; white-space:nowrap;
+            font-family:inherit; transition:background .15s;
+        }
+        .sq-ok:hover { background:#5b4bb3; }
+        .sq-ok.full { width:100%; padding:12px; margin-top:12px; }
+        .sq-sub { font-size:11px; color:#94a3b8; font-weight:700; margin:11px 0 6px; }
+        .sq-err { color:#e11d48; font-size:11.5px; font-weight:700; margin:8px 0 0; display:none; }
+        .sq-err.show { display:block; }
+
+        .sq-final { padding:16px 0 4px; }
+        .sq-sum { background:#f8fafc; border:1px solid #eef2f7; border-radius:14px; padding:13px 14px; }
+        .sq-sum-row { display:flex; justify-content:space-between; gap:12px; padding:4px 0; font-size:12.5px; color:#64748b; }
+        .sq-sum-row b { color:#0f172a; font-weight:700; text-align:right; }
+        .sq-sum-total { border-top:1px dashed #dbe3ec; margin-top:9px; padding-top:10px; display:flex; justify-content:space-between; align-items:baseline; }
+        .sq-sum-total span { font-size:12px; color:#64748b; font-weight:700; }
+        .sq-sum-total b { font-size:20px; color:#6d5acd; font-weight:800; }
+        .sq-agree { display:flex; align-items:flex-start; gap:8px; margin-top:14px; cursor:pointer; }
+        .sq-agree input { flex:none; width:17px; height:17px; margin-top:1px; accent-color:#6d5acd; }
+        .sq-agree span { font-size:11.5px; color:#475569; font-weight:600; line-height:1.55; }
+        .sq-agree a { color:#6d5acd; font-weight:700; text-decoration:underline; }
+        .sq-submit {
+            width:100%; border:0; border-radius:13px; cursor:pointer; padding:15px;
+            background:#6d5acd; color:#fff; font-size:15px; font-weight:800; margin-top:13px;
+            display:flex; align-items:center; justify-content:center; gap:8px;
+            font-family:inherit; transition:background .15s;
+        }
+        .sq-submit:hover { background:#5b4bb3; }
+        .sq-submit:disabled { background:#cbd5e1; cursor:default; }
+
         /* ===== 예약확인/카톡상담 액션 바 (PC에서는 예약 패널 하단에 인라인 표시) ===== */
         .pc-side-right a, .pc-side-right button {
             border-radius:12px; display:flex; align-items:center; justify-content:center; gap:6px;
@@ -477,6 +578,28 @@
      실제 폼은 새로 만들지 않고 #pc-quote 요소를 이 안으로 옮겼다가, 닫으면 원래 자리(#pc-quote-anchor)로 되돌려놓는 방식. -->
 <div id="pc-quote-modal" role="dialog" aria-modal="true" aria-label="실시간 견적/예약" onclick="if(event.target===this) closeQuoteModal()">
     <div id="pc-quote-modal-inner"></div>
+</div>
+
+<!-- 단계형 예약 신청 창 — "예약신청"·"빠른예약"을 누르면 열립니다.
+     질문을 한 번에 하나씩 보여주고, 답한 질문은 체크 표시와 함께 위에 남습니다.
+     내용은 JS(renderStepForm)에서 그려주므로 여기에는 껍데기만 둡니다. -->
+<div id="step-modal" role="dialog" aria-modal="true" aria-label="예약 신청" onclick="if(event.target===this) closeStepForm()">
+    <div id="step-box">
+        <div id="step-head">
+            <div id="step-head-row">
+                <div>
+                    <h3>예약 신청</h3>
+                    <p>질문에 답하시면 바로 예상 금액이 나와요</p>
+                </div>
+                <button type="button" id="step-close" onclick="closeStepForm()" aria-label="닫기"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="step-progress">
+                <div id="step-bar-track"><div id="step-bar"></div></div>
+                <span id="step-count"><b>1</b> / 6</span>
+            </div>
+        </div>
+        <div id="step-body"></div>
+    </div>
 </div>
 
 <!-- 진입 프로모션 팝업 (모바일/PC 공통, admin에서 문구·버튼·색 편집 가능) -->
@@ -1796,16 +1919,308 @@ function setQuoteOpen(open) {
     quoteBtn.setAttribute('aria-expanded', String(open));
     quoteIcon.style.transform = open ? 'rotate(45deg)' : 'rotate(0deg)';
 }
-// 견적/예약 열기: PC는 견적 패널을 화면 중앙 모달로 확대, 모바일은 본문 견적 섹션 펼치기
-window.openQuote = function() {
-    const isPC = window.matchMedia('(min-width: 1024px)').matches;
-    if (isPC) {
-        maximizeQuoteModal();
-    } else {
-        setQuoteOpen(true);
-        setTimeout(() => quoteBtn.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+// 견적/예약 열기 → 단계형 예약 신청 창을 띄웁니다.
+window.openQuote = function() { openStepForm(); };
+
+/* ===== 단계형 예약 신청 =====
+   질문을 한 번에 하나씩 보여주고, 답하면 체크 표시와 함께 위에 남고 다음 질문이 열립니다.
+   잘못된 값은 그 질문 자리에서 막고 다음으로 넘기지 않습니다.
+   모아둔 답은 기존 견적 폼(qtys·폼 필드)에 그대로 넣고 기존 제출 함수(onReserve)를 호출합니다. */
+const SQ_TOTAL = 6;
+const SQ_LIFT_LABEL  = { '3h':'3시간권', '4h':'4시간권', '6h':'6시간권' };
+const SQ_EXTRA_LABEL = { visor:'헬멧+고글 세트', helmet:'헬멧', goggle:'고글' };
+const SQ_TIMES = (() => {
+    const out = [];
+    for (let m = 7*60 + 30; m <= 23*60; m += 30) {
+        out.push(String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0'));
     }
+    return out;
+})();
+
+let sqAns = {};
+let sqIdx = 0;        // 지금 답하는 질문 (SQ_TOTAL이면 마지막 확인 화면)
+let sqFurthest = 0;   // 지금까지 답을 마친 지점
+
+function sqEsc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function sqTodayDate() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+function sqTodayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function sqReset() {
+    sqAns = { name:'', phone:'', date:'', time:'09:00',
+              lift:null, liftAdult:0, liftChild:0,
+              equip:0, cloth:0, extra:null, extraCount:0,
+              memo:'', agree:false };
+    sqIdx = 0; sqFurthest = 0;
+}
+
+window.openStepForm = function() {
+    sqReset();
+    renderStepForm();
+    document.getElementById('step-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
 };
+window.closeStepForm = function() {
+    const m = document.getElementById('step-modal');
+    if (!m || !m.classList.contains('open')) return;
+    m.classList.remove('open');
+    document.body.style.overflow = '';
+};
+window.sqSetNum   = function(key, n) { sqAns[key] = n; renderStepForm(); };
+window.sqSetAgree = function(v) { sqAns.agree = !!v; };
+window.sqEdit     = function(i) { sqIdx = i; renderStepForm(); };
+window.sqPick = function(key, v) {
+    sqAns[key] = v;
+    if (key === 'lift'  && v === 'none') { sqAns.liftAdult = 0; sqAns.liftChild = 0; }
+    if (key === 'extra' && v === 'none') { sqAns.extraCount = 0; }
+    if (key === 'extra' && v !== 'none' && sqAns.extraCount === 0) sqAns.extraCount = 1;
+    renderStepForm();
+};
+
+function sqNumChips(key, val, max) {
+    let h = '<div class="sq-chips">';
+    for (let n = 0; n <= (max || 8); n++) {
+        h += '<button type="button" class="sq-chip num' + (val === n ? ' on' : '') +
+             '" onclick="sqSetNum(\'' + key + '\',' + n + ')">' + n + '</button>';
+    }
+    return h + '</div>';
+}
+function sqEditChip(text, i) {
+    return '<button type="button" class="sq-chip on" onclick="sqEdit(' + i + ')">' + sqEsc(text) +
+           ' <i class="fa-solid fa-pen" style="font-size:9px;opacity:.55;margin-left:3px"></i></button>';
+}
+function sqOkBtn(i, full) {
+    return '<button type="button" class="sq-ok' + (full ? ' full' : '') + '" onclick="sqConfirm(' + i + ')">확인 →</button>';
+}
+
+function sqBlock(i) {
+    const active = (i === sqIdx);
+    const done   = !active && i < sqFurthest;
+    let label = '', inner = '';
+
+    if (i === 0) {
+        label = '예약자 성함을 알려주세요';
+        inner = done ? sqEditChip(sqAns.name, i)
+            : '<div class="sq-row"><input type="text" id="sq-in-name" placeholder="예: 홍길동" value="' + sqEsc(sqAns.name) +
+              '" onkeydown="if(event.key===\'Enter\'){event.preventDefault();sqConfirm(0);}">' + sqOkBtn(0) + '</div>';
+    } else if (i === 1) {
+        label = '연락 가능한 휴대폰 번호를 알려주세요';
+        inner = done ? sqEditChip(sqAns.phone, i)
+            : '<div class="sq-row"><input type="tel" id="sq-in-phone" placeholder="010-0000-0000" maxlength="13" value="' + sqEsc(sqAns.phone) +
+              '" oninput="formatPhone(this)" onkeydown="if(event.key===\'Enter\'){event.preventDefault();sqConfirm(1);}">' + sqOkBtn(1) + '</div>';
+    } else if (i === 2) {
+        label = '언제 방문하시나요?';
+        if (done) {
+            inner = sqEditChip(sqAns.date + ' ' + sqAns.time, i);
+        } else {
+            const opts = SQ_TIMES.map(t => '<option' + (sqAns.time === t ? ' selected' : '') + '>' + t + '</option>').join('');
+            inner = '<div class="sq-row"><input type="date" id="sq-in-date" min="' + sqTodayStr() + '" value="' + sqEsc(sqAns.date) + '"></div>' +
+                    '<p class="sq-sub">도착 예정 시간</p>' +
+                    '<div class="sq-row"><select id="sq-in-time">' + opts + '</select></div>' + sqOkBtn(2, true);
+        }
+    } else if (i === 3) {
+        label = '리프트권이 필요하세요?';
+        if (done) {
+            inner = sqEditChip(sqAns.lift === 'none' ? '리프트권 필요 없음'
+                : SQ_LIFT_LABEL[sqAns.lift] + ' · 대인 ' + sqAns.liftAdult + ' / 소인 ' + sqAns.liftChild, i);
+        } else {
+            inner = '<div class="sq-chips">' +
+                [['none','필요 없어요'],['3h','3시간권'],['4h','4시간권'],['6h','6시간권']]
+                    .map(o => '<button type="button" class="sq-chip' + (sqAns.lift === o[0] ? ' on' : '') +
+                              '" onclick="sqPick(\'lift\',\'' + o[0] + '\')">' + o[1] + '</button>').join('') +
+                '</div>';
+            if (sqAns.lift && sqAns.lift !== 'none') {
+                inner += '<p class="sq-sub">대인 (만 13세 이상)</p>' + sqNumChips('liftAdult', sqAns.liftAdult);
+                inner += '<p class="sq-sub">소인 (만 12세 이하)</p>' + sqNumChips('liftChild', sqAns.liftChild);
+            }
+            if (sqAns.lift) inner += sqOkBtn(3, true);
+        }
+    } else if (i === 4) {
+        label = '장비·의류 렌탈은 몇 명분 필요하세요?';
+        if (done) {
+            const parts = [];
+            if (sqAns.equip) parts.push('장비 ' + sqAns.equip + '명');
+            if (sqAns.cloth) parts.push('의류 ' + sqAns.cloth + '명');
+            inner = sqEditChip(parts.length ? parts.join(' · ') : '렌탈 필요 없음', i);
+        } else {
+            inner = '<p class="sq-sub">스키·보드 장비 · 15,000원 / 인</p>' + sqNumChips('equip', sqAns.equip) +
+                    '<p class="sq-sub">스키복·보드복 의류 · 15,000원 / 인</p>' + sqNumChips('cloth', sqAns.cloth) +
+                    sqOkBtn(4, true);
+        }
+    } else if (i === 5) {
+        label = '헬멧·고글이 필요하세요?';
+        if (done) {
+            inner = sqEditChip(sqAns.extra === 'none' ? '보호장비 필요 없음'
+                : SQ_EXTRA_LABEL[sqAns.extra] + ' ' + sqAns.extraCount + '개', i);
+        } else {
+            inner = '<div class="sq-chips">' +
+                [['none','필요 없어요'],['visor','헬멧+고글 세트'],['helmet','헬멧만'],['goggle','고글만']]
+                    .map(o => '<button type="button" class="sq-chip' + (sqAns.extra === o[0] ? ' on' : '') +
+                              '" onclick="sqPick(\'extra\',\'' + o[0] + '\')">' + o[1] + '</button>').join('') +
+                '</div>';
+            if (sqAns.extra && sqAns.extra !== 'none') {
+                inner += '<p class="sq-sub">개수</p>' + sqNumChips('extraCount', sqAns.extraCount);
+            }
+            if (sqAns.extra) inner += sqOkBtn(5, true);
+        }
+    }
+
+    return '<div class="sq' + (active ? ' active' : '') + (done ? ' done' : '') + '">' +
+           '<div class="sq-label"><span class="sq-num">' + (i+1) + '</span>' +
+           '<span class="sq-text">' + label + '</span>' +
+           '<i class="fa-solid fa-check sq-check"></i></div>' +
+           '<div>' + inner + '</div>' +
+           '<p class="sq-err" id="sq-err-' + i + '"></p></div>';
+}
+
+// 모아둔 답을 기존 견적 폼 상태에 반영 (합계 계산·제출을 기존 코드가 그대로 처리하도록)
+function sqSyncToForm() {
+    Object.keys(qtys).forEach(k => { qtys[k] = 0; });
+    if (sqAns.lift && sqAns.lift !== 'none') {
+        qtys['lift' + sqAns.lift + 'Adult'] = sqAns.liftAdult;
+        qtys['lift' + sqAns.lift + 'Child'] = sqAns.liftChild;
+    }
+    qtys.equip = sqAns.equip;
+    qtys.cloth = sqAns.cloth;
+    if (sqAns.extra && sqAns.extra !== 'none') qtys[sqAns.extra] = sqAns.extraCount;
+
+    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+    setVal('reserver-name',  sqAns.name);
+    setVal('reserver-phone', sqAns.phone);
+    setVal('visit-date',     sqAns.date);
+    setVal('visit-time',     sqAns.time);
+    setVal('reserver-memo',  sqAns.memo);
+
+    Object.keys(qtys).forEach(k => {
+        const q = document.getElementById(k + '-qty');   if (q)  q.innerText = qtys[k];
+        const mb = document.getElementById(k + '-minus'); if (mb) mb.disabled = qtys[k] <= 0;
+    });
+    if (window.onDateChange) window.onDateChange();
+}
+
+function sqFinalBlock() {
+    sqSyncToForm();
+    const total = calculateTotal();
+    const rows = [];
+    rows.push(['예약자', sqAns.name + ' · ' + sqAns.phone]);
+    rows.push(['방문 일시', sqAns.date + ' ' + sqAns.time]);
+    if (sqAns.lift && sqAns.lift !== 'none') {
+        rows.push(['리프트권', SQ_LIFT_LABEL[sqAns.lift] + ' · 대인 ' + sqAns.liftAdult + ' / 소인 ' + sqAns.liftChild]);
+    }
+    if (sqAns.equip) rows.push(['장비 렌탈', sqAns.equip + '명']);
+    if (sqAns.cloth) rows.push(['의류 렌탈', sqAns.cloth + '명']);
+    if (sqAns.extra && sqAns.extra !== 'none') rows.push([SQ_EXTRA_LABEL[sqAns.extra], sqAns.extraCount + '개']);
+
+    return '<div class="sq-final">' +
+        '<div class="sq-label"><span class="sq-num" style="background:#6d5acd;color:#fff">' +
+        '<i class="fa-solid fa-check" style="font-size:9px"></i></span>' +
+        '<span class="sq-text">예약 내용을 확인해주세요</span></div>' +
+        '<div class="sq-sum">' +
+            rows.map(r => '<div class="sq-sum-row"><span>' + sqEsc(r[0]) + '</span><b>' + sqEsc(r[1]) + '</b></div>').join('') +
+            '<div class="sq-sum-total"><span>예상 합계</span><b>' + total.toLocaleString() + '원</b></div>' +
+        '</div>' +
+        '<p class="sq-sub">요청사항 (선택)</p>' +
+        '<div class="sq-row"><textarea id="sq-in-memo" rows="2" placeholder="키·발 사이즈, 픽업 장소 등 남기실 내용">' + sqEsc(sqAns.memo) + '</textarea></div>' +
+        '<label class="sq-agree"><input type="checkbox" id="sq-in-agree"' + (sqAns.agree ? ' checked' : '') + ' onchange="sqSetAgree(this.checked)">' +
+        '<span>수집 항목: 이름, 연락처, 방문 일시, 예약 내역 · 이용 목적: 예약 접수·확인 · 보유 기간: 방문 예정일로부터 1년<br>' +
+        '위 개인정보 수집·이용 및 이용약관에 동의합니다. <a href="privacy.html" target="_blank" rel="noopener">전문 보기</a></span></label>' +
+        '<p class="sq-err" id="sq-err-final"></p>' +
+        '<button type="button" class="sq-submit" onclick="sqSubmit()">' +
+        '<i class="fa-solid fa-paper-plane" style="font-size:13px"></i> 예약 신청하기</button>' +
+        '</div>';
+}
+
+function renderStepForm() {
+    const body = document.getElementById('step-body');
+    if (!body) return;
+
+    const upTo = Math.min(Math.max(sqIdx, sqFurthest), SQ_TOTAL - 1);
+    let html = '';
+    for (let i = 0; i <= upTo; i++) html += sqBlock(i);
+    if (sqFurthest >= SQ_TOTAL) html += sqFinalBlock();
+    body.innerHTML = html;
+
+    const shown = (sqIdx >= SQ_TOTAL) ? SQ_TOTAL : sqIdx + 1;
+    document.getElementById('step-count').innerHTML = '<b>' + shown + '</b> / ' + SQ_TOTAL;
+    document.getElementById('step-bar').style.width = (Math.min(sqFurthest, SQ_TOTAL) / SQ_TOTAL * 100) + '%';
+
+    // 글자를 직접 입력하는 칸만 자동으로 focus (날짜·선택 상자는 팝업이 떠서 제외)
+    const focusEl = body.querySelector('.sq.active input[type=text], .sq.active input[type=tel]');
+    if (focusEl) setTimeout(() => { try { focusEl.focus(); } catch(e) {} }, 70);
+    const target = body.querySelector('.sq.active') || body.querySelector('.sq-final');
+    if (target) setTimeout(() => target.scrollIntoView({ behavior:'smooth', block:'nearest' }), 90);
+}
+
+window.sqConfirm = function(i) {
+    const errEl = document.getElementById('sq-err-' + i);
+    if (errEl) errEl.classList.remove('show');
+    const fail = (msg) => { if (errEl) { errEl.innerText = msg; errEl.classList.add('show'); } return false; };
+
+    if (i === 0) {
+        const v = (document.getElementById('sq-in-name').value || '').trim();
+        if (!isValidName(v)) return fail('이름은 2자 이상, 한글 또는 영문으로 입력해주세요.');
+        sqAns.name = v;
+    } else if (i === 1) {
+        const v = (document.getElementById('sq-in-phone').value || '').trim();
+        if (!isValidPhone(v)) return fail('010으로 시작하는 휴대폰 번호 11자리를 정확히 입력해주세요.');
+        sqAns.phone = v;
+    } else if (i === 2) {
+        const d = document.getElementById('sq-in-date').value;
+        const t = document.getElementById('sq-in-time').value;
+        if (!d) return fail('방문 날짜를 선택해주세요.');
+        const pick = new Date(d + 'T00:00:00');
+        if (isNaN(pick.getTime())) return fail('날짜를 다시 확인해주세요.');
+        if (pick < sqTodayDate()) return fail('지난 날짜는 예약할 수 없어요. 오늘 이후로 선택해주세요.');
+        if (pick.getTime() === sqTodayDate().getTime()) {
+            const now = new Date();
+            const hm  = t.split(':').map(Number);
+            if (hm[0]*60 + hm[1] <= now.getHours()*60 + now.getMinutes()) {
+                return fail('이미 지난 시간이에요. 도착 가능한 시간으로 선택해주세요.');
+            }
+        }
+        sqAns.date = d; sqAns.time = t;
+    } else if (i === 3) {
+        if (!sqAns.lift) return fail('리프트권 옵션을 선택해주세요.');
+        if (sqAns.lift !== 'none' && (sqAns.liftAdult + sqAns.liftChild) < 1) {
+            return fail('리프트권 인원을 1명 이상 선택해주세요.');
+        }
+    } else if (i === 5) {
+        if (!sqAns.extra) return fail('보호장비 옵션을 선택해주세요.');
+        if (sqAns.extra !== 'none' && sqAns.extraCount < 1) return fail('개수를 1개 이상 선택해주세요.');
+    }
+
+    if (i >= sqFurthest) sqFurthest = i + 1;
+    sqIdx = Math.min(sqFurthest, SQ_TOTAL);
+    renderStepForm();
+    return true;
+};
+
+window.sqSubmit = function() {
+    const errEl = document.getElementById('sq-err-final');
+    if (errEl) errEl.classList.remove('show');
+    const fail = (msg) => { if (errEl) { errEl.innerText = msg; errEl.classList.add('show'); } };
+
+    const memoEl = document.getElementById('sq-in-memo');
+    if (memoEl) sqAns.memo = memoEl.value.trim();
+
+    sqSyncToForm();
+    if (!Object.values(qtys).some(v => v > 0)) {
+        return fail('리프트권·장비·의류·보호장비 중 최소 한 가지는 선택해주세요.');
+    }
+    if (!sqAns.agree) return fail('개인정보 수집·이용 및 이용약관 동의가 필요합니다.');
+
+    const agreeEl = document.getElementById('reserver-agree');
+    if (agreeEl) agreeEl.checked = true;
+    calculateTotal();
+
+    closeStepForm();
+    window.onReserve();
+};
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeStepForm(); });
 
 // ===== PC 전용: 견적 패널을 모달로 확대/원위치 =====
 // #pc-quote를 새로 그리지 않고, 있던 DOM 요소를 모달 안으로 옮겼다가 닫으면 원래 자리(#pc-quote-anchor)로 되돌린다.
