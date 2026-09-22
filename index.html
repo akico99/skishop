@@ -27,13 +27,13 @@
     <meta property="og:title" content="무주놀러와스키샵&amp;렌탈샵 | 무주리조트스키장 앞 렌탈">
     <meta property="og:description" content="무주리조트스키장 앞 스키·보드·의류 렌탈, 리프트권 할인, 슬로프 앞 배달, 실시간 견적.">
     <meta property="og:url" content="https://www.nolleowaski.com/">
-    <meta property="og:image" content="https://www.nolleowaski.com/1.jpg">
-    <meta property="og:image:width" content="960">
-    <meta property="og:image:height" content="900">
+    <meta property="og:image" content="https://www.nolleowaski.com/assets/generated/hero-hook-v1.png">
+    <meta property="og:image:width" content="1536">
+    <meta property="og:image:height" content="1024">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="무주놀러와스키샵&amp;렌탈샵 | 무주 스키장 렌탈">
     <meta name="twitter:description" content="무주리조트스키장 앞 스키·보드·의류 렌탈과 리프트권 안내.">
-    <meta name="twitter:image" content="https://www.nolleowaski.com/1.jpg">
+    <meta name="twitter:image" content="https://www.nolleowaski.com/assets/generated/hero-hook-v1.png">
 
     <!-- 구글·네이버가 "무주에 있는 스키 렌탈 가게"로 인식하게 해주는 구조화 데이터.
          ⚠️ 여기 적는 값은 반드시 화면에 실제로 보이는 정보와 일치해야 합니다.
@@ -47,7 +47,7 @@
       "alternateName": ["무주놀러와", "무주 스키샵", "무주 렌탈샵"],
       "description": "무주리조트스키장과 덕유산리조트 정문 앞 스키·보드 렌탈샵. 의류·장비·안전장비 대여, 리프트권 할인, 강습 연계, 슬로프 앞 배달.",
       "url": "https://www.nolleowaski.com/",
-      "image": "https://www.nolleowaski.com/1.jpg",
+      "image": "https://www.nolleowaski.com/assets/generated/hero-hook-v1.png",
       "telephone": "+82-10-7720-5333",
       "email": "jahyeon7886@naver.com",
       "taxID": "336-35-01685",
@@ -114,6 +114,39 @@
         .hide-scrollbar::-webkit-scrollbar { display:none; }
         .hide-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
         #main-slide-wrapper { transition:opacity .2s ease-in-out; }
+
+        /* 의류·장비 룩북: 모바일 스와이프 + PC 드래그/버튼 캐러셀 */
+        .swipe-gallery-wrap { position:relative; }
+        .swipe-gallery {
+            display:flex; gap:12px; overflow-x:auto; padding:8px 34px 14px;
+            scroll-snap-type:x mandatory; scroll-behavior:smooth;
+            overscroll-behavior-x:contain; touch-action:pan-x; scroll-padding-inline:34px;
+        }
+        .swipe-gallery > .swipe-card { flex:0 0 82%; scroll-snap-align:center; }
+        .swipe-gallery-nav {
+            position:absolute; top:50%; z-index:5; width:32px; height:32px;
+            display:flex; align-items:center; justify-content:center; transform:translateY(-50%);
+            border:1px solid rgba(109,90,205,.18); border-radius:999px;
+            background:rgba(255,255,255,.92); color:#6d5acd;
+            box-shadow:0 6px 16px rgba(15,23,42,.12); transition:transform .15s, background .15s;
+        }
+        .swipe-gallery-nav:hover { background:#f5f3ff; transform:translateY(-50%) scale(1.05); }
+        .swipe-gallery-nav:focus-visible { outline:3px solid rgba(109,90,205,.32); outline-offset:2px; }
+        .swipe-gallery-nav.prev { left:8px; }
+        .swipe-gallery-nav.next { right:8px; }
+        .swipe-gallery-hint { color:#94a3b8; font-size:11px; text-align:center; }
+        .lookbook-feature { background:linear-gradient(135deg,#f8f7ff,#fff); }
+        .lookbook-feature img { aspect-ratio:1; object-fit:cover; }
+        @media (min-width:640px) {
+            .swipe-gallery > .swipe-card { flex-basis:48%; }
+        }
+        @media (min-width:1024px) {
+            .swipe-gallery > .swipe-card { flex-basis:48%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .swipe-gallery { scroll-behavior:auto; }
+            .swipe-gallery-nav { transition:none; }
+        }
 
         /* 토스트 */
         #toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:#0f172a; color:#fff; padding:10px 20px; border-radius:999px; font-size:13px; font-weight:600; white-space:nowrap; opacity:0; transition:opacity .3s,transform .3s; pointer-events:none; z-index:999; }
@@ -1193,95 +1226,160 @@
                 <p class="text-[11px] text-gray-400 mt-2 text-center">의류·장비 1인 15,000원 · 헬멧+고글 함께 빌리면 5,000원 할인</p>
             </div>
 
-            <!-- ② 26/27 시즌 의류 -->
-            <div class="px-4 pt-2 pb-1 flex justify-between items-center">
-                <h3 class="sec-title font-black text-[#0f172a] text-[15px]"><i class="fa-solid fa-shirt text-[#6d5acd] mr-1.5"></i> 26/27 시즌 의류</h3>
+            <!-- ② 시즌 룩북 후킹 비주얼: 실제 보유 현장 사진과 분리된 생성형 캠페인 이미지 -->
+            <div class="px-4 pt-1 pb-3">
+                <div class="lookbook-feature rounded-2xl border border-violet-100 overflow-hidden p-2 shadow-sm">
+                    <img src="./assets/generated/apparel-equipment-cards-v1.png"
+                         alt="시즌 스키복과 장비를 카드형으로 보여주는 무주 놀러와 룩북"
+                         width="1254" height="1254" loading="lazy" decoding="async"
+                         class="w-full rounded-xl">
+                    <div class="px-2 pt-2 pb-1 flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-[10px] font-bold text-[#6d5acd]">26/27 SEASON LOOKBOOK</p>
+                            <p class="text-[12px] font-black text-[#0f172a] mt-0.5">의류와 장비를 한눈에 골라보세요</p>
+                        </div>
+                        <span class="text-[10px] text-gray-400 whitespace-nowrap">스타일 참고</span>
+                    </div>
+                </div>
             </div>
-            <div class="grid grid-cols-3 lg:grid-cols-2 gap-2 lg:gap-4 px-4 pb-4 pt-2">
+
+            <!-- ③ 26/27 시즌 의류 -->
+            <div class="px-4 pt-2 pb-1 flex justify-between items-center">
+                <div>
+                    <h3 class="sec-title font-black text-[#0f172a] text-[15px]"><i class="fa-solid fa-shirt text-[#6d5acd] mr-1.5"></i> 26/27 시즌 의류</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">룩북은 스타일 참고용 · 실제 매장 사진은 이어서 확인하세요</p>
+                </div>
+                <span class="text-[10px] text-gray-400 whitespace-nowrap">좌우로 넘기기</span>
+            </div>
+            <div class="swipe-gallery-wrap" data-gallery-shell="outfit">
+                <button type="button" class="swipe-gallery-nav prev" data-gallery-prev="outfit" aria-label="시즌 의류 이전 사진"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+                <div id="outfit-gallery" data-gallery="outfit" class="swipe-gallery hide-scrollbar" role="list" aria-label="26/27 시즌 의류 사진 목록">
+                <!-- 시즌 룩북 1 · 생성 이미지 -->
+                <button type="button" onclick="openImgModal('./assets/generated/outfit-lookbook-01-v1.png')" class="swipe-card block text-left rounded-xl overflow-hidden border border-violet-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./assets/generated/outfit-lookbook-01-v1.png" alt="슬로프에서 스키를 타는 블루·화이트 시즌 룩북" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1"><span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#시즌룩북</span><span class="text-[10px] text-gray-400">스타일 참고</span></div>
+                </button>
+                <!-- 시즌 룩북 2 · 생성 이미지 -->
+                <button type="button" onclick="openImgModal('./assets/generated/outfit-lookbook-02-v1.png')" class="swipe-card block text-left rounded-xl overflow-hidden border border-violet-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./assets/generated/outfit-lookbook-02-v1.png" alt="렌탈샵에서 스키복 핏을 확인하는 머스터드·화이트 룩북" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1"><span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#피팅룩</span><span class="text-[10px] text-gray-400">스타일 참고</span></div>
+                </button>
+                <!-- 시즌 룩북 3 · 생성 이미지 -->
+                <button type="button" onclick="openImgModal('./assets/generated/outfit-lookbook-03-v1.png')" class="swipe-card block text-left rounded-xl overflow-hidden border border-violet-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./assets/generated/outfit-lookbook-03-v1.png" alt="스키장에서 포즈를 취한 두 사람의 블루·화이트 룩북" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1"><span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#커플룩</span><span class="text-[10px] text-gray-400">스타일 참고</span></div>
+                </button>
                 <!-- 의류1 -->
-                <button type="button" onclick="openImgModal('./p/의류1.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                <button type="button" onclick="openImgModal('./p/의류1.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
                     <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류1.jpg" alt="매장 입구 의류·헬멧 진열" class="w-full h-full object-cover"></div>
                     <div class="p-2 flex flex-wrap gap-1">
                         <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#매장전경</span>
                     </div>
                 </button>
                 <!-- 의류2 -->
-                <button type="button" onclick="openImgModal('./p/의류2.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                <button type="button" onclick="openImgModal('./p/의류2.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
                     <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류2.jpg" alt="상하의 전 사이즈 진열" class="w-full h-full object-cover"></div>
                     <div class="p-2 flex flex-wrap gap-1">
                         <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#전사이즈보유</span>
                     </div>
                 </button>
                 <!-- 의류3 -->
-                <button type="button" onclick="openImgModal('./p/의류3.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                <button type="button" onclick="openImgModal('./p/의류3.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
                     <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류3.jpg" alt="그레이·블랙톤 세트업" class="w-full h-full object-cover"></div>
                     <div class="p-2 flex flex-wrap gap-1">
                         <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#그레이블랙톤</span>
                     </div>
                 </button>
                 <!-- 의류4 -->
-                <button type="button" onclick="openImgModal('./p/의류4.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                <button type="button" onclick="openImgModal('./p/의류4.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
                     <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류4.jpg" alt="블루·베이지톤 세트업" class="w-full h-full object-cover"></div>
                     <div class="p-2 flex flex-wrap gap-1">
                         <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#블루베이지톤</span>
                     </div>
                 </button>
                 <!-- 의류5 -->
-                <button type="button" onclick="openImgModal('./p/의류5.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                <button type="button" onclick="openImgModal('./p/의류5.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
                     <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류5.jpg" alt="화이트·형광 세이프티 컬러" class="w-full h-full object-cover"></div>
                     <div class="p-2 flex flex-wrap gap-1">
                         <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#세이프티컬러</span>
                     </div>
                 </button>
                 <!-- 의류6 -->
-                <button type="button" onclick="openImgModal('./p/의류6.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                <button type="button" onclick="openImgModal('./p/의류6.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
                     <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류6.jpg" alt="레드·블루·그린 포인트컬러" class="w-full h-full object-cover"></div>
                     <div class="p-2 flex flex-wrap gap-1">
                         <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#포인트컬러</span>
                     </div>
                 </button>
+                </div>
+                <button type="button" class="swipe-gallery-nav next" data-gallery-next="outfit" aria-label="시즌 의류 다음 사진"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+                <p class="swipe-gallery-hint px-4 pb-2"><i class="fa-solid fa-hand-pointer mr-1" aria-hidden="true"></i> 사진을 좌우로 밀어 더 많은 의류를 확인하세요</p>
             </div>
 
-            <!-- ③ 장비 소개 -->
+            <!-- ④ 장비 소개 -->
             <div class="px-4 pt-2 pb-1 flex justify-between items-center border-t border-gray-100">
-                <h3 class="sec-title font-black text-[#0f172a] text-[15px] pt-3"><i class="fa-solid fa-person-skiing text-[#6d5acd] mr-1.5"></i> 장비 소개</h3>
+                <div>
+                    <h3 class="sec-title font-black text-[#0f172a] text-[15px] pt-3"><i class="fa-solid fa-person-skiing text-[#6d5acd] mr-1.5"></i> 장비 소개</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">룩북은 사용 장면 참고용 · 실제 보유 장비는 이어서 확인하세요</p>
+                </div>
+                <span class="text-[10px] text-gray-400 whitespace-nowrap">좌우로 넘기기</span>
             </div>
-            <div class="grid grid-cols-3 lg:grid-cols-2 gap-2 lg:gap-4 px-4 pb-4 pt-2">
+            <div class="swipe-gallery-wrap" data-gallery-shell="equipment">
+                <button type="button" class="swipe-gallery-nav prev" data-gallery-prev="equipment" aria-label="장비 이전 사진"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+                <div id="equipment-gallery" data-gallery="equipment" class="swipe-gallery hide-scrollbar" role="list" aria-label="스키·보드 장비 사진 목록">
+                <!-- 장비 룩북 1 · 생성 이미지 -->
+                <button type="button" onclick="openImgModal('./assets/generated/equipment-lookbook-01-v1.png')" class="swipe-card block text-left rounded-xl overflow-hidden border border-violet-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./assets/generated/equipment-lookbook-01-v1.png" alt="스키와 스노보드를 정리한 장비 룩북" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1"><span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#장비룩북</span><span class="text-[10px] text-gray-400">사용 장면 참고</span></div>
+                </button>
+                <!-- 장비 룩북 2 · 생성 이미지 -->
+                <button type="button" onclick="openImgModal('./assets/generated/equipment-lookbook-02-v1.png')" class="swipe-card block text-left rounded-xl overflow-hidden border border-violet-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./assets/generated/equipment-lookbook-02-v1.png" alt="스키 부츠 버클을 조절하는 장비 피팅 룩북" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1"><span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#부츠피팅</span><span class="text-[10px] text-gray-400">사용 장면 참고</span></div>
+                </button>
+                <!-- 장비 룩북 3 · 생성 이미지 -->
+                <button type="button" onclick="openImgModal('./assets/generated/equipment-lookbook-03-v1.png')" class="swipe-card block text-left rounded-xl overflow-hidden border border-violet-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./assets/generated/equipment-lookbook-03-v1.png" alt="슬로프에서 스노보드를 들고 있는 장비 룩북" class="w-full h-full object-cover"></div>
+                    <div class="p-2 flex flex-wrap gap-1"><span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#슬로프액션</span><span class="text-[10px] text-gray-400">사용 장면 참고</span></div>
+                </button>
                 <!-- 장비1 -->
-                <button type="button" onclick="openImgModal('./p/장비1.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                <button type="button" onclick="openImgModal('./p/장비1.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
                     <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비1.jpg" alt="스키·스노보드 판 다수 보유" class="w-full h-full object-cover"></div>
                     <div class="p-2 flex flex-wrap gap-1">
                         <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#스키보드판다수보유</span>
                     </div>
                 </button>
                 <!-- 장비2 -->
-                <button type="button" onclick="openImgModal('./p/장비2.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                <button type="button" onclick="openImgModal('./p/장비2.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
                     <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비2.jpg" alt="스키부츠 전 사이즈 진열" class="w-full h-full object-cover"></div>
                     <div class="p-2 flex flex-wrap gap-1">
                         <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#스키부츠전사이즈</span>
                     </div>
                 </button>
                 <!-- 장비3 -->
-                <button type="button" onclick="openImgModal('./p/장비3.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                <button type="button" onclick="openImgModal('./p/장비3.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
                     <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비3.jpg" alt="스노보드 데크 다수 보유" class="w-full h-full object-cover"></div>
                     <div class="p-2 flex flex-wrap gap-1">
                         <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#보드데크다수보유</span>
                     </div>
                 </button>
                 <!-- 장비4 -->
-                <button type="button" onclick="openImgModal('./p/장비4.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                <button type="button" onclick="openImgModal('./p/장비4.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
                     <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비4.jpg" alt="보드부츠 전 사이즈 진열" class="w-full h-full object-cover"></div>
                     <div class="p-2 flex flex-wrap gap-1">
                         <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#보드부츠전사이즈</span>
                     </div>
                 </button>
                 <!-- 장비5 · 숏스키(스키에이트) -->
-                <button type="button" onclick="openImgModal('./p/장비5.jpg')" class="block w-full text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
+                <button type="button" onclick="openImgModal('./p/장비5.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
                     <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비5.jpg" alt="숏스키(스키에이트)" class="w-full h-full object-cover"></div>
                     <div class="p-2 flex flex-wrap gap-1">
                         <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#숏스키입문추천</span>
                     </div>
                 </button>
+                </div>
+                <button type="button" class="swipe-gallery-nav next" data-gallery-next="equipment" aria-label="장비 다음 사진"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+                <p class="swipe-gallery-hint px-4 pb-2"><i class="fa-solid fa-hand-pointer mr-1" aria-hidden="true"></i> 사진을 좌우로 밀어 스키·보드 장비를 확인하세요</p>
             </div>
 
             <div class="px-4 pb-4"><button onclick="openQuote()" class="w-full bg-[#6d5acd] text-white rounded-xl py-3 font-bold text-[14px] hover:bg-violet-700 transition">의류·장비 예약하기</button></div>
@@ -1621,7 +1719,7 @@ function syncToSheet(reservation) {
 function freshFocal() { return { focalX:50, focalY:50, zoom:1 }; }
 // 관리자가 아직 아무것도 등록 안 했을 때 쓰는 기본 슬라이드 3장(하드코딩) — 항상 이걸로 시작, 실패해도 사이트는 정상 동작
 let mainSlidesData = [
-    { img:'./2.jpg', texts:{ badge:'오픈 특가', title:'풀세트 단돈 40,000원', desc:'장비 + 의류 + 헬멧 + 고글 + 장갑 · 오픈 한정가' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
+    { img:'./assets/generated/hero-hook-v1.png', texts:{ badge:'시즌 룩북', title:'무주에서 제일 잘 입는 하루', desc:'스키복부터 장비까지, 슬로프 앞에서 바로 준비하세요' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
     { img:'./1.jpg', texts:{ badge:'26/27 신상', title:'무주에서 제일 잘 입은 사람 되기', desc:'사장이 직접 고른 트렌디한 신상 스키복' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
     { img:'./4.jpg', texts:{ badge:'무료 배달', title:'장비는 슬로프 앞까지', desc:'픽업 · 반납도 직접 찾아갑니다' }, links:{}, mobile:freshFocal(), pc:freshFocal() }
 ];
@@ -2804,6 +2902,27 @@ function promoHexToRgba(hex, alpha) {
     }, 900);
 
     overlay.addEventListener('click', (e) => { if (e.target === overlay) promoClose(); });
+})();
+
+// ===== 의류·장비 캐러셀: 버튼·키보드·스와이프·드래그 =====
+(function initSwipeGalleries() {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelectorAll('[data-gallery-shell]').forEach(shell => {
+        const id = shell.dataset.galleryShell;
+        const gallery = shell.querySelector(`[data-gallery="${id}"]`);
+        const prev = shell.querySelector(`[data-gallery-prev="${id}"]`);
+        const next = shell.querySelector(`[data-gallery-next="${id}"]`);
+        if (!gallery || !prev || !next) return;
+
+        const step = () => Math.max(gallery.clientWidth * 0.82, 260);
+        const move = direction => gallery.scrollBy({ left: direction * step(), behavior: reduceMotion ? 'auto' : 'smooth' });
+        prev.addEventListener('click', () => move(-1));
+        next.addEventListener('click', () => move(1));
+        gallery.addEventListener('keydown', event => {
+            if (event.key === 'ArrowLeft') { event.preventDefault(); move(-1); }
+            if (event.key === 'ArrowRight') { event.preventDefault(); move(1); }
+        });
+    });
 })();
 
 // ===== PC 가로 스크롤: 마우스 드래그 + 휠로 좌우 이동 =====
