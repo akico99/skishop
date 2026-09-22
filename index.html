@@ -410,8 +410,9 @@
            떠 있어 팝업을 또 띄우는 게 중복이라 제거함. 대신 스크롤로 시선만 이동시키고, 이미 보이는 상태라
            스크롤이 거의 없을 때도 "방금 클릭이 반영됐다"는 걸 알 수 있도록 테두리를 잠깐 강조한다. */
         @keyframes pcQuotePulse {
-            0%   { box-shadow: 0 16px 36px -12px rgba(76,29,149,.18), 0 0 0 0 rgba(109,90,205,.55); }
-            100% { box-shadow: 0 16px 36px -12px rgba(76,29,149,.18), 0 0 0 14px rgba(109,90,205,0); }
+            0%   { box-shadow: 0 16px 36px -12px rgba(76,29,149,.18), 0 0 0 0 rgba(109,90,205,.5); }
+            60%  { box-shadow: 0 16px 36px -12px rgba(76,29,149,.18), 0 0 0 6px rgba(109,90,205,0); }
+            100% { box-shadow: 0 16px 36px -12px rgba(76,29,149,.18), 0 0 0 0 rgba(109,90,205,0); }
         }
         .pc-quote.pc-quote-pulse { animation: pcQuotePulse .9s ease; }
 
