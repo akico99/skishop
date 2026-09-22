@@ -370,8 +370,6 @@
         .pc-bottom-bar { display: none; }
         #pc-quote-head { display: none; }
         #pc-nav { display: none; }
-        #pc-quote-modal { display: none !important; }
-        @media (min-width: 1024px) { #pc-quote-modal { display: flex !important; } }
 
         /* 예약 확인 바텀시트 */
         #lookup-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:200; justify-content:center; align-items:flex-end; }
@@ -407,40 +405,16 @@
         .pc-quote.collapsed #pc-quote-head .pqh-chevron { transform:rotate(180deg); }
         .pc-quote.collapsed #quote-section { display:none !important; }
 
-        /* ===== 견적 패널 닫기/최소화 버튼 (평소 사이드바에서는 숨김, 모달로 확대됐을 때만 노출) ===== */
-        .pc-quote-modal-controls { display:none; align-items:center; gap:6px; }
-        .pqm-btn {
-            width:26px; height:26px; border-radius:8px; border:0; cursor:pointer;
-            background:rgba(255,255,255,.18); color:#fff; display:flex; align-items:center; justify-content:center;
-            font-size:12px; transition:background .15s;
+        /* ===== "빠른예약"·"예약신청"을 눌렀을 때: 이미 화면에 붙어있는 견적 패널로 스크롤 + 잠깐 테두리를 강조 =====
+           과거에는 패널을 화면 중앙 팝업으로 확대했지만, 데스크톱에서는 이 패널이 항상 오른쪽에 sticky로
+           떠 있어 팝업을 또 띄우는 게 중복이라 제거함. 대신 스크롤로 시선만 이동시키고, 이미 보이는 상태라
+           스크롤이 거의 없을 때도 "방금 클릭이 반영됐다"는 걸 알 수 있도록 테두리를 잠깐 강조한다. */
+        @keyframes pcQuotePulse {
+            0%   { box-shadow: 0 16px 36px -12px rgba(76,29,149,.18), 0 0 0 0 rgba(109,90,205,.5); }
+            60%  { box-shadow: 0 16px 36px -12px rgba(76,29,149,.18), 0 0 0 6px rgba(109,90,205,0); }
+            100% { box-shadow: 0 16px 36px -12px rgba(76,29,149,.18), 0 0 0 0 rgba(109,90,205,0); }
         }
-        .pqm-btn:hover { background:rgba(255,255,255,.32); }
-
-        /* ===== "빠른예약" 등을 눌렀을 때 견적 패널을 화면 중앙으로 확대하는 모달 ===== */
-        #pc-quote-modal {
-            position:fixed; inset:0; z-index:200; padding:56px 40px 40px;
-            align-items:flex-start; justify-content:center;
-            overflow-y:auto;
-            background:rgba(15,10,35,.55);
-            visibility:hidden; opacity:0; pointer-events:none;
-            transition:opacity .25s ease, visibility 0s linear .25s;
-        }
-        #pc-quote-modal.open {
-            visibility:visible; opacity:1; pointer-events:auto;
-            transition:opacity .25s ease, visibility 0s linear 0s;
-        }
-        /* 폼 내용이 길어서(스크롤 필요) 화면 정중앙에 맞추면 오히려 애매하게 낮아 보이므로,
-           화면 위쪽에 붙여서 항상 헤더(닫기·최소화 버튼)부터 바로 보이게 함 */
-        #pc-quote-modal-inner { width:480px; max-width:100%; max-height:calc(100vh - 96px); }
-        .pc-quote { transition:transform .32s cubic-bezier(.34,1.15,.64,1), opacity .22s ease; }
-        #pc-quote-modal #pc-quote {
-            position:relative !important; width:100%; max-height:calc(100vh - 96px);
-            transform:scale(.94); opacity:0;
-        }
-        #pc-quote-modal #pc-quote.pqm-in { transform:scale(1); opacity:1; }
-        /* 모달로 떠 있는 동안: 접기 화살표는 숨기고 닫기/최소화 버튼만 노출 */
-        #pc-quote-modal .pqh-chevron { display:none; }
-        #pc-quote-modal .pc-quote-modal-controls { display:flex; }
+        .pc-quote.pc-quote-pulse { animation: pcQuotePulse .9s ease; }
 
         /* ===== 예약확인/카톡상담 액션 바 (PC에서는 예약 패널 하단에 인라인 표시) ===== */
         .pc-side-right a, .pc-side-right button {
@@ -471,12 +445,6 @@
 <div id="img-modal" role="dialog" aria-modal="true" aria-label="이미지 크게 보기" onclick="closeImgModal(event)">
     <div class="img-modal-close" onclick="closeImgModal()" aria-label="닫기">&times;</div>
     <img id="img-modal-img" src="" alt="확대 이미지">
-</div>
-
-<!-- PC 전용: "빠른예약" 등을 눌렀을 때 견적 패널을 화면 중앙으로 확대해서 보여주는 모달 셸.
-     실제 폼은 새로 만들지 않고 #pc-quote 요소를 이 안으로 옮겼다가, 닫으면 원래 자리(#pc-quote-anchor)로 되돌려놓는 방식. -->
-<div id="pc-quote-modal" role="dialog" aria-modal="true" aria-label="실시간 견적/예약" onclick="if(event.target===this) closeQuoteModal()">
-    <div id="pc-quote-modal-inner"></div>
 </div>
 
 <!-- 진입 프로모션 팝업 (모바일/PC 공통, admin에서 문구·버튼·색 편집 가능) -->
@@ -678,16 +646,11 @@
     </div><!-- /pc-slide -->
 
     <!-- PC 왼쪽 / 모바일 두 번째: 견적 폼 -->
-    <div id="pc-quote-anchor" style="display:none"></div>
     <div class="pc-quote" id="pc-quote">
 
-    <!-- PC 전용 패널 헤더 (여닫기 / 모달 확대 시 닫기·최소화) -->
+    <!-- PC 전용 패널 헤더 (클릭 시 여닫기) -->
     <div id="pc-quote-head" onclick="togglePcQuote()">
         <span><i class="fa-solid fa-calculator mr-1.5"></i> 실시간 견적/예약</span>
-        <span class="pc-quote-modal-controls">
-            <button type="button" onclick="event.stopPropagation(); minimizeQuoteModal()" aria-label="최소화" class="pqm-btn"><i class="fa-solid fa-minus"></i></button>
-            <button type="button" onclick="event.stopPropagation(); closeQuoteModal()" aria-label="닫기" class="pqm-btn"><i class="fa-solid fa-xmark"></i></button>
-        </span>
         <i class="fa-solid fa-chevron-up pqh-chevron text-[12px]"></i>
     </div>
 
@@ -1796,50 +1759,25 @@ function setQuoteOpen(open) {
     quoteBtn.setAttribute('aria-expanded', String(open));
     quoteIcon.style.transform = open ? 'rotate(45deg)' : 'rotate(0deg)';
 }
-// 견적/예약 열기: PC는 견적 패널을 화면 중앙 모달로 확대, 모바일은 본문 견적 섹션 펼치기
+// 견적/예약 열기: PC는 이미 오른쪽에 붙어있는 견적 패널로 스크롤 + 접혀있으면 펼치기,
+// 모바일은 본문 견적 섹션 펼치기. 과거에는 PC에서 패널을 화면 중앙 팝업으로 복제했지만,
+// 항상 보이는 sticky 패널을 또 띄우는 중복이라 제거하고 스크롤+강조 방식으로 바꿈.
 window.openQuote = function() {
     const isPC = window.matchMedia('(min-width: 1024px)').matches;
     if (isPC) {
-        maximizeQuoteModal();
+        const panel = document.getElementById('pc-quote');
+        if (!panel) return;
+        panel.classList.remove('collapsed');
+        panel.scrollIntoView({ behavior:'smooth', block:'start' });
+        panel.classList.remove('pc-quote-pulse');
+        void panel.offsetWidth; // 강제 리플로우: 연속 클릭 시에도 애니메이션이 다시 재생되도록
+        panel.classList.add('pc-quote-pulse');
+        setTimeout(() => panel.classList.remove('pc-quote-pulse'), 900);
     } else {
         setQuoteOpen(true);
         setTimeout(() => quoteBtn.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
     }
 };
-
-// ===== PC 전용: 견적 패널을 모달로 확대/원위치 =====
-// #pc-quote를 새로 그리지 않고, 있던 DOM 요소를 모달 안으로 옮겼다가 닫으면 원래 자리(#pc-quote-anchor)로 되돌린다.
-window.maximizeQuoteModal = function() {
-    const panel = document.getElementById('pc-quote');
-    const modal = document.getElementById('pc-quote-modal');
-    const inner = document.getElementById('pc-quote-modal-inner');
-    if (!panel || !modal || !inner) return;
-    panel.classList.remove('collapsed');
-    inner.appendChild(panel);
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    panel.classList.remove('pqm-in');
-    requestAnimationFrame(() => requestAnimationFrame(() => panel.classList.add('pqm-in')));
-};
-window.closeQuoteModal = function() {
-    const panel  = document.getElementById('pc-quote');
-    const modal  = document.getElementById('pc-quote-modal');
-    const anchor = document.getElementById('pc-quote-anchor');
-    if (!panel || !modal || !anchor) return;
-    if (!modal.classList.contains('open')) return;
-    panel.classList.remove('pqm-in');
-    modal.classList.remove('open');
-    document.body.style.overflow = '';
-    anchor.parentNode.insertBefore(panel, anchor.nextSibling);
-};
-window.minimizeQuoteModal = function() {
-    closeQuoteModal();
-    const panel = document.getElementById('pc-quote');
-    if (panel) panel.classList.add('collapsed');
-};
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeQuoteModal();
-});
 quoteBtn.addEventListener('click', () => {
     const isOpen = quoteBtn.getAttribute('aria-expanded') === 'true';
     setQuoteOpen(!isOpen);
@@ -2439,8 +2377,6 @@ function promoHexToRgba(hex, alpha) {
 
 // ===== PC 견적폼 왼쪽 패널 여닫기 =====
 window.togglePcQuote = function() {
-    const modal = document.getElementById('pc-quote-modal');
-    if (modal && modal.classList.contains('open')) return; // 모달로 확대된 동안은 헤더 클릭으로 접히지 않게
     document.getElementById('pc-quote').classList.toggle('collapsed');
 };
 
