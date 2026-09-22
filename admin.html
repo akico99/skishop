@@ -47,8 +47,8 @@
         .hero-frame .hf-gradient { position:absolute; inset:0; background:linear-gradient(0deg, rgba(0,0,0,.8) 0%, rgba(0,0,0,.25) 45%, transparent 70%); pointer-events:none; }
         /* white-space:pre-line → Enter로 입력한 줄바꿈 그대로 반영, word-break:keep-all → 한글 단어 중간에서 어색하게 안 끊김 */
         .hero-el { position:absolute; left:var(--x,6%); top:var(--y,80%); max-width:88%; cursor:move; outline:2px solid transparent; outline-offset:4px; transition:outline-color .12s; font-size:var(--size,16px); font-weight:var(--weight,700); text-align:var(--align,left); line-height:1.3; white-space:pre-line; word-break:keep-all; overflow-wrap:break-word; z-index:10; }
-        .hero-el:hover { outline-color:rgba(124,58,237,.6); }
-        .hero-el.hf-selected { outline-color:#7c3aed; outline-style:dashed; }
+        .hero-el:hover { outline-color:rgba(109,90,205,.6); }
+        .hero-el.hf-selected { outline-color:#6d5acd; outline-style:dashed; }
         .hero-el.hf-empty-text { opacity:.35; font-style:italic; }
         /* 드래그로 문구 위치를 옮길 때, 다른 문구나 프레임 중앙과 위치가 맞으면 뜨는 안내선(스냅) */
         .hf-guide { position:absolute; background:#ec4899; pointer-events:none; z-index:50; display:none; }
@@ -57,21 +57,21 @@
         .hf-guide-h { left:0; right:0; height:1px; }
         /* 문구 모양: 플레인(배경 없음)/알약 배지/박스 — admin에서 자유롭게 선택 */
         .hero-el[data-shape="plain"] { color:var(--color,#fff); text-shadow:0 2px 10px rgba(0,0,0,.5); }
-        .hero-el[data-shape="pill"]  { background:var(--bg,rgba(255,255,255,.9)); color:var(--color,#7c3aed); padding:.35em .9em; border-radius:999px; }
+        .hero-el[data-shape="pill"]  { background:var(--bg,rgba(255,255,255,.9)); color:var(--color,#6d5acd); padding:.35em .9em; border-radius:999px; }
         .hero-el[data-shape="box"]   { background:var(--bg,rgba(15,23,42,.55)); color:var(--color,#fff); padding:.4em .8em; border-radius:12px; }
 
         /* 선택된 글자 요소 편집 바 */
         /* 접히는 패널 안이 아니라 화면에 고정된 바 — 히어로 패널을 접어두고 진입 팝업만 펼친 상태에서도 항상 보이도록 */
         #hero-style-bar { display:none; position:fixed; left:12px; right:12px; bottom:12px; z-index:500; max-width:600px; margin:0 auto; align-items:center; gap:10px; background:#f5f3ff; border:1px solid #e9e2fd; border-radius:12px; padding:10px 12px; flex-wrap:wrap; box-shadow:0 10px 30px rgba(15,23,42,.25); }
         #hero-style-bar.show { display:flex; }
-        #hero-style-bar label { font-size:11px; color:#7c3aed; font-weight:700; display:flex; align-items:center; gap:5px; }
+        #hero-style-bar label { font-size:11px; color:#6d5acd; font-weight:700; display:flex; align-items:center; gap:5px; }
         #hero-style-bar select { font-size:11px; border:1px solid #e9e2fd; border-radius:6px; padding:4px 6px; background:#fff; color:#0f172a; }
         #hero-style-bar input[type=color] { width:28px; height:28px; border:0; border-radius:6px; padding:0; background:none; cursor:pointer; }
         #hero-style-bar input[type=range] { width:90px; }
 
         /* 슬라이드 탭 */
         .hero-tab { padding:7px 14px; border-radius:10px; font-size:12px; font-weight:700; background:#f1f5f9; color:#64748b; cursor:pointer; white-space:nowrap; flex:none; }
-        .hero-tab.active { background:#7c3aed; color:#fff; }
+        .hero-tab.active { background:#6d5acd; color:#fff; }
 
         /* 모바일/PC 모드 전환 탭 */
         .mode-tab { flex:1; padding:8px 10px; border-radius:10px; font-size:12px; font-weight:800; background:#f1f5f9; color:#64748b; cursor:pointer; text-align:center; }
@@ -108,9 +108,14 @@
         #promo-panel.open #promo-panel-body { display:block; }
         #promo-panel.open .promo-panel-chevron { transform:rotate(180deg); }
         .promo-panel-chevron { transition:transform .2s ease; }
+
+        #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:#0f172a; color:#fff; padding:10px 20px; border-radius:999px; font-size:13px; font-weight:600; white-space:nowrap; opacity:0; transition:opacity .3s,transform .3s; pointer-events:none; z-index:9999; max-width:90vw; overflow:hidden; text-overflow:ellipsis; }
+        #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
+
+<div id="toast"></div>
 
 <!-- ====================================================
      로그인 화면
@@ -183,7 +188,7 @@
                         <i class="fa-solid fa-xmark text-gray-500"></i>
                     </button>
                 </div>
-                <p class="text-[11px] text-gray-400 mb-3">전체 사진 중 <b class="text-[#7c3aed]">밝은 사각 틀 안쪽</b>이 지금 편집 중인 <b id="focal-mode-label" class="text-[#7c3aed]">모바일</b> 화면에 실제로 보여지는 부분입니다 — 틀을 드래그해서 옮겨보세요</p>
+                <p class="text-[11px] text-gray-400 mb-3">전체 사진 중 <b class="text-[#6d5acd]">밝은 사각 틀 안쪽</b>이 지금 편집 중인 <b id="focal-mode-label" class="text-[#6d5acd]">모바일</b> 화면에 실제로 보여지는 부분입니다 — 틀을 드래그해서 옮겨보세요</p>
                 <div id="focal-frame">
                     <img id="focal-img" src="" alt="">
                     <div id="focal-crop-box"><span id="focal-crop-box-label">모바일</span></div>
@@ -195,7 +200,7 @@
                 </div>
                 <p class="text-[11px] text-gray-400 text-center mt-1">틀 크기가 확대 배율만큼 좁아져서, 사진에서 더 좁은 영역만 크게 보여줍니다</p>
                 <button type="button" onclick="closeFocalModal()"
-                        class="w-full mt-4 bg-[#7c3aed] text-white rounded-xl py-3 font-bold text-[13px] hover:bg-violet-700 transition">
+                        class="w-full mt-4 bg-[#6d5acd] text-white rounded-xl py-3 font-bold text-[13px] hover:bg-violet-700 transition">
                     확인
                 </button>
             </div>
@@ -232,7 +237,7 @@
             <button type="button" onclick="document.getElementById('banner-panel').classList.toggle('open')"
                     class="w-full flex items-center justify-between px-4 py-3.5">
                 <h2 class="font-bold text-[#0f172a] text-[13px] flex items-center gap-1.5">
-                    <i class="fa-solid fa-image text-[#7c3aed] text-[12px]"></i> 메인 히어로 슬라이드 관리
+                    <i class="fa-solid fa-image text-[#6d5acd] text-[12px]"></i> 메인 히어로 슬라이드 관리
                 </h2>
                 <i class="fa-solid fa-chevron-down banner-panel-chevron text-gray-400 text-[12px]"></i>
             </button>
@@ -253,7 +258,7 @@
 
                 <!-- 미리보기 겸 편집기 -->
                 <p class="text-[11px] text-gray-400 font-medium mb-1.5">
-                    <b class="text-[#7c3aed]">글자를 드래그</b>해서 위치 이동(다른 문구·화면 중앙과 맞으면 분홍 안내선과 함께 자동 정렬), 클릭하면 색상·크기 편집 · <b class="text-[#7c3aed]">사진을 클릭</b>하면 그 지점이 중심이 되도록 크롭됩니다
+                    <b class="text-[#6d5acd]">글자를 드래그</b>해서 위치 이동(다른 문구·화면 중앙과 맞으면 분홍 안내선과 함께 자동 정렬), 클릭하면 색상·크기 편집 · <b class="text-[#6d5acd]">사진을 클릭</b>하면 그 지점이 중심이 되도록 크롭됩니다
                 </p>
                 <div class="hero-frame mb-2 hf-empty" id="hf-frame">
                     <img id="hf-photo" class="hf-photo" src="" alt="">
@@ -276,7 +281,7 @@
                 <!-- 문구 입력 (선택된 슬라이드) — 목록/개수는 heroTextStyle.order 기준, 자유롭게 추가/삭제 가능 -->
                 <div id="hero-text-fields" class="space-y-2.5"></div>
                 <button type="button" onclick="addTextSlotFor('hero')"
-                        class="w-full mt-2 border border-violet-200 text-[#7c3aed] rounded-xl py-2 font-bold text-[12px] hover:bg-violet-50 transition">
+                        class="w-full mt-2 border border-violet-200 text-[#6d5acd] rounded-xl py-2 font-bold text-[12px] hover:bg-violet-50 transition">
                     <i class="fa-solid fa-plus mr-1"></i> 문구 추가
                 </button>
                 <!-- 방금 삭제한 문구를 되돌릴 수 있는 목록 (배지 등 기본 문구를 실수로 지워도 복구 가능) -->
@@ -285,7 +290,7 @@
                 <!-- 슬라이드 추가/삭제 -->
                 <div class="flex gap-2 mt-4">
                     <button type="button" onclick="addHeroSlide()"
-                            class="flex-1 border border-violet-200 text-[#7c3aed] rounded-xl py-2.5 font-bold text-[12px] hover:bg-violet-50 transition">
+                            class="flex-1 border border-violet-200 text-[#6d5acd] rounded-xl py-2.5 font-bold text-[12px] hover:bg-violet-50 transition">
                         <i class="fa-solid fa-plus mr-1"></i> 슬라이드 추가
                     </button>
                     <button type="button" onclick="removeCurrentHeroSlide()"
@@ -295,7 +300,7 @@
                 </div>
 
                 <button type="button" onclick="saveHeroSlides()" id="hero-save-btn"
-                        class="w-full mt-3 bg-[#7c3aed] text-white rounded-xl py-3 font-bold text-[13px] hover:bg-violet-700 transition">
+                        class="w-full mt-3 bg-[#6d5acd] text-white rounded-xl py-3 font-bold text-[13px] hover:bg-violet-700 transition">
                     전체 저장
                 </button>
                 <p id="hero-save-status" class="text-[11px] text-center mt-2"></p>
@@ -307,7 +312,7 @@
             <button type="button" onclick="document.getElementById('promo-panel').classList.toggle('open')"
                     class="w-full flex items-center justify-between px-4 py-3.5">
                 <h2 class="font-bold text-[#0f172a] text-[13px] flex items-center gap-1.5">
-                    <i class="fa-solid fa-bell text-[#7c3aed] text-[12px]"></i> 진입 팝업 관리
+                    <i class="fa-solid fa-bell text-[#6d5acd] text-[12px]"></i> 진입 팝업 관리
                 </h2>
                 <i class="fa-solid fa-chevron-down promo-panel-chevron text-gray-400 text-[12px]"></i>
             </button>
@@ -316,10 +321,10 @@
                 <!-- 표시 여부 — 모바일/PC 따로 -->
                 <div class="grid grid-cols-2 gap-3 mb-3">
                     <label class="flex items-center gap-2 text-[12px] font-bold text-[#0f172a] border border-gray-100 rounded-xl px-3 py-2.5">
-                        <input type="checkbox" id="promo-enabled-mobile" class="w-4 h-4 accent-[#7c3aed]"> 모바일에 표시
+                        <input type="checkbox" id="promo-enabled-mobile" class="w-4 h-4 accent-[#6d5acd]"> 모바일에 표시
                     </label>
                     <label class="flex items-center gap-2 text-[12px] font-bold text-[#0f172a] border border-gray-100 rounded-xl px-3 py-2.5">
-                        <input type="checkbox" id="promo-enabled-pc" class="w-4 h-4 accent-[#7c3aed]"> PC에 표시
+                        <input type="checkbox" id="promo-enabled-pc" class="w-4 h-4 accent-[#6d5acd]"> PC에 표시
                     </label>
                 </div>
 
@@ -338,10 +343,10 @@
 
                 <!-- 미리보기 (이미지가 있으면 배경 사진 위에 색 틴트 오버레이, 없으면 단색 배경) -->
                 <p class="text-[11px] text-gray-400 font-medium mb-1.5">
-                    사진이 있으면 <b class="text-[#7c3aed]">사진을 클릭</b>해서 위치·확대 조절 · 우측 하단 모서리를 <b class="text-[#7c3aed]">드래그</b>하면 크기 조절
-                    (<span id="promo-size-mode-label" class="text-[#7c3aed] font-bold">모바일</span> 기준)
+                    사진이 있으면 <b class="text-[#6d5acd]">사진을 클릭</b>해서 위치·확대 조절 · 우측 하단 모서리를 <b class="text-[#6d5acd]">드래그</b>하면 크기 조절
+                    (<span id="promo-size-mode-label" class="text-[#6d5acd] font-bold">모바일</span> 기준)
                 </p>
-                <p class="text-[11px] text-gray-400 font-medium mb-1.5"><b class="text-[#7c3aed]">글자를 드래그</b>해서 위치 이동, 클릭하면 모양·색상·크기 편집</p>
+                <p class="text-[11px] text-gray-400 font-medium mb-1.5"><b class="text-[#6d5acd]">글자를 드래그</b>해서 위치 이동, 클릭하면 모양·색상·크기 편집</p>
                 <div id="promo-preview" class="relative rounded-2xl overflow-hidden mb-2" style="width:100%;">
                     <img id="promo-prev-img" class="absolute inset-0 w-full h-full object-cover" style="display:none; cursor:crosshair; object-position:var(--fx,50%) var(--fy,50%); transform:scale(var(--zoom,1)); transform-origin:var(--fx,50%) var(--fy,50%);" alt="">
                     <!-- pointer-events:none 필수 — 없으면 이 오버레이가 사진 클릭을 가로채서 초점 조절 팝업이 안 열림 -->
@@ -403,12 +408,12 @@
                 <!-- 문구 입력 (선택된 슬라이드) — 목록/개수는 promoTextStyle.order 기준, 히어로 슬라이드와 동일하게 자유롭게 추가/삭제·위치·모양 지정 가능 -->
                 <div id="promo-text-fields" class="space-y-2.5"></div>
                 <button type="button" onclick="addTextSlotFor('promo')"
-                        class="w-full mt-2 border border-violet-200 text-[#7c3aed] rounded-xl py-2 font-bold text-[12px] hover:bg-violet-50 transition">
+                        class="w-full mt-2 border border-violet-200 text-[#6d5acd] rounded-xl py-2 font-bold text-[12px] hover:bg-violet-50 transition">
                     <i class="fa-solid fa-plus mr-1"></i> 문구 추가
                 </button>
                 <!-- 방금 삭제한 문구를 되돌릴 수 있는 목록 -->
                 <div id="promo-deleted-list" class="mt-2 space-y-1"></div>
-                <p class="text-[11px] text-gray-400 mt-1.5">문구 안에 <b class="text-[#7c3aed]">{{이렇게}}</b> 감싸면 하늘색으로 강조됩니다 (제목 등에 활용)</p>
+                <p class="text-[11px] text-gray-400 mt-1.5">문구 안에 <b class="text-[#6d5acd]">{{이렇게}}</b> 감싸면 하늘색으로 강조됩니다 (제목 등에 활용)</p>
 
                 <div class="space-y-3 mt-3">
                     <div>
@@ -443,7 +448,7 @@
 
                 <div class="flex gap-2 mt-4">
                     <button type="button" onclick="addPromoSlide()"
-                            class="flex-1 border border-violet-200 text-[#7c3aed] rounded-xl py-2.5 font-bold text-[12px] hover:bg-violet-50 transition">
+                            class="flex-1 border border-violet-200 text-[#6d5acd] rounded-xl py-2.5 font-bold text-[12px] hover:bg-violet-50 transition">
                         <i class="fa-solid fa-plus mr-1"></i> 슬라이드 추가
                     </button>
                     <button type="button" onclick="removeCurrentPromoSlide()"
@@ -453,7 +458,7 @@
                 </div>
 
                 <button type="button" onclick="savePromoPopup()" id="promo-save-btn"
-                        class="w-full mt-3 bg-[#7c3aed] text-white rounded-xl py-3 font-bold text-[13px] hover:bg-violet-700 transition">
+                        class="w-full mt-3 bg-[#6d5acd] text-white rounded-xl py-3 font-bold text-[13px] hover:bg-violet-700 transition">
                     전체 저장
                 </button>
                 <p id="promo-save-status" class="text-[11px] text-center mt-2"></p>
@@ -679,6 +684,18 @@
 
 <script>
 // ====================================================
+// 토스트 알림 (window.alert 대체)
+// ====================================================
+let toastTimer;
+window.showToast = function(msg) {
+    const t = document.getElementById('toast');
+    if (!t) { console.warn(msg); return; }
+    t.innerText = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+};
+
+// ====================================================
 // 설정
 // ====================================================
 const SUPABASE_URL   = 'https://ffreclgubmxdznubedam.supabase.co';
@@ -862,7 +879,7 @@ function renderDeletedList(ctx) {
     wrap.innerHTML = ctx.deletedStack.map((d, i) => `
         <div class="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-lg px-2.5 py-1.5">
             <span class="text-[11px] text-gray-400">삭제됨: <b class="text-gray-600">${(ctx.knownLabels && ctx.knownLabels[d.id]) || '커스텀 문구'}</b></span>
-            <button type="button" onclick="restoreTextSlotFor('${ctx.key}', ${i})" class="text-[11px] font-bold text-[#7c3aed] hover:text-violet-800">
+            <button type="button" onclick="restoreTextSlotFor('${ctx.key}', ${i})" class="text-[11px] font-bold text-[#6d5acd] hover:text-violet-800">
                 <i class="fa-solid fa-rotate-left mr-1"></i>복구
             </button>
         </div>
@@ -894,7 +911,7 @@ window.restoreTextSlotFor = function(ctxKey, stackIdx) {
 window.removeTextSlotFor = function(ctxKey, id) {
     const ctx = TEXT_CTX_REGISTRY[ctxKey];
     const ts = ctx.getTextStyle();
-    if (ts.order.length <= 1) { alert('문구는 최소 1개 있어야 합니다.'); return; }
+    if (ts.order.length <= 1) { showToast('문구는 최소 1개 있어야 합니다.'); return; }
     ctx.deletedStack.push({
         id,
         index: ts.order.indexOf(id),
@@ -1082,12 +1099,12 @@ initTextStyleBarOnce();
 // 모바일/PC 각각 기본 문구 위치·모양·크기·색상 (관리자가 아직 지정 안 했을 때 쓰는 값). index.html의 HERO_TEXT_DEFAULTS와 반드시 동일하게 유지.
 const HERO_TEXT_DEFAULTS = {
     mobile: {
-        badge: { x:6, y:76, size:11, color:'#7c3aed', bg:'rgba(255,255,255,.9)', shape:'pill',  weight:700, align:'left' },
+        badge: { x:6, y:76, size:11, color:'#6d5acd', bg:'rgba(255,255,255,.9)', shape:'pill',  weight:700, align:'left' },
         title: { x:6, y:84, size:28, color:'#ffffff', bg:'rgba(15,23,42,.55)',   shape:'plain', weight:900, align:'left' },
         desc:  { x:6, y:92, size:14, color:'rgba(255,255,255,.85)', bg:'rgba(15,23,42,.55)', shape:'plain', weight:500, align:'left' }
     },
     pc: {
-        badge: { x:5, y:16, size:12, color:'#7c3aed', bg:'rgba(255,255,255,.9)', shape:'pill',  weight:700, align:'left' },
+        badge: { x:5, y:16, size:12, color:'#6d5acd', bg:'rgba(255,255,255,.9)', shape:'pill',  weight:700, align:'left' },
         title: { x:5, y:62, size:34, color:'#ffffff', bg:'rgba(15,23,42,.55)',   shape:'plain', weight:900, align:'left' },
         desc:  { x:5, y:80, size:15, color:'rgba(255,255,255,.85)', bg:'rgba(15,23,42,.55)', shape:'plain', weight:500, align:'left' }
     }
@@ -1330,7 +1347,7 @@ window.addHeroSlide = function() {
     renderHeroTabs();
 };
 window.removeCurrentHeroSlide = function() {
-    if (heroSlides.length <= 1) { alert('슬라이드는 최소 1개 있어야 합니다.'); return; }
+    if (heroSlides.length <= 1) { showToast('슬라이드는 최소 1개 있어야 합니다.'); return; }
     heroSlides.splice(currentHeroIdx, 1);
     currentHeroIdx = Math.max(0, currentHeroIdx - 1);
     loadCurrentSlideIntoEditor();
@@ -1664,7 +1681,7 @@ window.addPromoSlide = function() {
     renderPromoTabs();
 };
 window.removeCurrentPromoSlide = function() {
-    if (promoConfig.slides.length <= 1) { alert('슬라이드는 최소 1개 있어야 합니다.'); return; }
+    if (promoConfig.slides.length <= 1) { showToast('슬라이드는 최소 1개 있어야 합니다.'); return; }
     promoConfig.slides.splice(currentPromoIdx, 1);
     currentPromoIdx = Math.max(0, currentPromoIdx - 1);
     loadCurrentPromoIntoEditor();
@@ -2068,7 +2085,7 @@ async function saveDetail() {
         await loadReservations();
 
     } catch (err) {
-        alert('저장 실패: ' + err.message);
+        showToast('저장 실패: ' + err.message);
     } finally {
         btn.disabled = false;
         btnText.innerText = '변경사항 저장';
@@ -2095,7 +2112,7 @@ function resetFilter() {
 function printReservations() {
     const rows = Object.values(_reservationMap || {});
     if (!rows.length) {
-        alert('인쇄할 예약이 없습니다. 먼저 검색해 주세요.');
+        showToast('인쇄할 예약이 없습니다. 먼저 검색해 주세요.');
         return;
     }
 
@@ -2195,7 +2212,7 @@ function printReservations() {
         </body></html>`;
 
     const w = window.open('', '_blank');
-    if (!w) { alert('팝업이 차단되었습니다. 팝업 허용 후 다시 시도해 주세요.'); return; }
+    if (!w) { showToast('팝업이 차단되었습니다. 팝업 허용 후 다시 시도해 주세요.'); return; }
     w.document.write(html);
     w.document.close();
 }
