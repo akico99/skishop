@@ -115,37 +115,50 @@
         .hide-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
         #main-slide-wrapper { transition:opacity .2s ease-in-out; }
 
-        /* 의류·장비 룩북: 모바일 스와이프 + PC 드래그/버튼 캐러셀 */
-        .swipe-gallery-wrap { position:relative; }
-        .swipe-gallery {
-            display:flex; gap:12px; overflow-x:auto; padding:8px 34px 14px;
-            scroll-snap-type:x mandatory; scroll-behavior:smooth;
-            overscroll-behavior-x:contain; touch-action:pan-x; scroll-padding-inline:34px;
-        }
-        .swipe-gallery > .swipe-card { flex:0 0 82%; scroll-snap-align:center; }
-        .swipe-gallery-nav {
-            position:absolute; top:50%; z-index:5; width:32px; height:32px;
-            display:flex; align-items:center; justify-content:center; transform:translateY(-50%);
-            border:1px solid rgba(109,90,205,.18); border-radius:999px;
-            background:rgba(255,255,255,.92); color:#6d5acd;
-            box-shadow:0 6px 16px rgba(15,23,42,.12); transition:transform .15s, background .15s;
-        }
-        .swipe-gallery-nav:hover { background:#f5f3ff; transform:translateY(-50%) scale(1.05); }
-        .swipe-gallery-nav:focus-visible { outline:3px solid rgba(109,90,205,.32); outline-offset:2px; }
-        .swipe-gallery-nav.prev { left:8px; }
-        .swipe-gallery-nav.next { right:8px; }
-        .swipe-gallery-hint { color:#94a3b8; font-size:11px; text-align:center; }
-        .lookbook-feature { background:linear-gradient(135deg,#f8f7ff,#fff); }
-        .lookbook-feature img { aspect-ratio:1; object-fit:cover; }
-        @media (min-width:640px) {
-            .swipe-gallery > .swipe-card { flex-basis:48%; }
-        }
-        @media (min-width:1024px) {
-            .swipe-gallery > .swipe-card { flex-basis:48%; }
-        }
+        /* 의류·장비 룩북: SNS 프로필 그리드와 스토리형 사진 뷰어 */
+        .rental-feature-card { position:relative; isolation:isolate; overflow:hidden; color:#fff; background:linear-gradient(130deg,#5744b4 0%,#765bd2 58%,#a064c6 100%); }
+        .rental-feature-card::after { content:''; position:absolute; z-index:-1; width:220px; height:220px; right:-74px; top:-100px; border:1px solid rgba(255,255,255,.2); border-radius:50%; box-shadow:0 0 0 24px rgba(255,255,255,.05),0 0 0 48px rgba(255,255,255,.04); }
+        .rental-price-chip { background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.18); }
+        .lookbook-profile-avatar { background:linear-gradient(135deg,#6d5acd,#bf66c8); box-shadow:0 0 0 3px #fff,0 0 0 5px rgba(109,90,205,.3); }
+        .lookbook-tabs { display:grid; grid-template-columns:1fr 1fr; border-bottom:1px solid #e2e8f0; }
+        .lookbook-tab { position:relative; padding:12px 8px; color:#64748b; font-size:13px; font-weight:800; }
+        .lookbook-tab[aria-selected="true"] { color:#6d5acd; }
+        .lookbook-tab[aria-selected="true"]::after { content:''; position:absolute; left:18%; right:18%; bottom:-1px; height:2px; border-radius:2px; background:#6d5acd; }
+        .lookbook-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:3px; }
+        .lookbook-tile { position:relative; display:block; overflow:hidden; aspect-ratio:1; background:#f1f5f9; text-align:left; }
+        .lookbook-tile img { width:100%; height:100%; object-fit:cover; transition:transform .35s ease,filter .35s ease; }
+        .lookbook-tile:hover img,.lookbook-tile:focus-visible img { transform:scale(1.045); filter:saturate(1.08); }
+        .lookbook-tile::after { content:''; position:absolute; inset:35% 0 0; background:linear-gradient(transparent,rgba(15,23,42,.66)); pointer-events:none; }
+        .lookbook-tile-label { position:absolute; z-index:1; left:8px; right:8px; bottom:7px; color:white; font-size:10px; font-weight:800; line-height:1.25; text-shadow:0 1px 4px rgba(0,0,0,.5); }
+        .lookbook-tile-tag { position:absolute; z-index:1; top:7px; left:7px; max-width:calc(100% - 14px); padding:3px 7px; overflow:hidden; border-radius:999px; background:rgba(15,23,42,.48); color:#fff; font-size:9px; font-weight:700; text-overflow:ellipsis; white-space:nowrap; backdrop-filter:blur(8px); }
+        .lookbook-deck { position:relative; height:238px; display:grid; place-items:center; isolation:isolate; }
+        .lookbook-deck::before,.lookbook-deck::after { content:''; position:absolute; width:min(66%,250px); height:212px; border:1px solid rgba(109,90,205,.16); border-radius:18px; background:#fff; box-shadow:0 14px 35px rgba(15,23,42,.12); }
+        .lookbook-deck::before { transform:translateX(15px) rotate(7deg); z-index:-2; }
+        .lookbook-deck::after { transform:translateX(-13px) rotate(-6deg); z-index:-1; }
+        .lookbook-deck-main { position:relative; width:min(66%,250px); height:212px; padding:0; border:0; border-radius:18px; overflow:hidden; background:#e2e8f0; box-shadow:0 16px 36px rgba(15,23,42,.22); transform:rotate(-1deg); transition:transform .25s ease,opacity .2s ease; }
+        .lookbook-deck-main:hover { transform:rotate(0) translateY(-3px); }
+        .lookbook-deck-main img { width:100%; height:100%; object-fit:cover; }
+        .lookbook-deck-main::after { content:''; position:absolute; inset:50% 0 0; background:linear-gradient(transparent,rgba(15,23,42,.65)); }
+        .lookbook-deck-copy { position:absolute; z-index:1; left:13px; bottom:12px; color:#fff; text-align:left; text-shadow:0 1px 6px rgba(0,0,0,.55); }
+        .lookbook-story-viewer { position:fixed; inset:0; z-index:450; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(7,10,20,.88); backdrop-filter:blur(12px); }
+        .lookbook-story-viewer.open { display:flex; }
+        .lookbook-story-panel { position:relative; width:min(100%,430px); height:min(780px,calc(100dvh - 32px)); overflow:hidden; border:1px solid rgba(255,255,255,.22); border-radius:24px; background:#111827; box-shadow:0 28px 80px rgba(0,0,0,.45); }
+        .lookbook-story-image { width:100%; height:100%; object-fit:contain; background:#111827; }
+        .lookbook-story-progress { position:absolute; z-index:3; top:12px; left:12px; right:12px; display:flex; gap:4px; }
+        .lookbook-story-progress span { height:3px; flex:1; overflow:hidden; border-radius:999px; background:rgba(255,255,255,.38); }
+        .lookbook-story-progress span.active::after { content:''; display:block; height:100%; background:#fff; transform-origin:left; animation:lookbook-progress 4s linear forwards; }
+        @keyframes lookbook-progress { from { transform:scaleX(0); } to { transform:scaleX(1); } }
+        .lookbook-story-top { position:absolute; z-index:4; top:24px; left:16px; right:16px; display:flex; align-items:center; justify-content:space-between; color:#fff; text-shadow:0 1px 4px #000; }
+        .lookbook-story-close { width:36px; height:36px; border:1px solid rgba(255,255,255,.35); border-radius:50%; background:rgba(15,23,42,.4); color:#fff; }
+        .lookbook-story-nav { position:absolute; z-index:4; top:44%; width:40px; height:40px; display:grid; place-items:center; border:1px solid rgba(255,255,255,.5); border-radius:50%; background:rgba(15,23,42,.45); color:#fff; }
+        .lookbook-story-nav.prev { left:12px; }
+        .lookbook-story-nav.next { right:12px; }
+        .lookbook-story-bottom { position:absolute; z-index:4; inset:auto 0 0; padding:54px 18px 18px; background:linear-gradient(transparent,rgba(7,10,20,.88)); color:white; }
+        .lookbook-story-booking { width:100%; min-height:46px; border:0; border-radius:14px; background:#fff; color:#5744b4; font-size:14px; font-weight:900; }
+        .lookbook-story-viewer :focus-visible { outline:3px solid #d6c8ff; outline-offset:3px; }
         @media (prefers-reduced-motion: reduce) {
-            .swipe-gallery { scroll-behavior:auto; }
-            .swipe-gallery-nav { transition:none; }
+            .lookbook-tile img,.lookbook-deck-main { transition:none; }
+            .lookbook-story-progress span.active::after { animation:none; transform:scaleX(1); }
         }
 
         /* 토스트 */
@@ -423,12 +436,7 @@
         #promo-track { display:flex; transition:transform .35s ease; }
         #promo-track > div { flex:0 0 100%; }
 
-        /* ===== 이미지 팝업(모달) ===== */
-        #img-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:400; justify-content:center; align-items:center; padding:24px; }
-        #img-modal.open { display:flex; }
-        #img-modal img { max-width:90vw; max-height:85vh; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.5); }
-        #img-modal .img-modal-close { position:absolute; top:20px; right:24px; width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,.15); color:#fff; font-size:22px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s; }
-        #img-modal .img-modal-close:hover { background:rgba(255,255,255,.3); }
+        /* 룩북은 화면 높이를 꽉 채우고 사진이 가려지지 않도록 별도 뷰어 사용 */
 
         /* ===== PC 견적폼 왼쪽 패널 헤더 (여닫이) ===== */
         #pc-quote-head {
@@ -601,10 +609,24 @@
 <!-- 토스트 -->
 <div id="toast" role="alert" aria-live="polite"></div>
 
-<!-- 이미지 팝업(모달) -->
-<div id="img-modal" role="dialog" aria-modal="true" aria-label="이미지 크게 보기" onclick="closeImgModal(event)">
-    <div class="img-modal-close" onclick="closeImgModal()" aria-label="닫기">&times;</div>
-    <img id="img-modal-img" src="" alt="확대 이미지">
+<!-- SNS 스토리형 룩북 사진 뷰어 -->
+<div id="lookbook-story-viewer" class="lookbook-story-viewer" role="dialog" aria-modal="true" aria-label="룩북 사진 보기" aria-hidden="true" onclick="if(event.target===this) closeLookbookStory()">
+    <div class="lookbook-story-panel" tabindex="-1">
+        <div class="lookbook-story-progress" data-story-progress aria-hidden="true"></div>
+        <div class="lookbook-story-top">
+            <div><span id="lookbook-story-section" class="block text-[10px] font-bold"></span><span id="lookbook-story-count" class="block text-[10px] opacity-80" aria-live="polite"></span></div>
+            <button type="button" data-story-close class="lookbook-story-close" aria-label="사진 닫기">&times;</button>
+        </div>
+        <img id="lookbook-story-image" class="lookbook-story-image" src="" alt="">
+        <button type="button" data-story-prev class="lookbook-story-nav prev" aria-label="이전 사진"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+        <button type="button" data-story-next class="lookbook-story-nav next" aria-label="다음 사진"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+        <div class="lookbook-story-bottom">
+            <span id="lookbook-story-tag" class="inline-block rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-bold backdrop-blur-sm"></span>
+            <p id="lookbook-story-title" class="mt-2 text-[15px] font-black"></p>
+            <p id="lookbook-story-note" class="mt-1 text-[11px] text-white/75"></p>
+            <button type="button" data-story-booking class="lookbook-story-booking mt-4">이 스타일로 예약하기</button>
+        </div>
+    </div>
 </div>
 
 <!-- PC 전용: "빠른예약" 등을 눌렀을 때 견적 패널을 화면 중앙으로 확대해서 보여주는 모달 셸.
@@ -819,7 +841,7 @@
     <section class="bg-white" aria-label="이벤트 배너">
         <div id="main-slide-container" class="relative w-full overflow-hidden bg-[#1e293b]">
             <div id="main-slide-wrapper" class="absolute inset-0 opacity-100">
-                <img id="main-slide-img" src="./2.jpg" alt="배너" class="w-full h-full object-cover" style="object-position:var(--fx,50%) var(--fy,50%); transform:scale(var(--zoom,1)); transform-origin:var(--fx,50%) var(--fy,50%);">
+                <img id="main-slide-img" src="./2.jpg" alt="" class="w-full h-full object-cover" style="object-position:var(--fx,50%) var(--fy,50%); transform:scale(var(--zoom,1)); transform-origin:var(--fx,50%) var(--fy,50%);">
                 <div id="main-slide-gradient" class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
                 <div id="main-slide-texts"></div>
             </div>
@@ -1197,198 +1219,137 @@
         </div>
 
         <!-- ===== 패널: 의류·장비 ===== -->
-        <div id="outfit-section" class="hidden mt-3 rounded-xl border border-gray-100 overflow-hidden bg-white">
-
-            <!-- ① 가격표 (가격 안내는 여기에서만) -->
-            <div class="px-4 pt-4 pb-3">
-                <h3 class="sec-title font-black text-[#0f172a] text-[15px] mb-2"><i class="fa-solid fa-tags text-[#6d5acd] mr-1.5"></i> 렌탈 가격 안내</h3>
-                <div class="rounded-2xl border border-violet-100 overflow-hidden">
-                    <div class="grid grid-cols-2 bg-[#6d5acd] text-white text-[13px] font-bold">
-                        <div class="py-2.5 text-center">품목</div>
-                        <div class="py-2.5 text-center border-l border-white/20">1인 가격</div>
+        <section id="outfit-section" class="hidden mt-3 rounded-xl border border-gray-100 overflow-hidden bg-white" aria-labelledby="lookbook-heading">
+            <div class="px-4 pt-4 pb-4" aria-labelledby="rental-price-title">
+                <div data-rental-offer class="rental-feature-card rounded-3xl p-5 shadow-lg">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="rounded-full bg-white/15 border border-white/25 px-3 py-1 text-[10px] font-black tracking-[.14em]">OPEN SPECIAL</span>
+                        <span class="text-[10px] font-semibold text-white/80">예약금 없음 · 실시간 견적</span>
                     </div>
-                    <div class="grid grid-cols-2 text-[14px] border-b border-gray-100">
-                        <div class="py-3 text-center font-bold text-[#0f172a]">의류</div>
-                        <div class="py-3 text-center border-l border-gray-100 font-black text-[#6d5acd]">15,000원</div>
-                    </div>
-                    <div class="grid grid-cols-2 text-[14px] border-b border-gray-100">
-                        <div class="py-3 text-center font-bold text-[#0f172a]">장비</div>
-                        <div class="py-3 text-center border-l border-gray-100 font-black text-[#6d5acd]">15,000원</div>
-                    </div>
-                    <div class="grid grid-cols-2 text-[14px] border-b border-gray-100">
-                        <div class="py-3 text-center font-bold text-[#0f172a]">헬멧</div>
-                        <div class="py-3 text-center border-l border-gray-100 font-black text-[#6d5acd]">10,000원</div>
-                    </div>
-                    <div class="grid grid-cols-2 text-[14px] border-b border-gray-100">
-                        <div class="py-3 text-center font-bold text-[#0f172a]">고글</div>
-                        <div class="py-3 text-center border-l border-gray-100 font-black text-[#6d5acd]">10,000원</div>
-                    </div>
-                    <div class="grid grid-cols-2 text-[14px]">
-                        <div class="py-3 text-center font-bold text-[#0f172a]">헬멧 + 고글</div>
-                        <div class="py-3 text-center border-l border-gray-100 font-black text-[#6d5acd]">15,000원</div>
+                    <p class="mt-5 text-[13px] font-bold text-white/85">이번 시즌, 장비와 의류를 한 번에</p>
+                    <h3 id="rental-price-title" class="mt-1 text-[25px] leading-tight font-black tracking-tight">풀세트 <span class="text-[34px]">40,000원</span></h3>
+                    <p class="mt-2 text-[12px] font-semibold text-white/90">장비 + 의류 + 헬멧 + 고글</p>
+                    <div class="mt-4 flex items-center gap-2 text-[11px]">
+                        <span class="rental-price-chip rounded-lg px-2.5 py-1.5">개별 선택 합계 45,000원</span>
+                        <span class="rounded-lg bg-white px-2.5 py-1.5 font-black text-[#5744b4]">5,000원 할인</span>
                     </div>
                 </div>
-                <p class="text-[11px] text-gray-400 mt-2 text-center">의류·장비 1인 15,000원 · 헬멧+고글 함께 빌리면 5,000원 할인</p>
+
+                <h3 class="mt-5 mb-2 text-[13px] font-black text-[#0f172a]"><i class="fa-solid fa-tags text-[#6d5acd] mr-1.5"></i> 렌탈 가격 안내</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="rental-price-chip rounded-xl px-3 py-2.5 flex items-center justify-between"><span class="text-[12px] font-bold text-slate-600">의류</span><strong class="text-[12px] text-[#5744b4]">15,000원</strong></div>
+                    <div class="rental-price-chip rounded-xl px-3 py-2.5 flex items-center justify-between"><span class="text-[12px] font-bold text-slate-600">장비</span><strong class="text-[12px] text-[#5744b4]">15,000원</strong></div>
+                    <div class="rental-price-chip rounded-xl px-3 py-2.5 flex items-center justify-between"><span class="text-[12px] font-bold text-slate-600">헬멧</span><strong class="text-[12px] text-[#5744b4]">10,000원</strong></div>
+                    <div class="rental-price-chip rounded-xl px-3 py-2.5 flex items-center justify-between"><span class="text-[12px] font-bold text-slate-600">고글</span><strong class="text-[12px] text-[#5744b4]">10,000원</strong></div>
+                    <div class="rental-price-chip col-span-2 rounded-xl px-3 py-2.5 flex items-center justify-between"><span class="text-[12px] font-bold text-slate-600">헬멧 + 고글 세트</span><strong class="text-[12px] text-[#5744b4]">15,000원 <span class="text-[10px] text-emerald-600">5,000원 할인</span></strong></div>
+                </div>
+                <p class="mt-2 text-[10px] leading-relaxed text-slate-500">장갑·양말은 위생상 대여하지 않고 매장에서 판매합니다.</p>
             </div>
 
-            <!-- ② 시즌 룩북 후킹 비주얼: 실제 보유 현장 사진과 분리된 생성형 캠페인 이미지 -->
-            <div class="px-4 pt-1 pb-3">
-                <div class="lookbook-feature rounded-2xl border border-violet-100 overflow-hidden p-2 shadow-sm">
-                    <img src="./assets/generated/apparel-equipment-cards-v1.png"
-                         alt="시즌 스키복과 장비를 카드형으로 보여주는 무주 놀러와 룩북"
-                         width="1254" height="1254" loading="lazy" decoding="async"
-                         class="w-full rounded-xl">
-                    <div class="px-2 pt-2 pb-1 flex items-center justify-between gap-3">
-                        <div>
-                            <p class="text-[10px] font-bold text-[#6d5acd]">26/27 SEASON LOOKBOOK</p>
-                            <p class="text-[12px] font-black text-[#0f172a] mt-0.5">의류와 장비를 한눈에 골라보세요</p>
-                        </div>
-                        <span class="text-[10px] text-gray-400 whitespace-nowrap">스타일 참고</span>
+            <div class="mx-4 rounded-2xl border border-violet-100 bg-gradient-to-br from-[#faf8ff] via-white to-[#f4f1ff] p-4">
+                <div class="flex items-end justify-between gap-2">
+                    <div>
+                        <p class="text-[10px] font-black tracking-[.12em] text-[#6d5acd]">26/27 SEASON LOOKBOOK</p>
+                        <h3 class="mt-1 text-[15px] font-black text-[#0f172a]">이번 시즌 룩, 먼저 둘러보기</h3>
+                        <p class="mt-1 text-[10px] text-slate-500">카드를 넘기거나 눌러 크게 확인하세요</p>
                     </div>
+                    <span class="shrink-0 rounded-full bg-white px-2 py-1 text-[9px] font-bold text-slate-500 shadow-sm">STYLE NOTE</span>
+                </div>
+                <div class="lookbook-deck mt-1">
+                    <button id="lookbook-deck-main" type="button" class="lookbook-deck-main" data-deck-open aria-label="시즌 룩북 크게 보기">
+                        <img id="lookbook-deck-image" src="./assets/generated/outfit-lookbook-01-v1.webp" alt="블루·화이트 스키복 스타일 참고 이미지" width="900" height="900" loading="lazy" decoding="async">
+                        <span class="lookbook-deck-copy"><span id="lookbook-deck-tag" class="block text-[10px] font-bold">#시즌룩북</span><span id="lookbook-deck-title" class="mt-1 block text-[14px] font-black">26/27 시즌 스타일 참고</span></span>
+                    </button>
+                </div>
+                <div class="flex items-center justify-center gap-6">
+                    <button type="button" data-deck-prev class="grid h-9 w-9 place-items-center rounded-full border border-violet-100 bg-white text-[#6d5acd] shadow-sm" aria-label="이전 룩북 카드"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+                    <span id="lookbook-deck-count" class="min-w-14 text-center text-[11px] font-black tabular-nums text-slate-500" aria-live="polite">01 / 03</span>
+                    <button type="button" data-deck-next class="grid h-9 w-9 place-items-center rounded-full border border-violet-100 bg-white text-[#6d5acd] shadow-sm" aria-label="다음 룩북 카드"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
                 </div>
             </div>
 
-            <!-- ③ 26/27 시즌 의류 -->
-            <div class="px-4 pt-2 pb-1 flex justify-between items-center">
-                <div>
-                    <h3 class="sec-title font-black text-[#0f172a] text-[15px]"><i class="fa-solid fa-shirt text-[#6d5acd] mr-1.5"></i> 26/27 시즌 의류</h3>
-                    <p class="text-[10px] text-gray-400 mt-1">룩북은 스타일 참고용 · 실제 매장 사진은 이어서 확인하세요</p>
+            <div class="px-4 pt-5 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="lookbook-profile-avatar grid h-12 w-12 shrink-0 place-items-center rounded-full text-[15px] font-black text-white">놀</div>
+                    <div class="min-w-0 flex-1">
+                        <h3 id="lookbook-heading" class="truncate text-[14px] font-black text-[#0f172a]">무주놀러와스키샵&amp;렌탈샵</h3>
+                        <p class="mt-1 text-[10px] text-slate-500">무주덕유산리조트 정문 앞 · 시즌 룩북</p>
+                    </div>
+                    <span class="rounded-full bg-violet-50 px-2.5 py-1 text-[9px] font-black text-[#6d5acd]">26/27</span>
                 </div>
-                <span class="text-[10px] text-gray-400 whitespace-nowrap">좌우로 넘기기</span>
-            </div>
-            <div class="swipe-gallery-wrap" data-gallery-shell="outfit">
-                <button type="button" class="swipe-gallery-nav prev" data-gallery-prev="outfit" aria-label="시즌 의류 이전 사진"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
-                <div id="outfit-gallery" data-gallery="outfit" class="swipe-gallery hide-scrollbar" role="list" aria-label="26/27 시즌 의류 사진 목록">
-                <!-- 시즌 룩북 1 · 생성 이미지 -->
-                <button type="button" onclick="openImgModal('./assets/generated/outfit-lookbook-01-v1.png')" class="swipe-card block text-left rounded-xl overflow-hidden border border-violet-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./assets/generated/outfit-lookbook-01-v1.png" alt="슬로프에서 스키를 타는 블루·화이트 시즌 룩북" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1"><span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#시즌룩북</span><span class="text-[10px] text-gray-400">스타일 참고</span></div>
-                </button>
-                <!-- 시즌 룩북 2 · 생성 이미지 -->
-                <button type="button" onclick="openImgModal('./assets/generated/outfit-lookbook-02-v1.png')" class="swipe-card block text-left rounded-xl overflow-hidden border border-violet-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./assets/generated/outfit-lookbook-02-v1.png" alt="렌탈샵에서 스키복 핏을 확인하는 머스터드·화이트 룩북" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1"><span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#피팅룩</span><span class="text-[10px] text-gray-400">스타일 참고</span></div>
-                </button>
-                <!-- 시즌 룩북 3 · 생성 이미지 -->
-                <button type="button" onclick="openImgModal('./assets/generated/outfit-lookbook-03-v1.png')" class="swipe-card block text-left rounded-xl overflow-hidden border border-violet-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./assets/generated/outfit-lookbook-03-v1.png" alt="스키장에서 포즈를 취한 두 사람의 블루·화이트 룩북" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1"><span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#커플룩</span><span class="text-[10px] text-gray-400">스타일 참고</span></div>
-                </button>
-                <!-- 의류1 -->
-                <button type="button" onclick="openImgModal('./p/의류1.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류1.jpg" alt="매장 입구 의류·헬멧 진열" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1">
-                        <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#매장전경</span>
-                    </div>
-                </button>
-                <!-- 의류2 -->
-                <button type="button" onclick="openImgModal('./p/의류2.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류2.jpg" alt="상하의 전 사이즈 진열" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1">
-                        <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#전사이즈보유</span>
-                    </div>
-                </button>
-                <!-- 의류3 -->
-                <button type="button" onclick="openImgModal('./p/의류3.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류3.jpg" alt="그레이·블랙톤 세트업" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1">
-                        <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#그레이블랙톤</span>
-                    </div>
-                </button>
-                <!-- 의류4 -->
-                <button type="button" onclick="openImgModal('./p/의류4.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류4.jpg" alt="블루·베이지톤 세트업" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1">
-                        <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#블루베이지톤</span>
-                    </div>
-                </button>
-                <!-- 의류5 -->
-                <button type="button" onclick="openImgModal('./p/의류5.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류5.jpg" alt="화이트·형광 세이프티 컬러" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1">
-                        <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#세이프티컬러</span>
-                    </div>
-                </button>
-                <!-- 의류6 -->
-                <button type="button" onclick="openImgModal('./p/의류6.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/의류6.jpg" alt="레드·블루·그린 포인트컬러" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1">
-                        <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#포인트컬러</span>
-                    </div>
-                </button>
+                <div class="mt-4 grid grid-cols-3 divide-x divide-slate-100 rounded-xl bg-slate-50 py-2.5 text-center">
+                    <div><strong class="block text-[13px] font-black text-[#0f172a]">6</strong><span class="text-[9px] text-slate-500">실제 의류 사진</span></div>
+                    <div><strong class="block text-[13px] font-black text-[#0f172a]">5</strong><span class="text-[9px] text-slate-500">실제 장비 사진</span></div>
+                    <div><strong class="block text-[13px] font-black text-[#0f172a]">6</strong><span class="text-[9px] text-slate-500">스타일 참고 컷</span></div>
                 </div>
-                <button type="button" class="swipe-gallery-nav next" data-gallery-next="outfit" aria-label="시즌 의류 다음 사진"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
-                <p class="swipe-gallery-hint px-4 pb-2"><i class="fa-solid fa-hand-pointer mr-1" aria-hidden="true"></i> 사진을 좌우로 밀어 더 많은 의류를 확인하세요</p>
             </div>
 
-            <!-- ④ 장비 소개 -->
-            <div class="px-4 pt-2 pb-1 flex justify-between items-center border-t border-gray-100">
-                <div>
-                    <h3 class="sec-title font-black text-[#0f172a] text-[15px] pt-3"><i class="fa-solid fa-person-skiing text-[#6d5acd] mr-1.5"></i> 장비 소개</h3>
-                    <p class="text-[10px] text-gray-400 mt-1">룩북은 사용 장면 참고용 · 실제 보유 장비는 이어서 확인하세요</p>
-                </div>
-                <span class="text-[10px] text-gray-400 whitespace-nowrap">좌우로 넘기기</span>
-            </div>
-            <div class="swipe-gallery-wrap" data-gallery-shell="equipment">
-                <button type="button" class="swipe-gallery-nav prev" data-gallery-prev="equipment" aria-label="장비 이전 사진"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
-                <div id="equipment-gallery" data-gallery="equipment" class="swipe-gallery hide-scrollbar" role="list" aria-label="스키·보드 장비 사진 목록">
-                <!-- 장비 룩북 1 · 생성 이미지 -->
-                <button type="button" onclick="openImgModal('./assets/generated/equipment-lookbook-01-v1.png')" class="swipe-card block text-left rounded-xl overflow-hidden border border-violet-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./assets/generated/equipment-lookbook-01-v1.png" alt="스키와 스노보드를 정리한 장비 룩북" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1"><span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#장비룩북</span><span class="text-[10px] text-gray-400">사용 장면 참고</span></div>
-                </button>
-                <!-- 장비 룩북 2 · 생성 이미지 -->
-                <button type="button" onclick="openImgModal('./assets/generated/equipment-lookbook-02-v1.png')" class="swipe-card block text-left rounded-xl overflow-hidden border border-violet-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./assets/generated/equipment-lookbook-02-v1.png" alt="스키 부츠 버클을 조절하는 장비 피팅 룩북" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1"><span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#부츠피팅</span><span class="text-[10px] text-gray-400">사용 장면 참고</span></div>
-                </button>
-                <!-- 장비 룩북 3 · 생성 이미지 -->
-                <button type="button" onclick="openImgModal('./assets/generated/equipment-lookbook-03-v1.png')" class="swipe-card block text-left rounded-xl overflow-hidden border border-violet-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./assets/generated/equipment-lookbook-03-v1.png" alt="슬로프에서 스노보드를 들고 있는 장비 룩북" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1"><span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#슬로프액션</span><span class="text-[10px] text-gray-400">사용 장면 참고</span></div>
-                </button>
-                <!-- 장비1 -->
-                <button type="button" onclick="openImgModal('./p/장비1.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비1.jpg" alt="스키·스노보드 판 다수 보유" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1">
-                        <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#스키보드판다수보유</span>
-                    </div>
-                </button>
-                <!-- 장비2 -->
-                <button type="button" onclick="openImgModal('./p/장비2.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비2.jpg" alt="스키부츠 전 사이즈 진열" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1">
-                        <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#스키부츠전사이즈</span>
-                    </div>
-                </button>
-                <!-- 장비3 -->
-                <button type="button" onclick="openImgModal('./p/장비3.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비3.jpg" alt="스노보드 데크 다수 보유" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1">
-                        <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#보드데크다수보유</span>
-                    </div>
-                </button>
-                <!-- 장비4 -->
-                <button type="button" onclick="openImgModal('./p/장비4.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비4.jpg" alt="보드부츠 전 사이즈 진열" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1">
-                        <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#보드부츠전사이즈</span>
-                    </div>
-                </button>
-                <!-- 장비5 · 숏스키(스키에이트) -->
-                <button type="button" onclick="openImgModal('./p/장비5.jpg')" class="swipe-card block text-left rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-white hover:border-[#6d5acd] transition">
-                    <div class="relative w-full aspect-[4/3] bg-gray-100"><img src="./p/장비5.jpg" alt="숏스키(스키에이트)" class="w-full h-full object-cover"></div>
-                    <div class="p-2 flex flex-wrap gap-1">
-                        <span class="text-[10px] font-bold text-[#6d5acd] bg-violet-50 px-1.5 py-0.5 rounded-full">#숏스키입문추천</span>
-                    </div>
-                </button>
-                </div>
-                <button type="button" class="swipe-gallery-nav next" data-gallery-next="equipment" aria-label="장비 다음 사진"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
-                <p class="swipe-gallery-hint px-4 pb-2"><i class="fa-solid fa-hand-pointer mr-1" aria-hidden="true"></i> 사진을 좌우로 밀어 스키·보드 장비를 확인하세요</p>
+            <div class="lookbook-tabs px-4" role="tablist" aria-label="룩북 사진 종류">
+                <button id="lookbook-tab-outfit" type="button" class="lookbook-tab" role="tab" data-lookbook-tab="outfit" aria-selected="true" aria-controls="lookbook-grid-outfit" tabindex="0">의류 <span class="ml-1 text-[10px] font-semibold">스타일·매장</span></button>
+                <button id="lookbook-tab-equipment" type="button" class="lookbook-tab" role="tab" data-lookbook-tab="equipment" aria-selected="false" aria-controls="lookbook-grid-equipment" tabindex="-1">장비 <span class="ml-1 text-[10px] font-semibold">스타일·보유품</span></button>
             </div>
 
-            <div class="px-4 pb-4"><button onclick="openQuote()" class="w-full bg-[#6d5acd] text-white rounded-xl py-3 font-bold text-[14px] hover:bg-violet-700 transition">의류·장비 예약하기</button></div>
-        </div>
+            <div id="lookbook-grid-outfit" class="lookbook-grid" data-lookbook-grid="outfit" role="tabpanel" aria-labelledby="lookbook-tab-outfit" aria-label="무주 스키복 룩북과 실제 매장 의류 사진">
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/generated/outfit-lookbook-01-v1.webp" data-story-title="블루·화이트 시즌 스키복" data-story-tag="#시즌룩북" data-story-note="스타일 참고">
+                    <img src="./assets/generated/outfit-lookbook-01-v1.webp" alt="블루·화이트 스키복을 입고 슬로프에서 턴하는 스타일 참고 사진" width="900" height="900" loading="lazy" decoding="async"><span class="lookbook-tile-tag">스타일 참고</span><span class="lookbook-tile-label">#시즌룩북 · 블루·화이트</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/generated/outfit-lookbook-02-v1.webp" data-story-title="머스터드·화이트 스키복 핏" data-story-tag="#피팅룩" data-story-note="스타일 참고">
+                    <img src="./assets/generated/outfit-lookbook-02-v1.webp" alt="머스터드·화이트 스키복 핏 스타일 참고 사진" width="900" height="900" loading="lazy" decoding="async"><span class="lookbook-tile-tag">스타일 참고</span><span class="lookbook-tile-label">#피팅룩 · 포인트 컬러</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/generated/outfit-lookbook-03-v1.webp" data-story-title="두 사람이 함께 입은 스키복" data-story-tag="#커플룩" data-story-note="스타일 참고">
+                    <img src="./assets/generated/outfit-lookbook-03-v1.webp" alt="두 사람이 함께 입은 블루·화이트 스키복 스타일 참고 사진" width="900" height="900" loading="lazy" decoding="async"><span class="lookbook-tile-tag">스타일 참고</span><span class="lookbook-tile-label">#커플룩</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./p/의류1.jpg" data-story-title="매장 의류와 헬멧 진열" data-story-tag="#매장전경" data-story-note="실제 매장">
+                    <img src="./p/의류1.jpg" alt="무주 스키 렌탈샵 매장 입구의 의류와 헬멧 진열" width="600" height="600" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#매장전경</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./p/의류2.jpg" data-story-title="사이즈별 스키복 진열" data-story-tag="#전사이즈보유" data-story-note="실제 매장">
+                    <img src="./p/의류2.jpg" alt="무주 스키복 렌탈 사이즈별 의류 진열" width="600" height="600" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#전사이즈보유</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./p/의류3.jpg" data-story-title="그레이·블랙톤 스키복" data-story-tag="#그레이블랙톤" data-story-note="실제 매장">
+                    <img src="./p/의류3.jpg" alt="무주 스키샵에서 볼 수 있는 그레이·블랙톤 스키복" width="600" height="600" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#그레이블랙톤</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./p/의류4.jpg" data-story-title="블루·베이지톤 스키복" data-story-tag="#블루베이지톤" data-story-note="실제 매장">
+                    <img src="./p/의류4.jpg" alt="무주 스키샵에서 볼 수 있는 블루·베이지톤 스키복" width="600" height="600" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#블루베이지톤</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./p/의류5.jpg" data-story-title="화이트·형광 포인트 스키복" data-story-tag="#세이프티컬러" data-story-note="실제 매장">
+                    <img src="./p/의류5.jpg" alt="화이트와 형광 컬러가 들어간 실제 스키복" width="600" height="600" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#세이프티컬러</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./p/의류6.jpg" data-story-title="포인트 컬러 스키복" data-story-tag="#포인트컬러" data-story-note="실제 매장">
+                    <img src="./p/의류6.jpg" alt="다양한 포인트 컬러의 실제 스키복 진열" width="600" height="600" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#포인트컬러</span>
+                </button>
+            </div>
+
+            <div id="lookbook-grid-equipment" class="lookbook-grid" data-lookbook-grid="equipment" role="tabpanel" aria-labelledby="lookbook-tab-equipment" aria-label="무주 스키샵의 스키·보드 장비 소개" hidden>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./assets/generated/equipment-lookbook-01-v1.webp" data-story-title="스키와 스노보드 장비 룩북" data-story-tag="#장비룩북" data-story-note="스타일 참고">
+                    <img src="./assets/generated/equipment-lookbook-01-v1.webp" alt="스키와 스노보드 장비를 정리한 스타일 참고 사진" width="900" height="900" loading="lazy" decoding="async"><span class="lookbook-tile-tag">스타일 참고</span><span class="lookbook-tile-label">#장비룩북</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./assets/generated/equipment-lookbook-02-v1.webp" data-story-title="스키 부츠 피팅 장면" data-story-tag="#부츠피팅" data-story-note="스타일 참고">
+                    <img src="./assets/generated/equipment-lookbook-02-v1.webp" alt="스키 부츠 버클을 조절하는 피팅 스타일 참고 사진" width="900" height="900" loading="lazy" decoding="async"><span class="lookbook-tile-tag">스타일 참고</span><span class="lookbook-tile-label">#부츠피팅</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./assets/generated/equipment-lookbook-03-v1.webp" data-story-title="슬로프에서 보드를 든 장면" data-story-tag="#슬로프액션" data-story-note="스타일 참고">
+                    <img src="./assets/generated/equipment-lookbook-03-v1.webp" alt="슬로프에서 스노보드를 든 스타일 참고 사진" width="900" height="900" loading="lazy" decoding="async"><span class="lookbook-tile-tag">스타일 참고</span><span class="lookbook-tile-label">#슬로프액션</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./p/장비1.jpg" data-story-title="스키·스노보드 판 보유" data-story-tag="#스키보드판다수보유" data-story-note="실제 보유 장비">
+                    <img src="./p/장비1.jpg" alt="무주 렌탈샵의 스키와 스노보드 판 보유 현황" width="600" height="600" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 보유 장비</span><span class="lookbook-tile-label">#스키보드판다수보유</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./p/장비2.jpg" data-story-title="스키 부츠 사이즈별 보유" data-story-tag="#스키부츠전사이즈" data-story-note="실제 보유 장비">
+                    <img src="./p/장비2.jpg" alt="무주 스키 렌탈용 스키 부츠 진열" width="600" height="600" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 보유 장비</span><span class="lookbook-tile-label">#스키부츠전사이즈</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./p/장비3.jpg" data-story-title="스노보드 데크 보유" data-story-tag="#보드데크다수보유" data-story-note="실제 보유 장비">
+                    <img src="./p/장비3.jpg" alt="무주 스키샵의 스노보드 데크 보유 현황" width="600" height="600" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 보유 장비</span><span class="lookbook-tile-label">#보드데크다수보유</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./p/장비4.jpg" data-story-title="보드 부츠 보유" data-story-tag="#보드부츠전사이즈" data-story-note="실제 보유 장비">
+                    <img src="./p/장비4.jpg" alt="무주 렌탈샵의 보드 부츠 진열" width="600" height="600" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 보유 장비</span><span class="lookbook-tile-label">#보드부츠전사이즈</span>
+                </button>
+                <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./p/장비5.jpg" data-story-title="숏스키·스키에이트" data-story-tag="#숏스키입문추천" data-story-note="실제 보유 장비">
+                    <img src="./p/장비5.jpg" alt="무주 렌탈샵의 숏스키와 스키에이트 장비" width="600" height="600" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 보유 장비</span><span class="lookbook-tile-label">#숏스키입문추천</span>
+                </button>
+            </div>
+
+            <div class="px-4 pb-4 pt-4">
+                <button onclick="openQuote()" class="w-full rounded-xl bg-[#6d5acd] py-3 font-bold text-[14px] text-white transition hover:bg-violet-700">의류·장비 예약하기</button>
+            </div>
+        </section>
 
         <!-- ===== 패널: 강습 안내 ===== -->
         <div id="lesson-section" class="hidden mt-3 rounded-xl border border-gray-100 bg-white overflow-hidden">
@@ -1642,14 +1603,14 @@
 
     <!-- 전화문의 플로팅 버튼 (모바일 전용 — PC는 우측 견적 패널 안에 이미 있음) -->
     <a href="tel:010-7720-5333" aria-label="전화 문의"
-       class="lg:hidden fixed right-4 bottom-[156px] w-14 h-14 rounded-full bg-[#0f172a] text-white flex items-center justify-center shadow-lg z-40 hover:brightness-110 transition">
-        <i class="fa-solid fa-phone text-xl"></i>
+       class="lg:hidden fixed right-3 bottom-[150px] w-12 h-12 rounded-full bg-[#0f172a] text-white flex items-center justify-center shadow-lg z-40 hover:brightness-110 transition">
+        <i class="fa-solid fa-phone text-lg"></i>
     </a>
 
     <!-- 카톡상담 플로팅 버튼 (모바일 전용 — PC는 우측 견적 패널 안에 이미 있음) -->
     <a href="http://pf.kakao.com/_DYBbxj/chat" target="_blank" rel="noopener" aria-label="카카오톡 상담"
-       class="lg:hidden fixed right-4 bottom-[92px] w-14 h-14 rounded-full bg-[#FEE500] text-[#3A1D1D] flex items-center justify-center shadow-lg z-40 hover:brightness-95 transition">
-        <i class="fa-solid fa-comment text-xl"></i>
+       class="lg:hidden fixed right-3 bottom-[94px] w-12 h-12 rounded-full bg-[#FEE500] text-[#3A1D1D] flex items-center justify-center shadow-lg z-40 hover:brightness-95 transition">
+        <i class="fa-solid fa-comment text-lg"></i>
     </a>
 
     <!-- 하단 고정 바 (모바일·PC 공통) -->
@@ -1724,9 +1685,9 @@ function syncToSheet(reservation) {
 function freshFocal() { return { focalX:50, focalY:50, zoom:1 }; }
 // 관리자가 아직 아무것도 등록 안 했을 때 쓰는 기본 슬라이드 3장(하드코딩) — 항상 이걸로 시작, 실패해도 사이트는 정상 동작
 let mainSlidesData = [
-    { img:'./assets/generated/hero-hook-v1.png', texts:{ badge:'시즌 룩북', title:'무주에서 제일 잘 입는 하루', desc:'스키복부터 장비까지, 슬로프 앞에서 바로 준비하세요' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
-    { img:'./1.jpg', texts:{ badge:'26/27 신상', title:'무주에서 제일 잘 입은 사람 되기', desc:'사장이 직접 고른 트렌디한 신상 스키복' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
-    { img:'./4.jpg', texts:{ badge:'무료 배달', title:'장비는 슬로프 앞까지', desc:'픽업 · 반납도 직접 찾아갑니다' }, links:{}, mobile:freshFocal(), pc:freshFocal() }
+    { img:'./2.jpg', texts:{ badge:'오픈 특가', title:'풀세트 단돈 40,000원', desc:'장비 + 의류 + 헬멧 + 고글 · 오픈 한정가' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
+    { img:'./1.jpg', texts:{ badge:'26/27 신상', title:'렌탈복도 내 스타일로', desc:'매장에서 직접 보고 고르는 시즌 스키복' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
+    { img:'./4.jpg', texts:{ badge:'무료 배달', title:'장비는 스키장 바로 앞까지', desc:'픽업 · 반납도 걱정 없습니다' }, links:{}, mobile:freshFocal(), pc:freshFocal() }
 ];
 // 문구 위치·모양·크기·색상 기본값 — 모바일/PC 각각 (admin.html의 HERO_TEXT_DEFAULTS와 반드시 동일하게 유지)
 const HERO_TEXT_DEFAULTS = {
@@ -1802,11 +1763,13 @@ function fillSlide(d) {
     const mode = isPcMode() ? 'pc' : 'mobile';
     const f = d[mode] || freshFocal();
     const img = document.getElementById('main-slide-img');
-    img.src = d.img;
+    const texts = d.texts || {};
+    const imageName = String(d.img || '').replace(/^\.\//, '');
+    img.src = ['1.jpg','2.jpg','4.jpg'].includes(imageName) ? './' + imageName + '?v=20260927' : d.img;
+    img.alt = d.alt || [texts.title, texts.desc].filter(Boolean).join(' · ') || '무주놀러와 스키샵 안내';
     img.style.setProperty('--fx', (f.focalX != null ? f.focalX : 50) + '%');
     img.style.setProperty('--fy', (f.focalY != null ? f.focalY : 50) + '%');
     img.style.setProperty('--zoom', f.zoom || 1);
-    const texts = d.texts || {};
     const links = d.links || {};
     heroTextStyle.order.forEach(id => {
         const el = document.getElementById('main-slide-' + id);
@@ -2672,7 +2635,7 @@ const PROMO_DEFAULT = {
     size: { mobile:{width:414,height:280}, pc:{width:480,height:320} }, // 팝업 박스 너비·높이(px) — 모바일/PC 각각
     pcPosition: { v:'bottom', h:'center' }, // PC에서 팝업이 뜨는 위치 — 모바일은 항상 하단 고정(바텀시트)
     slides: [
-        { texts:{ eyebrow:'무주 스키 렌탈 신규 오픈', title:'풀세트 {{40,000원}}', desc:'장비 + 의류 + 헬멧 + 고글 + 장갑\n오픈 기념 한정 특가', buttonText:'지금 예약하기' }, links:{}, actionType:'quote', actionValue:'', gradFrom:'', gradTo:'', img:'', mobile:freshFocal(), pc:freshFocal() },
+        { texts:{ eyebrow:'무주 스키 렌탈 신규 오픈', title:'풀세트 {{40,000원}}', desc:'장비 + 의류 + 헬멧 + 고글\n오픈 기념 한정 특가', buttonText:'지금 예약하기' }, links:{}, actionType:'quote', actionValue:'', gradFrom:'', gradTo:'', img:'', mobile:freshFocal(), pc:freshFocal() },
         { texts:{ eyebrow:'26/27 시즌 신상 입고', title:'올해 제일 {{잘 입은 사람}}', desc:'사장이 직접 고른 트렌디한 신상 스키복\n슬로프 앞까지 무료 배달', buttonText:'룩북 구경하기' }, links:{}, actionType:'section', actionValue:'outfit-section', gradFrom:'', gradTo:'', img:'', mobile:freshFocal(), pc:freshFocal() }
     ]
 };
@@ -2909,66 +2872,173 @@ function promoHexToRgba(hex, alpha) {
     overlay.addEventListener('click', (e) => { if (e.target === overlay) promoClose(); });
 })();
 
-// ===== 의류·장비 캐러셀: 버튼·키보드·스와이프·드래그 =====
-(function initSwipeGalleries() {
+// ===== SNS형 룩북 탭·카드 덱·스토리 뷰어 =====
+(function initLookbook() {
+    const tabs = Array.from(document.querySelectorAll('[data-lookbook-tab]'));
+    const grids = Array.from(document.querySelectorAll('[data-lookbook-grid]'));
+    const deckImages = [
+        { src:'./assets/generated/outfit-lookbook-01-v1.webp', title:'블루·화이트 시즌 스키복', tag:'#시즌룩북', alt:'블루·화이트 스키복을 입고 슬로프에서 턴하는 스타일 참고 사진' },
+        { src:'./assets/generated/outfit-lookbook-02-v1.webp', title:'머스터드·화이트 스키복 핏', tag:'#피팅룩', alt:'머스터드·화이트 스키복 핏 스타일 참고 사진' },
+        { src:'./assets/generated/outfit-lookbook-03-v1.webp', title:'두 사람이 함께 입은 스키복', tag:'#커플룩', alt:'두 사람이 함께 입은 블루·화이트 스키복 스타일 참고 사진' }
+    ];
+    const deckImage = document.getElementById('lookbook-deck-image');
+    const deckTitle = document.getElementById('lookbook-deck-title');
+    const deckTag = document.getElementById('lookbook-deck-tag');
+    const deckCount = document.getElementById('lookbook-deck-count');
+    const deckMain = document.getElementById('lookbook-deck-main');
+    let deckIndex = 0;
+
+    function renderDeck() {
+        const item = deckImages[deckIndex];
+        deckImage.src = item.src;
+        deckImage.alt = item.alt;
+        deckTitle.textContent = item.title;
+        deckTag.textContent = item.tag;
+        deckCount.textContent = String(deckIndex + 1).padStart(2, '0') + ' / ' + String(deckImages.length).padStart(2, '0');
+        deckMain.setAttribute('aria-label', item.title + ' · 크게 보기');
+    }
+    function changeDeck(direction) {
+        deckIndex = (deckIndex + direction + deckImages.length) % deckImages.length;
+        renderDeck();
+    }
+
+    function selectLookbookCategory(category, moveFocus) {
+        tabs.forEach(function(tab) {
+            const selected = tab.dataset.lookbookTab === category;
+            tab.setAttribute('aria-selected', String(selected));
+            tab.tabIndex = selected ? 0 : -1;
+        });
+        grids.forEach(function(grid) { grid.hidden = grid.dataset.lookbookGrid !== category; });
+        if (moveFocus) {
+            const active = tabs.find(function(tab) { return tab.dataset.lookbookTab === category; });
+            if (active) active.focus();
+        }
+    }
+
+    tabs.forEach(function(tab, index) {
+        tab.addEventListener('click', function() { selectLookbookCategory(tab.dataset.lookbookTab, false); });
+        tab.addEventListener('keydown', function(event) {
+            if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+            event.preventDefault();
+            const next = (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+            selectLookbookCategory(tabs[next].dataset.lookbookTab, true);
+        });
+    });
+    document.querySelector('[data-deck-prev]').addEventListener('click', function() { changeDeck(-1); });
+    document.querySelector('[data-deck-next]').addEventListener('click', function() { changeDeck(1); });
+
+    const viewer = document.getElementById('lookbook-story-viewer');
+    const storyImage = document.getElementById('lookbook-story-image');
+    const storyCount = document.getElementById('lookbook-story-count');
+    const storySection = document.getElementById('lookbook-story-section');
+    const storyTag = document.getElementById('lookbook-story-tag');
+    const storyTitle = document.getElementById('lookbook-story-title');
+    const storyNote = document.getElementById('lookbook-story-note');
+    const storyProgress = viewer.querySelector('[data-story-progress]');
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    document.querySelectorAll('[data-gallery-shell]').forEach(shell => {
-        const id = shell.dataset.galleryShell;
-        const gallery = shell.querySelector(`[data-gallery="${id}"]`);
-        const prev = shell.querySelector(`[data-gallery-prev="${id}"]`);
-        const next = shell.querySelector(`[data-gallery-next="${id}"]`);
-        if (!gallery || !prev || !next) return;
+    const storyState = { category:'outfit', items:[], index:0, timer:0, opener:null, previousOverflow:'' };
 
-        const step = () => Math.max(gallery.clientWidth * 0.82, 260);
-        const move = direction => gallery.scrollBy({ left: direction * step(), behavior: reduceMotion ? 'auto' : 'smooth' });
-        prev.addEventListener('click', () => move(-1));
-        next.addEventListener('click', () => move(1));
-        gallery.addEventListener('keydown', event => {
-            if (event.key === 'ArrowLeft') { event.preventDefault(); move(-1); }
-            if (event.key === 'ArrowRight') { event.preventDefault(); move(1); }
+    function getStoryItems(category) {
+        return Array.from(document.querySelectorAll('[data-lookbook-grid="' + category + '"] [data-story-item]'));
+    }
+    function renderStory() {
+        const item = storyState.items[storyState.index];
+        if (!item) return;
+        const thumbnail = item.querySelector('img');
+        storyImage.src = item.dataset.storySrc;
+        storyImage.alt = thumbnail ? thumbnail.alt : item.dataset.storyTitle;
+        storySection.textContent = storyState.category === 'outfit' ? '무주놀러와 · 의류 룩북' : '무주놀러와 · 장비 소개';
+        storyCount.textContent = String(storyState.index + 1) + ' / ' + String(storyState.items.length);
+        storyTag.textContent = item.dataset.storyTag || '';
+        storyTitle.textContent = item.dataset.storyTitle || '';
+        storyNote.textContent = item.dataset.storyNote || '';
+        storyProgress.innerHTML = storyState.items.map(function(_, index) {
+            return '<span class="' + (index === storyState.index ? 'active' : '') + '"></span>';
+        }).join('');
+    }
+    function scheduleStoryAdvance() {
+        window.clearTimeout(storyState.timer);
+        if (reduceMotion || !viewer.classList.contains('open')) return;
+        storyState.timer = window.setTimeout(function() { moveStory(1); }, 4000);
+    }
+    function moveStory(direction) {
+        if (!storyState.items.length) return;
+        storyState.index = (storyState.index + direction + storyState.items.length) % storyState.items.length;
+        renderStory();
+        scheduleStoryAdvance();
+    }
+    function openLookbookStory(category, index, opener) {
+        const items = getStoryItems(category);
+        if (!items.length) return;
+        storyState.category = category;
+        storyState.items = items;
+        storyState.index = Math.max(0, Math.min(index || 0, items.length - 1));
+        storyState.opener = opener || document.activeElement;
+        storyState.previousOverflow = document.body.style.overflow;
+        renderStory();
+        viewer.classList.add('open');
+        viewer.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        viewer.querySelector('[data-story-close]').focus();
+        scheduleStoryAdvance();
+    }
+    function closeLookbookStory() {
+        window.clearTimeout(storyState.timer);
+        viewer.classList.remove('open');
+        viewer.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = storyState.previousOverflow;
+        if (storyState.opener && storyState.opener.isConnected) storyState.opener.focus();
+        storyState.opener = null;
+    }
+
+    window.openLookbookStory = openLookbookStory;
+    window.closeLookbookStory = closeLookbookStory;
+    document.querySelectorAll('[data-story-item]').forEach(function(item) {
+        item.addEventListener('click', function() {
+            const categoryIndex = getStoryItems(item.dataset.storyCategory).indexOf(item);
+            openLookbookStory(item.dataset.storyCategory, categoryIndex, item);
         });
     });
-})();
-
-// ===== PC 가로 스크롤: 마우스 드래그 + 휠로 좌우 이동 =====
-(function initDragScroll() {
-    const lists = document.querySelectorAll('.hide-scrollbar');
-    lists.forEach(el => {
-        let isDown = false, startX = 0, startLeft = 0, moved = 0;
-
-        el.addEventListener('mousedown', (e) => {
-            isDown = true; moved = 0;
-            startX = e.pageX; startLeft = el.scrollLeft;
-            el.style.cursor = 'grabbing'; el.style.userSelect = 'none';
-        });
-        window.addEventListener('mouseup', () => {
-            if (!isDown) return;
-            isDown = false;
-            el.style.cursor = ''; el.style.userSelect = '';
-        });
-        el.addEventListener('mouseleave', () => { if (isDown) { isDown = false; el.style.cursor = ''; el.style.userSelect = ''; } });
-        el.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            const dx = e.pageX - startX;
-            moved += Math.abs(dx);
-            el.scrollLeft = startLeft - dx;
-        });
-        // 드래그한 직후의 클릭은 무시 (카드 버튼 오작동 방지)
-        el.addEventListener('click', (e) => {
-            if (moved > 6) { e.preventDefault(); e.stopPropagation(); }
-        }, true);
-
-        // 세로 휠 → 가로 스크롤 (가로 스크롤이 가능한 경우에만)
-        el.addEventListener('wheel', (e) => {
-            if (el.scrollWidth <= el.clientWidth) return;
-            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-                el.scrollLeft += e.deltaY;
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        el.style.cursor = 'grab';
+    deckMain.addEventListener('click', function() { openLookbookStory('outfit', deckIndex, deckMain); });
+    viewer.querySelector('[data-story-prev]').addEventListener('click', function() { moveStory(-1); });
+    viewer.querySelector('[data-story-next]').addEventListener('click', function() { moveStory(1); });
+    viewer.querySelector('[data-story-close]').addEventListener('click', closeLookbookStory);
+    viewer.querySelector('[data-story-booking]').addEventListener('click', function() {
+        closeLookbookStory();
+        window.openQuote();
     });
+    document.addEventListener('keydown', function(event) {
+        if (!viewer.classList.contains('open')) return;
+        if (event.key === 'Escape') { event.preventDefault(); closeLookbookStory(); }
+        else if (event.key === 'ArrowLeft') { event.preventDefault(); moveStory(-1); }
+        else if (event.key === 'ArrowRight') { event.preventDefault(); moveStory(1); }
+        else if (event.key === 'Tab') {
+            const controls = Array.from(viewer.querySelectorAll('button:not([disabled])'));
+            const first = controls[0];
+            const last = controls[controls.length - 1];
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+            else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        }
+    });
+
+    let deckTouchStart = 0;
+    document.querySelector('.lookbook-deck').addEventListener('touchstart', function(event) {
+        deckTouchStart = event.changedTouches[0].clientX;
+    }, { passive:true });
+    document.querySelector('.lookbook-deck').addEventListener('touchend', function(event) {
+        const distance = event.changedTouches[0].clientX - deckTouchStart;
+        if (Math.abs(distance) > 48) changeDeck(distance < 0 ? 1 : -1);
+    }, { passive:true });
+    let storyTouchStart = 0;
+    viewer.querySelector('.lookbook-story-panel').addEventListener('touchstart', function(event) {
+        storyTouchStart = event.changedTouches[0].clientX;
+    }, { passive:true });
+    viewer.querySelector('.lookbook-story-panel').addEventListener('touchend', function(event) {
+        const distance = event.changedTouches[0].clientX - storyTouchStart;
+        if (Math.abs(distance) > 48) moveStory(distance < 0 ? 1 : -1);
+    }, { passive:true });
+
+    renderDeck();
 })();
 
 // ===== FAQ 아코디언 =====
@@ -3010,7 +3080,9 @@ window.openImgModal = function(src) {
 window.closeImgModal = function(e) {
     // 배경(오버레이) 또는 닫기 버튼 클릭 시 닫기. 이미지 자체 클릭은 무시.
     if (e && e.target && e.target.id === 'img-modal-img') return;
-    document.getElementById('img-modal').classList.remove('open');
+    const modal = document.getElementById('img-modal');
+    if (!modal) return;
+    modal.classList.remove('open');
     document.body.style.overflow = '';
 };
 // ESC로 닫기

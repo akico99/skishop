@@ -1110,9 +1110,9 @@ const HERO_TEXT_DEFAULTS = {
     }
 };
 const HERO_SLIDE_FALLBACK = [
-    { img:'./assets/generated/hero-hook-v1.png', texts:{ badge:'시즌 룩북', title:'무주에서 제일 잘 입는 하루', desc:'스키복부터 장비까지, 슬로프 앞에서 바로 준비하세요' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
-    { img:'./1.jpg', texts:{ badge:'26/27 신상', title:'무주에서 제일 잘 입은 사람 되기', desc:'사장이 직접 고른 트렌디한 신상 스키복' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
-    { img:'./4.jpg', texts:{ badge:'무료 배달', title:'장비는 슬로프 앞까지', desc:'픽업 · 반납도 직접 찾아갑니다' }, links:{}, mobile:freshFocal(), pc:freshFocal() }
+    { img:'./2.jpg', texts:{ badge:'오픈 특가', title:'풀세트 단돈 40,000원', desc:'장비 + 의류 + 헬멧 + 고글 · 오픈 한정가' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
+    { img:'./1.jpg', texts:{ badge:'26/27 신상', title:'렌탈복도 내 스타일로', desc:'매장에서 직접 보고 고르는 시즌 스키복' }, links:{}, mobile:freshFocal(), pc:freshFocal() },
+    { img:'./4.jpg', texts:{ badge:'무료 배달', title:'장비는 스키장 바로 앞까지', desc:'픽업 · 반납도 걱정 없습니다' }, links:{}, mobile:freshFocal(), pc:freshFocal() }
 ];
 let heroSlides = HERO_SLIDE_FALLBACK.map(s => ({ ...s, texts:{...s.texts}, links:{...s.links}, mobile:{...s.mobile}, pc:{...s.pc} }));
 let heroTextStyle = { order:['badge','title','desc'], mobile:{}, pc:{} }; // { order:[id...], mobile:{id:{x,y,size,color,bg,shape,weight,align}}, pc:{...} }
@@ -1491,7 +1491,7 @@ const PROMO_DEFAULT = {
     size: { mobile:{width:414,height:280}, pc:{width:480,height:320} },
     pcPosition: { v:'bottom', h:'center' }, // PC에서 팝업이 뜨는 위치 — 모바일은 항상 하단 고정(바텀시트)이라 별도 설정 없음
     slides: [
-        { texts:{ eyebrow:'무주 스키 렌탈 신규 오픈', title:'풀세트 {{40,000원}}', desc:'장비 + 의류 + 헬멧 + 고글 + 장갑\n오픈 기념 한정 특가', buttonText:'지금 예약하기' }, links:{}, actionType:'quote', actionValue:'', gradFrom:'', gradTo:'', img:'', mobile:freshFocal(), pc:freshFocal() },
+        { texts:{ eyebrow:'무주 스키 렌탈 신규 오픈', title:'풀세트 {{40,000원}}', desc:'장비 + 의류 + 헬멧 + 고글\n오픈 기념 한정 특가', buttonText:'지금 예약하기' }, links:{}, actionType:'quote', actionValue:'', gradFrom:'', gradTo:'', img:'', mobile:freshFocal(), pc:freshFocal() },
         { texts:{ eyebrow:'26/27 시즌 신상 입고', title:'올해 제일 {{잘 입은 사람}}', desc:'사장이 직접 고른 트렌디한 신상 스키복\n슬로프 앞까지 무료 배달', buttonText:'룩북 구경하기' }, links:{}, actionType:'section', actionValue:'outfit-section', gradFrom:'', gradTo:'', img:'', mobile:freshFocal(), pc:freshFocal() }
     ]
 };
