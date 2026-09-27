@@ -448,6 +448,11 @@
         .pc-quote.collapsed #pc-quote-head .pqh-chevron { transform:rotate(180deg); }
         .pc-quote.collapsed #quote-section { display:none !important; }
 
+        /* 견적 전용 모드에서는 금액 산정에 필요 없는 예약·개인정보 입력을 숨깁니다. */
+        #quote-section.estimate-only [data-reservation-only] { display:none !important; }
+        #quote-section [data-estimate-note] { display:none !important; }
+        #quote-section.estimate-only [data-estimate-note] { display:block !important; }
+
         /* ===== 견적 패널 닫기/최소화 버튼 (평소 사이드바에서는 숨김, 모달로 확대됐을 때만 노출) ===== */
         .pc-quote-modal-controls { display:none; align-items:center; gap:6px; }
         .pqm-btn {
@@ -892,9 +897,9 @@
                     <i id="quote-icon" class="fa-solid fa-plus text-white text-[16px] transition-transform duration-300" style="transform:rotate(0deg)"></i>
                 </span>
                 <span>
-                    <span class="block font-black text-[#6d5acd] text-[17px] leading-tight">실시간 견적 및 간편 예약</span>
-                    <span class="block text-[12px] text-gray-500 font-medium mt-1">탭 한 번이면 내 가격이 바로 나와요</span>
-                    <span class="inline-block text-[10px] text-[#6d5acd] font-bold bg-violet-100/70 px-2 py-0.5 rounded-md mt-2">예약금 없음 · 3초 견적</span>
+                    <span id="quote-mode-title" class="block font-black text-[#6d5acd] text-[17px] leading-tight">실시간 견적 및 간편 예약</span>
+                    <span id="quote-mode-description" class="block text-[12px] text-gray-500 font-medium mt-1">탭 한 번이면 내 가격이 바로 나와요</span>
+                    <span id="quote-mode-badge" class="inline-block text-[10px] text-[#6d5acd] font-bold bg-violet-100/70 px-2 py-0.5 rounded-md mt-2">예약금 없음 · 3초 견적</span>
                 </span>
             </span>
             <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#6d5acd]/15 z-0" aria-hidden="true">
@@ -906,7 +911,7 @@
             <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-5">
 
                 <!-- ① 예약자 정보 -->
-                <div>
+                <div data-reservation-only>
                     <p class="form-section-title"><i class="fa-solid fa-user text-[10px]"></i> 예약자 정보</p>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
@@ -933,7 +938,7 @@
                             <input type="date" id="visit-date" onchange="onDateChange()"
                                    class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-800 outline-none focus:border-violet-500 text-[13px]">
                         </div>
-                        <div>
+                        <div data-reservation-only>
                             <label for="visit-time" class="block text-[10px] text-gray-400 font-medium mb-1">방문 시간</label>
                             <select id="visit-time" class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-800 outline-none focus:border-violet-500 text-[13px]">
                                 <option>07:30</option><option>08:00</option><option>08:30</option>
@@ -1097,21 +1102,21 @@
                 </div>
 
                 <!-- ⑥ 기타 요청사항 -->
-                <div>
+                <div data-reservation-only>
                     <p class="form-section-title"><i class="fa-regular fa-comment text-[10px]"></i> 기타 요청사항</p>
                     <textarea id="reserver-memo" rows="2" placeholder="사이즈, 특이사항 등을 입력해주세요"
                               class="w-full border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-800 outline-none focus:border-violet-500 text-[12px] resize-none"></textarea>
                 </div>
 
                 <!-- 약관 -->
-                <div class="bg-gray-100 rounded-xl p-3 text-[11px] text-gray-500 leading-relaxed space-y-1">
+                <div data-reservation-only class="bg-gray-100 rounded-xl p-3 text-[11px] text-gray-500 leading-relaxed space-y-1">
                     <p>· 장비 파손·분실 시 스키/보드 30만원, 기타 장비 원가의 70% 보상</p>
                     <p>· 리프트권 당일 취소 시 환불 불가, 익일 17시 전 취소 시 100% 환불</p>
                     <p>· 의류 심각한 오염 시 보상 책임 있음</p>
                 </div>
                 <!-- 개인정보 수집·이용 고지 — 개인정보보호법 제15조에 따라 수집 항목·목적·
                      보유기간·거부권을 예약 전에 알려야 합니다. 내용을 바꾸면 privacy.html 도 함께 고치세요. -->
-                <div class="bg-gray-100 rounded-xl p-3 text-[11px] text-gray-500 leading-relaxed space-y-1">
+                <div data-reservation-only class="bg-gray-100 rounded-xl p-3 text-[11px] text-gray-500 leading-relaxed space-y-1">
                     <p class="font-bold text-gray-600">개인정보 수집·이용 안내</p>
                     <p>· 수집 항목: 이름, 연락처, 방문 일시, 예약 내역 (요청사항은 선택)</p>
                     <p>· 이용 목적: 예약 접수·확인 및 관련 연락</p>
@@ -1119,7 +1124,7 @@
                     <p>· 동의를 거부하실 수 있으며, 이 경우 온라인 예약 대신 전화로 예약하실 수 있습니다.</p>
                     <p class="pt-1"><a href="privacy.html" target="_blank" rel="noopener" class="text-[#6d5acd] font-bold underline">개인정보처리방침 전문 보기</a></p>
                 </div>
-                <label class="flex items-center gap-2 cursor-pointer">
+                <label data-reservation-only class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" id="reserver-agree" class="w-4 h-4 accent-[#6d5acd]">
                     <span class="text-[12px] text-gray-600 font-medium">위 이용약관 및 개인정보 수집·이용에 동의합니다 <span class="text-red-400">*</span></span>
                 </label>
@@ -1135,8 +1140,9 @@
                         <span class="text-[#6d5acd] font-bold text-sm">원</span>
                     </div>
                 </div>
+                <p data-estimate-note class="text-center text-[11px] leading-relaxed text-slate-500">예상 금액 확인용입니다. 예약은 접수되지 않습니다.</p>
 
-                <button id="reserve-submit-btn" onclick="onReserve()"
+                <button id="reserve-submit-btn" data-reservation-only onclick="onReserve()"
                         class="w-full bg-[#0f172a] text-white rounded-xl py-3.5 font-bold text-[14px] shadow-sm hover:bg-gray-800 transition flex items-center justify-center gap-2">
                     <span id="reserve-btn-text">예약 진행하기</span>
                 </button>
@@ -1615,7 +1621,7 @@
 
     <!-- 하단 고정 바 (모바일·PC 공통) -->
     <div class="mobile-bottom-bar fixed bottom-0 w-full max-w-[414px] bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 px-3 py-3 flex gap-2 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
-        <button onclick="openQuote()" class="flex-1 bg-white border border-[#6d5acd] text-[#6d5acd] rounded-xl font-bold text-[13px] py-3 hover:bg-violet-50 transition flex items-center justify-center gap-1">
+        <button onclick="openEstimate()" class="flex-1 bg-white border border-[#6d5acd] text-[#6d5acd] rounded-xl font-bold text-[13px] py-3 hover:bg-violet-50 transition flex items-center justify-center gap-1">
             <i class="fa-solid fa-calculator text-[13px]"></i> 견적신청
         </button>
         <button onclick="openLookup()" class="flex-1 bg-[#0f172a] text-white rounded-xl font-bold text-[13px] py-3 hover:bg-gray-800 transition flex items-center justify-center gap-1">
@@ -1990,14 +1996,31 @@ function calculateTotal() {
 const quoteBtn     = document.getElementById('quote-btn');
 const quoteSection = document.getElementById('quote-section');
 const quoteIcon    = document.getElementById('quote-icon');
+const quoteModeTitle = document.getElementById('quote-mode-title');
+const quoteModeDescription = document.getElementById('quote-mode-description');
+const quoteModeBadge = document.getElementById('quote-mode-badge');
 
 function setQuoteOpen(open) {
     quoteSection.classList.toggle('hidden', !open);
     quoteBtn.setAttribute('aria-expanded', String(open));
     quoteIcon.style.transform = open ? 'rotate(45deg)' : 'rotate(0deg)';
 }
-// 견적/예약 열기 → 단계형 예약 신청 창을 띄웁니다.
-window.openQuote = function() { openStepForm(); };
+// 견적 버튼은 예약 정보 없이 합계만 계산하고, 예약 버튼은 기존 단계형 신청을 엽니다.
+window.openEstimate = function() {
+    quoteSection.classList.add('estimate-only');
+    quoteModeTitle.textContent = '실시간 견적 계산';
+    quoteModeDescription.textContent = '날짜와 이용 항목을 선택해 예상 금액만 확인하세요';
+    quoteModeBadge.textContent = '예약 접수 없이 금액만 계산';
+    setQuoteOpen(true);
+    quoteBtn.scrollIntoView({ behavior:'smooth', block:'start' });
+};
+window.openQuote = function() {
+    quoteSection.classList.remove('estimate-only');
+    quoteModeTitle.textContent = '실시간 견적 및 간편 예약';
+    quoteModeDescription.textContent = '탭 한 번이면 내 가격이 바로 나와요';
+    quoteModeBadge.textContent = '예약금 없음 · 3초 견적';
+    openStepForm();
+};
 
 /* ===== 단계형 예약 신청 =====
    질문을 한 번에 하나씩 보여주고, 답하면 체크 표시와 함께 위에 남고 다음 질문이 열립니다.
