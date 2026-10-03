@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-labelledby="title desc">
+  <title id="title">무주리조트 가는 길</title>
+  <desc id="desc">대중교통과 시즌 셔틀 경로를 안내하는 겨울 산 테마 그림</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#eaf5ff"/><stop offset="1" stop-color="#c8dcff"/></linearGradient>
+    <linearGradient id="mountain" x2="0" y2="1"><stop stop-color="#8fb7e8"/><stop offset="1" stop-color="#687cc7"/></linearGradient>
+  </defs>
+  <rect width="1200" height="1200" rx="72" fill="url(#bg)"/>
+  <circle cx="950" cy="230" r="88" fill="#fff" opacity=".88"/>
+  <path d="M0 650 260 345l190 225 220-305 350 400 180-190v725H0Z" fill="url(#mountain)"/>
+  <path d="m262 346 76 91-78-26-48 52Zm409-81 96 133-90-37-68 57Z" fill="#fff" opacity=".95"/>
+  <path d="M0 780q230-120 455 0t460 0q140-70 285 8v412H0Z" fill="#fff"/>
+  <rect x="100" y="770" width="1000" height="300" rx="40" fill="#fff" opacity=".96"/>
+  <text x="600" y="870" text-anchor="middle" font-family="sans-serif" font-size="54" font-weight="800" fill="#51439d">무주리조트 가는 길</text>
+  <text x="600" y="940" text-anchor="middle" font-family="sans-serif" font-size="31" fill="#39445a">버스터미널 · 지역 셔틀 · 마지막 이동</text>
+  <path d="M260 1010h680" stroke="#8e7be0" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="290" cy="1010" r="22" fill="#51439d"/><circle cx="600" cy="1010" r="22" fill="#51439d"/><circle cx="910" cy="1010" r="22" fill="#51439d"/>
+  <text x="290" y="1050" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#39445a">출발지</text>
+  <text x="600" y="1050" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#39445a">무주터미널</text>
+  <text x="910" y="1050" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#39445a">리조트</text>
+</svg>

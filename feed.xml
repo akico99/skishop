@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>무주놀러와스키샵 블로그</title>
+    <link>https://www.nolleowaski.com/blog/</link>
+    <description>무주 스키장 렌탈 가격, 리프트권, 교통·셔틀, 강습과 시즌 일정 안내</description>
+    <language>ko-kr</language>
+    <lastBuildDate>Sat, 03 Oct 2026 00:00:00 +0900</lastBuildDate>
+    <atom:link href="https://www.nolleowaski.com/feed.xml" rel="self" type="application/rss+xml" xmlns:atom="http://www.w3.org/2005/Atom" />
+    <item>
+      <title>무주리조트 가는 법: 7개 도시 대중교통·셔틀</title>
+      <link>https://www.nolleowaski.com/blog/muju-ski-getting-there.html</link>
+      <guid isPermaLink="true">https://www.nolleowaski.com/blog/muju-ski-getting-there.html</guid>
+      <pubDate>Sat, 03 Oct 2026 00:00:00 +0900</pubDate>
+      <description>대전·대구·부산·전주·창원·천안·청주 출발 교통과 시즌 셔틀 확인 방법을 안내합니다.</description>
+    </item>
+    <item>
+      <title>무주 스키 초보·어린이 강습: 예약 전 확인할 점</title>
+      <link>https://www.nolleowaski.com/blog/muju-ski-lessons.html</link>
+      <guid isPermaLink="true">https://www.nolleowaski.com/blog/muju-ski-lessons.html</guid>
+      <pubDate>Sat, 03 Oct 2026 00:00:00 +0900</pubDate>
+      <description>연령, 반별 인원, 강습 내용, 장비·리프트 비용과 준비물을 공식 자료로 확인하세요.</description>
+    </item>
+    <item>
+      <title>무주리조트 2026/27 개장일·폐장일은 발표됐나요?</title>
+      <link>https://www.nolleowaski.com/blog/muju-ski-season-dates.html</link>
+      <guid isPermaLink="true">https://www.nolleowaski.com/blog/muju-ski-season-dates.html</guid>
+      <pubDate>Sat, 03 Oct 2026 00:00:00 +0900</pubDate>
+      <description>2026-10-03 기준 공식 발표 여부와 최신 시즌 일정 확인 경로를 안내합니다.</description>
+    </item>
+    <item>
+      <title>무주 스키장 렌탈 가격: 장비·의류·보호장비</title>
+      <link>https://www.nolleowaski.com/blog/muju-ski-price.html</link>
+      <guid isPermaLink="true">https://www.nolleowaski.com/blog/muju-ski-price.html</guid>
+      <pubDate>Sat, 03 Oct 2026 00:00:00 +0900</pubDate>
+      <description>무주놀러와스키샵의 2026/27 시즌 공개 장비·의류·헬멧·고글 렌탈 요금입니다.</description>
+    </item>
+    <item>
+      <title>무주리조트 리프트권 할인·시간권 안내</title>
+      <link>https://www.nolleowaski.com/blog/muju-lift-ticket.html</link>
+      <guid isPermaLink="true">https://www.nolleowaski.com/blog/muju-lift-ticket.html</guid>
+      <pubDate>Tue, 22 Sep 2026 00:00:00 +0900</pubDate>
+      <description>무주리조트 리프트권 3·4·6시간권의 주중·주말 요금과 선택 방법입니다.</description>
+    </item>
+    <item>
+      <title>무주 스키장 렌탈샵 이용 방법</title>
+      <link>https://www.nolleowaski.com/blog/muju-ski-rental.html</link>
+      <guid isPermaLink="true">https://www.nolleowaski.com/blog/muju-ski-rental.html</guid>
+      <pubDate>Tue, 22 Sep 2026 00:00:00 +0900</pubDate>
+      <description>무주 스키·보드 장비와 의류 예약, 방문 전 준비 방법을 안내합니다.</description>
+    </item>
+  </channel>
+</rss>

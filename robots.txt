@@ -10,4 +10,39 @@ User-agent: Yeti
 Allow: /
 Disallow: /admin.html
 
+# OpenAI
+User-agent: GPTBot
+Allow: /
+Disallow: /admin.html
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin.html
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin.html
+
+# Anthropic
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin.html
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /admin.html
+
+User-agent: Claude-User
+Allow: /
+Disallow: /admin.html
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin.html
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /admin.html
+
 Sitemap: https://www.nolleowaski.com/sitemap.xml
