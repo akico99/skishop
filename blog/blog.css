@@ -18,6 +18,8 @@ body {
   background: var(--blog-bg);
   font-family: Arial, "Noto Sans KR", "Malgun Gothic", sans-serif;
   line-height: 1.7;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 a { color: inherit; }
@@ -74,6 +76,7 @@ a { color: inherit; }
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  text-align: center;
 }
 
 h1,
@@ -86,6 +89,7 @@ h1 {
   font-size: clamp(30px, 5vw, 46px);
   line-height: 1.25;
   letter-spacing: -0.06em;
+  text-align: center;
 }
 
 h2 {
@@ -112,6 +116,7 @@ h3 {
 .blog-meta {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 8px 14px;
   margin: 20px 0 28px;
   color: var(--blog-muted);

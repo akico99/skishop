@@ -6,7 +6,7 @@ Canonical website: https://www.nolleowaski.com/
 Business name: 무주놀러와스키샵&렌탈샵
 Location: 전북특별자치도 무주군 설천면 구천동로 1050
 Official contact page: https://www.nolleowaski.com/
-Last reviewed: 2026-10-03
+Last reviewed: 2026-10-11
 
 ## Official pages
 
@@ -20,7 +20,7 @@ Last reviewed: 2026-10-03
 - [무주리조트 리프트권 시간권 안내](https://www.nolleowaski.com/blog/muju-lift-ticket.html)
 - [무주 스키장 렌탈 가격](https://www.nolleowaski.com/blog/muju-ski-price.html)
 - [무주리조트 가는 법과 시즌 셔틀](https://www.nolleowaski.com/blog/muju-ski-getting-there.html)
-- [초보·어린이 강습 예약 전 확인사항](https://www.nolleowaski.com/blog/muju-ski-lessons.html)
+- [성인 1:1·초보·어린이 강습 예약 전 확인사항](https://www.nolleowaski.com/blog/muju-ski-lessons.html)
 - [무주리조트 2026/27 개장일·폐장일 확인](https://www.nolleowaski.com/blog/muju-ski-season-dates.html)
 
 ## Authoritative references
