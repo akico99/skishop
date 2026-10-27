@@ -315,6 +315,97 @@ h3 {
 
 .blog-footer a { color: var(--blog-violet-dark); font-weight: 700; }
 
+/* ===== 예약 전환 요소: 헤더 버튼, 본문 예약 박스, 매장 소개, 하단 고정 바 ===== */
+.blog-article-hero.photo { aspect-ratio: auto; max-width: 760px; background: #fff; }
+.blog-article-hero.photo img { height: auto; aspect-ratio: 4 / 3; }
+.blog-article-hero.photo figcaption { padding: 10px 4px 0; color: var(--blog-muted); font-size: 12px; font-weight: 700; text-align: center; }
+
+.blog-nav a.blog-nav-cta {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--blog-violet);
+  color: #fff;
+}
+.blog-nav a.blog-nav-cta:hover { background: var(--blog-violet-dark); color: #fff; }
+
+.blog-cta {
+  margin: 32px 0;
+  padding: 22px 24px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #6d5acd, #4a3d94);
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(72, 58, 155, 0.22);
+}
+.blog-cta p { margin-bottom: 8px; color: #ece9ff; font-size: 15px; }
+.blog-cta .blog-cta-eyebrow { color: #d9d3ff; font-size: 12px; font-weight: 800; letter-spacing: 0.03em; }
+.blog-cta .blog-cta-title { color: #fff; font-size: 21px; font-weight: 900; line-height: 1.4; letter-spacing: -0.03em; }
+
+.blog-cta-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.blog-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 18px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.blog-btn.primary { background: #fff; border-color: #fff; color: var(--blog-violet-dark); }
+.blog-btn:hover { filter: brightness(0.96); }
+
+.blog-store {
+  margin: 40px 0;
+  padding: 26px;
+  border: 1px solid #ded8fa;
+  border-radius: 20px;
+  background: var(--blog-soft);
+}
+.blog-store h2 { margin-top: 0; }
+.blog-store > p { color: #3d4659; }
+.blog-store-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0; }
+.blog-store-gallery figure { margin: 0; overflow: hidden; border-radius: 14px; background: #fff; }
+.blog-store-gallery img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
+.blog-store-gallery figcaption { padding: 8px 10px; color: var(--blog-muted); font-size: 12px; font-weight: 700; }
+.blog-store-points { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.blog-store-points li { padding: 14px 16px; border-radius: 14px; background: #fff; font-size: 14px; }
+.blog-store-points strong { display: block; margin-bottom: 4px; color: var(--blog-violet-dark); font-size: 15px; }
+.blog-store .blog-btn { border-color: var(--blog-violet); color: var(--blog-violet-dark); background: #fff; }
+.blog-store .blog-btn.primary { background: var(--blog-violet); color: #fff; }
+
+body { padding-bottom: 78px; }
+.blog-sticky-cta {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.5fr;
+  gap: 8px;
+  padding: 10px max(12px, calc((100% - 960px) / 2)) calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--blog-line);
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 -6px 20px rgba(31, 38, 61, 0.08);
+}
+.blog-sticky-cta a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border: 1px solid var(--blog-line);
+  border-radius: 12px;
+  color: var(--blog-ink);
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.blog-sticky-cta a.kakao { background: #fee500; border-color: #fee500; color: #3a1d1d; }
+.blog-sticky-cta a.primary { background: var(--blog-violet); border-color: var(--blog-violet); color: #fff; }
+
 @media (max-width: 700px) {
   .blog-header-inner { min-height: 60px; }
   .blog-nav { gap: 10px; font-size: 12px; }
@@ -329,4 +420,11 @@ h3 {
   .blog-article { border-radius: 16px; padding: 24px 18px; }
   .blog-article-hero { max-width: none; margin-bottom: 24px; }
   h2 { margin-top: 32px; font-size: 21px; }
+  .blog-cta { padding: 20px 18px; }
+  .blog-cta .blog-cta-title { font-size: 19px; }
+  .blog-cta-actions .blog-btn { flex: 1 1 100%; }
+  .blog-store { padding: 20px 16px; }
+  .blog-store-gallery { grid-template-columns: 1fr 1fr; }
+  .blog-store-gallery figure:first-child { grid-column: span 2; }
+  .blog-store-points { grid-template-columns: 1fr; }
 }

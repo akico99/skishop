@@ -3120,6 +3120,14 @@ window.closeImgModal = function(e) {
 };
 // ESC로 닫기
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeImgModal(); });
+
+// 블로그 등에서 #reserve(예약 폼) 또는 #lookbook(의류 룩북) 링크로 들어오면 해당 화면을 바로 연다
+function openFromHash() {
+    if (location.hash === '#reserve' && window.openQuote) window.openQuote();
+    else if (location.hash === '#lookbook' && window.openPanelFromMenu) window.openPanelFromMenu('outfit-section');
+}
+window.addEventListener('load', openFromHash);
+window.addEventListener('hashchange', openFromHash);
 </script>
 </body>
 </html>
