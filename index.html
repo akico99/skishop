@@ -54,7 +54,7 @@
       "description": "무주덕유산리조트 정문 앞에서 스키·보드 장비와 의류 대여, 리프트권 할인, 슬로프 앞 배달을 안내하는 무주놀러와스키샵&렌탈샵.",
       "url": "https://www.nolleowaski.com/",
       "image": "https://www.nolleowaski.com/assets/generated/hero-hook-v1.png",
-      "telephone": "+82-10-7720-5333",
+      "telephone": "+82-10-9616-3421",
       "email": "jahyeon7886@naver.com",
       "taxID": "336-35-01685",
       "foundingDate": "2026-09-10",
@@ -892,8 +892,8 @@
 
     <!-- 전화문의 — PC는 전화 연결이 안 되므로 번호를 그대로 노출 + 클릭하면 복사, 헤더 바로 아래 고정 -->
     <div class="pc-side-right">
-        <button type="button" onclick="copyPhoneNumber('010-7720-5333')" class="bg-[#0f172a] text-white" aria-label="전화번호 복사">
-            <i class="fa-solid fa-phone text-[13px]"></i><span class="font-bold">010-7720-5333</span><i class="fa-regular fa-copy text-[11px] opacity-60"></i>
+        <button type="button" onclick="copyPhoneNumber('010-9616-3421')" class="bg-[#0f172a] text-white" aria-label="전화번호 복사">
+            <i class="fa-solid fa-phone text-[13px]"></i><span class="font-bold">010-9616-3421</span><i class="fa-regular fa-copy text-[11px] opacity-60"></i>
         </button>
     </div>
 
@@ -1380,7 +1380,7 @@
             </div>
             <div class="px-4 pb-5 flex gap-2">
                 <a href="https://sbski.co.kr" target="_blank" rel="noopener noreferrer" class="flex-1 bg-[#6d5acd] text-white rounded-xl py-3 font-bold text-[13px] text-center hover:bg-violet-700 transition flex items-center justify-center gap-1.5"><i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i> 강사 직접 선택하기</a>
-                <a href="tel:010-7720-5333" class="flex-1 bg-[#0f172a] text-white rounded-xl py-3 font-bold text-[13px] text-center hover:bg-gray-800 transition flex items-center justify-center gap-1.5"><i class="fa-solid fa-phone text-[11px]"></i> 강습 문의하기</a>
+                <a href="tel:010-9616-3421" class="flex-1 bg-[#0f172a] text-white rounded-xl py-3 font-bold text-[13px] text-center hover:bg-gray-800 transition flex items-center justify-center gap-1.5"><i class="fa-solid fa-phone text-[11px]"></i> 강습 문의하기</a>
             </div>
         </div>
 
@@ -1595,7 +1595,7 @@
                 <p>사업자등록번호: 336-35-01685</p>
                 <p>통신판매업신고번호: 제2026-전북무주-0041호</p>
                 <p>주소: 전북특별자치도 무주군 설천면 구천동로 1050</p>
-                <p>대표번호: 010-7720-5333</p>
+                <p>대표번호: 010-9616-3421</p>
                 <p>이메일: jahyeon7886@naver.com</p>
             </div>
         </div>
@@ -1617,7 +1617,7 @@
     </div><!-- /pc-wrapper -->
 
     <!-- 전화문의 플로팅 버튼 (모바일 전용 — PC는 우측 견적 패널 안에 이미 있음) -->
-    <a href="tel:010-7720-5333" aria-label="전화 문의"
+    <a href="tel:010-9616-3421" aria-label="전화 문의"
        class="lg:hidden fixed right-3 bottom-[150px] w-12 h-12 rounded-full bg-[#0f172a] text-white flex items-center justify-center shadow-lg z-40 hover:brightness-110 transition">
         <i class="fa-solid fa-phone text-lg"></i>
     </a>
@@ -2324,7 +2324,7 @@ window.sqSubmit = function() {
         return fail('리프트권·장비·의류·보호장비 중 최소 한 가지는 선택해주세요.');
     }
     if (!sqAns.agree) return fail('개인정보 수집·이용 및 이용약관 동의가 필요합니다.');
-    if (!_supabase) return fail('지금 예약 서버에 연결할 수 없습니다. 잠시 후 다시 시도하시거나 010-7720-5333으로 전화 주세요.');
+    if (!_supabase) return fail('지금 예약 서버에 연결할 수 없습니다. 잠시 후 다시 시도하시거나 010-9616-3421으로 전화 주세요.');
 
     const agreeEl = document.getElementById('reserver-agree');
     if (agreeEl) agreeEl.checked = true;
@@ -2538,7 +2538,7 @@ window.onReserve = async function() {
     }
     if (!anyQty) { showToast('항목을 1개 이상 선택해주세요'); return; }
     if (!agree)  { showToast('이용약관 및 개인정보 수집·이용에 동의해주세요'); return; }
-    if (!_supabase) { showToast('예약 서버에 연결할 수 없습니다. 010-7720-5333으로 전화 주세요'); return; }
+    if (!_supabase) { showToast('예약 서버에 연결할 수 없습니다. 010-9616-3421으로 전화 주세요'); return; }
 
     // 로딩
     const btn     = document.getElementById('reserve-submit-btn');
@@ -2595,7 +2595,7 @@ window.lookupReservation = async function() {
     if (!isValidName(name)) { showToast('이름을 올바르게 입력해주세요'); document.getElementById('lookup-name').focus(); return; }
     if (!phone) { showToast('연락처를 입력해주세요'); document.getElementById('lookup-phone').focus(); return; }
     if (!isValidPhone(phone)) { showToast('휴대폰 번호를 올바르게 입력해주세요 (010-0000-0000)'); document.getElementById('lookup-phone').focus(); return; }
-    if (!_supabase) { showToast('예약 서버에 연결할 수 없습니다. 010-7720-5333으로 전화 주세요'); return; }
+    if (!_supabase) { showToast('예약 서버에 연결할 수 없습니다. 010-9616-3421으로 전화 주세요'); return; }
 
     btn.disabled = true;
     btnText.innerHTML = '<span class="spinner"></span> 조회 중...';
