@@ -1771,11 +1771,19 @@ function renderSlideDots() {
 
 function fillSlide(d) {
     const mode = isPcMode() ? 'pc' : 'mobile';
-    const f = d[mode] || freshFocal();
+    let f = d[mode] || freshFocal();
     const img = document.getElementById('main-slide-img');
     const texts = d.texts || {};
     const imageName = String(d.img || '').replace(/^\.\//, '');
-    img.src = ['1.jpg','2.jpg','4.jpg'].includes(imageName) ? './' + imageName + '?v=20261027b' : d.img;
+    const builtIn = ['1.jpg','2.jpg','4.jpg'].includes(imageName);
+    // PC 배너는 가로로 긴 비율이라, 기본 슬라이드 3장은 PC 전용 가로 이미지(1-pc.jpg 등)를 쓰고
+    // 정사각 이미지 기준으로 저장된 확대·초점값 대신 가로 이미지에 맞춘 고정값을 적용한다
+    if (builtIn && mode === 'pc') {
+        img.src = './' + imageName.replace('.jpg', '-pc.jpg') + '?v=20261027c';
+        f = { focalX: 60, focalY: 50, zoom: 1 };
+    } else {
+        img.src = builtIn ? './' + imageName + '?v=20261027b' : d.img;
+    }
     img.alt = d.alt || [texts.title, texts.desc].filter(Boolean).join(' · ') || '무주놀러와 스키샵 안내';
     img.style.setProperty('--fx', (f.focalX != null ? f.focalX : 50) + '%');
     img.style.setProperty('--fy', (f.focalY != null ? f.focalY : 50) + '%');
