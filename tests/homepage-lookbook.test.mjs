@@ -48,12 +48,11 @@ test('uses factual, descriptive alternative text for hero slide photos', () => {
   assert.doesNotMatch(html, /desc:'장비 \+ 의류 \+ 헬멧 \+ 고글 \+ 장갑/);
 });
 
-test('uses optimized WebP assets for the generated style references', () => {
-  for (const asset of [
-    'outfit-lookbook-01-v1.webp', 'outfit-lookbook-02-v1.webp', 'outfit-lookbook-03-v1.webp',
-    'equipment-lookbook-01-v1.webp', 'equipment-lookbook-02-v1.webp', 'equipment-lookbook-03-v1.webp'
-  ]) {
-    requires(html, new RegExp(asset.replaceAll('.', '\\.')), `the optimized ${asset} image`);
-    assert.ok(fs.existsSync(path.join(root, 'assets', 'generated', asset)), `Missing image asset: ${asset}`);
-  }
+test('shows five real model shots in the season lookbook carousel', () => {
+  const deck = html.match(/const deckImages = \[([\s\S]*?)\];/);
+  assert.ok(deck, 'deck image list should exist');
+  const srcs = [...deck[1].matchAll(/src:'\.\/(assets\/photos\/model-[^']+)'/g)].map((m) => m[1]);
+  assert.equal(srcs.length, 5);
+  for (const rel of srcs) assert.ok(fs.existsSync(path.join(root, rel)), `Missing model photo: ${rel}`);
+  requires(html, /id="lookbook-deck-count"[^>]*>01 \/ 05</, 'a deck counter matching five photos');
 });
