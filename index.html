@@ -1775,7 +1775,7 @@ function fillSlide(d) {
     const img = document.getElementById('main-slide-img');
     const texts = d.texts || {};
     const imageName = String(d.img || '').replace(/^\.\//, '');
-    img.src = ['1.jpg','2.jpg','4.jpg'].includes(imageName) ? './' + imageName + '?v=20261027' : d.img;
+    img.src = ['1.jpg','2.jpg','4.jpg'].includes(imageName) ? './' + imageName + '?v=20261027b' : d.img;
     img.alt = d.alt || [texts.title, texts.desc].filter(Boolean).join(' · ') || '무주놀러와 스키샵 안내';
     img.style.setProperty('--fx', (f.focalX != null ? f.focalX : 50) + '%');
     img.style.setProperty('--fy', (f.focalY != null ? f.focalY : 50) + '%');
