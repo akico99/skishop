@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>네이버지도 길안내 연결 중 - 무주놀러와스키샵</title>
+  <meta property="og:title" content="네이버지도 길안내 - 무주놀러와스키샵">
+  <meta property="og:description" content="전북 무주군 설천면 구천동로 1050 (무주 덕유산리조트 정문 앞)">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif; background: #f8fafc; color: #0f172a; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; text-align: center; }
+    .card { background: #fff; border-radius: 20px; padding: 32px 24px; max-width: 360px; width: 100%; box-shadow: 0 10px 25px rgba(15,23,42,0.08); border: 1px solid #e2e8f0; }
+    h1 { font-size: 18px; margin: 0 0 8px; }
+    p { font-size: 13px; color: #64748b; margin: 0 0 20px; line-height: 1.5; }
+    .btn { display: block; width: 100%; padding: 14px 0; border-radius: 12px; background: #03C75A; color: #fff; font-weight: 700; font-size: 14px; text-decoration: none; box-sizing: border-box; margin-bottom: 10px; }
+    .sub { display: block; font-size: 12px; color: #64748b; text-decoration: underline; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🗺️ 네이버지도 길안내 연결 중...</h1>
+    <p>전북 무주군 설천면 구천동로 1050<br>(무주놀러와스키샵&amp;렌탈샵)</p>
+    <a class="btn" href="nmap://route/car?dlat=35.9070108&amp;dlng=127.7613208&amp;dname=%EC%A0%84%EB%B6%81%20%EB%AC%B4%EC%A3%BC%EA%B5%B0%20%EC%84%A4%EC%B2%9C%EB%A9%B4%20%EA%B5%AC%EC%B2%9C%EB%8F%99%EB%A1%9C%201050&amp;appname=com.nolleowaski">네이버지도 앱으로 길안내 시작</a>
+    <a class="sub" href="https://map.naver.com/p/search/%EC%A0%84%EB%B6%81%20%EB%AC%B4%EC%A3%BC%EA%B5%B0%20%EC%84%A4%EC%B2%9C%EB%A9%B4%20%EA%B5%AC%EC%B2%9C%EB%8F%99%EB%A1%9C%201050">웹 네이버지도로 보기</a>
+  </div>
+  <script>
+    (function() {
+      var addr = encodeURIComponent('전북 무주군 설천면 구천동로 1050');
+      var scheme = 'nmap://route/car?dlat=35.9070108&dlng=127.7613208&dname=' + addr + '&appname=com.nolleowaski';
+      var webUrl = 'https://map.naver.com/p/search/' + addr;
+      var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (!isMobile) {
+        window.location.replace(webUrl);
+        return;
+      }
+      var start = Date.now();
+      window.location.href = scheme;
+      setTimeout(function() {
+        if (!document.hidden && Date.now() - start < 2000) {
+          window.location.replace(webUrl);
+        }
+      }, 1200);
+    })();
+  </script>
+</body>
+</html>
