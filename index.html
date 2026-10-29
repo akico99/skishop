@@ -1387,7 +1387,7 @@
             <div class="px-4 pb-4">
                 <!-- 무곡 (넓은 단독 카드 · 사진+문구가 합쳐진 배너 이미지 1장) -->
                 <a href="https://mugok.co.kr/" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden border border-gray-100 shadow-sm mb-2.5 hover:border-[#1f9a9a] transition">
-                    <div class="aspect-[1200/440] bg-gray-100"><img src="./p/무곡1.PNG" alt="무곡펜션 — 겨울시즌 30%할인, 곤도라 티켓 혜택" class="w-full h-full object-cover"></div>
+                    <div class="aspect-[1200/440] bg-gray-100"><img src="./p/무곡1.PNG" alt="무곡펜션" class="w-full h-full object-cover"></div>
                     <div class="bg-[#0f172a] text-white text-center py-2 px-1 flex items-center justify-center gap-2"><span class="font-bold text-[13px]">예약하러 가기</span><i class="fa-solid fa-arrow-right text-[11px]"></i></div>
                 </a>
                 <!-- 나머지 펜션 (모바일 3열 / PC 2열) -->
@@ -1405,11 +1405,6 @@
                     <!-- 루마인펜션 -->
                     <a href="http://rumine.kr/" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:border-[#1f9a9a] transition">
                         <div class="w-full aspect-[4/3] bg-gray-100"><img src="./p/루마인.PNG" alt="루마인펜션" class="w-full h-full object-cover"></div>
-                        <div class="bg-[#0f172a] text-white text-center py-1.5 px-1 flex items-center justify-center gap-1.5"><span class="font-bold text-[12px]">예약하러 가기</span><i class="fa-solid fa-arrow-right text-[10px]"></i></div>
-                    </a>
-                    <!-- 빌라드무주펜션 -->
-                    <a href="http://villademuju.com/" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:border-[#1f9a9a] transition">
-                        <div class="w-full aspect-[4/3] bg-gray-100"><img src="./p/빌라드.PNG" alt="빌라드무주펜션" class="w-full h-full object-cover"></div>
                         <div class="bg-[#0f172a] text-white text-center py-1.5 px-1 flex items-center justify-center gap-1.5"><span class="font-bold text-[12px]">예약하러 가기</span><i class="fa-solid fa-arrow-right text-[10px]"></i></div>
                     </a>
                     <!-- 모모펜션 -->
@@ -1454,13 +1449,10 @@
                 <div><p class="font-bold text-[#0f172a] text-[13px]">전북 무주군 설천면 구천동로 1050</p><p class="text-[11px] text-gray-400 mt-0.5">무주 덕유산 리조트 스키장 정문 앞</p></div>
             </div>
             <div class="px-4 py-4 grid grid-cols-3 gap-2">
-                <!-- 길찾기 버튼 — 기존에는 좌표(36.0, 127.5842)가 하드코딩돼 있었는데 실제 매장에서 약 20km 떨어진 값이라
-                     주소 검색 방식으로 교체했습니다. 앱 전용 스킴은 PC나 앱 미설치 시 아무 반응이 없어서
-                     네이버·카카오는 웹 주소를 사용합니다(모바일에서는 앱으로 자동 연결).
-                     ※ 네이버 스마트플레이스·카카오맵에 매장 등록을 마치면, 주소 대신 상호명으로 바꾸는 편이 더 정확합니다. -->
-                <a href="tmap://search?name=%EC%A0%84%EB%B6%81%20%EB%AC%B4%EC%A3%BC%EA%B5%B0%20%EC%84%A4%EC%B2%9C%EB%A9%B4%20%EA%B5%AC%EC%B2%9C%EB%8F%99%EB%A1%9C%201050" class="flex flex-col items-center justify-center bg-[#1A6FE8] text-white rounded-xl py-3 gap-1.5 hover:opacity-90 transition"><span class="text-[18px]">🗺️</span><span class="text-[11px] font-bold">T맵</span></a>
-                <a href="https://map.kakao.com/?q=%EC%A0%84%EB%B6%81%20%EB%AC%B4%EC%A3%BC%EA%B5%B0%20%EC%84%A4%EC%B2%9C%EB%A9%B4%20%EA%B5%AC%EC%B2%9C%EB%8F%99%EB%A1%9C%201050" target="_blank" rel="noopener" class="flex flex-col items-center justify-center bg-[#FEE500] text-[#3A1D1D] rounded-xl py-3 gap-1.5 hover:opacity-90 transition"><span class="text-[18px]">🗺️</span><span class="text-[11px] font-bold">카카오맵</span></a>
-                <a href="https://map.naver.com/p/search/%EC%A0%84%EB%B6%81%20%EB%AC%B4%EC%A3%BC%EA%B5%B0%20%EC%84%A4%EC%B2%9C%EB%A9%B4%20%EA%B5%AC%EC%B2%9C%EB%8F%99%EB%A1%9C%201050" target="_blank" rel="noopener" class="flex flex-col items-center justify-center bg-[#03C75A] text-white rounded-xl py-3 gap-1.5 hover:opacity-90 transition"><span class="text-[18px]">🗺️</span><span class="text-[11px] font-bold">네이버지도</span></a>
+                <!-- 길찾기 버튼 — 전북 무주군 설천면 구천동로 1050 (위도 35.9070108, 경도 127.7613208) 바로 안내 -->
+                <a href="tmap://route?goalname=%EC%A0%84%EB%B6%81%20%EB%AC%B4%EC%A3%BC%EA%B5%B0%20%EC%84%A4%EC%B2%9C%EB%A9%B4%20%EA%B5%AC%EC%B2%9C%EB%8F%99%EB%A1%9C%201050&amp;goalx=127.7613208&amp;goaly=35.9070108&amp;rGoName=%EC%A0%84%EB%B6%81%20%EB%AC%B4%EC%A3%BC%EA%B5%B0%20%EC%84%A4%EC%B2%9C%EB%A9%B4%20%EA%B5%AC%EC%B2%9C%EB%8F%99%EB%A1%9C%201050&amp;rGoX=127.7613208&amp;rGoY=35.9070108" onclick="return openMapRoute('tmap', event)" class="flex flex-col items-center justify-center bg-[#1A6FE8] text-white rounded-xl py-3 gap-1.5 hover:opacity-90 transition"><span class="text-[18px]">🗺️</span><span class="text-[11px] font-bold">T맵</span></a>
+                <a href="kakaomap://route?ep=35.9070108,127.7613208&amp;by=CAR" onclick="return openMapRoute('kakao', event)" class="flex flex-col items-center justify-center bg-[#FEE500] text-[#3A1D1D] rounded-xl py-3 gap-1.5 hover:opacity-90 transition"><span class="text-[18px]">🗺️</span><span class="text-[11px] font-bold">카카오맵</span></a>
+                <a href="nmap://route/car?dlat=35.9070108&amp;dlng=127.7613208&amp;dname=%EC%A0%84%EB%B6%81%20%EB%AC%B4%EC%A3%BC%EA%B5%B0%20%EC%84%A4%EC%B2%9C%EB%A9%B4%20%EA%B5%AC%EC%B2%9C%EB%8F%99%EB%A1%9C%201050&amp;appname=com.nolleowaski" onclick="return openMapRoute('naver', event)" class="flex flex-col items-center justify-center bg-[#03C75A] text-white rounded-xl py-3 gap-1.5 hover:opacity-90 transition"><span class="text-[18px]">🗺️</span><span class="text-[11px] font-bold">네이버지도</span></a>
             </div>
         </div>
 
@@ -2441,6 +2433,38 @@ window.switchGuideTab = function(tab) {
     document.getElementById('guide-walkin').classList.toggle('hidden', r);
     document.getElementById('guide-tab-reserved').className = `flex-1 py-2 rounded-xl text-[13px] font-bold transition ${r ? 'bg-[#6d5acd] text-white' : 'bg-gray-100 text-gray-500'}`;
     document.getElementById('guide-tab-walkin').className   = `flex-1 py-2 rounded-xl text-[13px] font-bold transition ${!r ? 'bg-[#6d5acd] text-white' : 'bg-gray-100 text-gray-500'}`;
+};
+
+// ===== 지도 길안내 바로가기 (T맵 / 카카오맵 / 네이버지도) =====
+window.openMapRoute = function(app, e) {
+    const addr = '전북 무주군 설천면 구천동로 1050';
+    const encAddr = encodeURIComponent(addr);
+    const lat = 35.9070108;
+    const lng = 127.7613208;
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const schemes = {
+        tmap:  `tmap://route?goalname=${encAddr}&goalx=${lng}&goaly=${lat}&rGoName=${encAddr}&rGoX=${lng}&rGoY=${lat}`,
+        kakao: `kakaomap://route?ep=${lat},${lng}&by=CAR`,
+        naver: `nmap://route/car?dlat=${lat}&dlng=${lng}&dname=${encAddr}&appname=com.nolleowaski`
+    };
+    const webFallbacks = {
+        tmap:  `https://map.naver.com/p/search/${encAddr}`,
+        kakao: `https://map.kakao.com/link/to/${encAddr},${lat},${lng}`,
+        naver: `https://map.naver.com/p/search/${encAddr}`
+    };
+    if (e) e.preventDefault();
+    if (!isMobile) {
+        window.open(webFallbacks[app] || webFallbacks.naver, '_blank', 'noopener');
+        return false;
+    }
+    const clickedAt = Date.now();
+    window.location.href = schemes[app];
+    setTimeout(() => {
+        if (!document.hidden && Date.now() - clickedAt < 2000) {
+            window.open(webFallbacks[app], '_blank', 'noopener');
+        }
+    }, 1200);
+    return false;
 };
 
 // ===== 예약 확인 바텀시트 =====
