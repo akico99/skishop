@@ -714,11 +714,16 @@
             <div class="space-y-2.5 mb-4">
                 <!-- 계좌 입금 -->
                 <div class="bg-violet-50 border border-violet-100 rounded-xl p-3.5">
-                    <p class="text-[11px] font-bold text-[#6d5acd] mb-2 flex items-center gap-1"><i class="fa-solid fa-building-columns text-[10px]"></i> 방법 1. 계좌 입금</p>
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-[11px] font-bold text-[#6d5acd] flex items-center gap-1"><i class="fa-solid fa-building-columns text-[10px]"></i> 방법 1. 계좌 입금</p>
+                        <button type="button" onclick="copyAccountNumber('351-1411-4182-63')" class="text-[11px] font-bold text-[#6d5acd] bg-white border border-violet-200 rounded-lg px-2 py-1 hover:bg-violet-100 transition flex items-center gap-1">
+                            <i class="fa-regular fa-copy text-[10px]"></i> 계좌 복사
+                        </button>
+                    </div>
                     <div class="space-y-1 text-[12px] text-[#0f172a]">
-                        <div class="flex gap-2"><span class="text-gray-400 w-10 flex-shrink-0">은행</span><span class="font-bold">추후 안내 예정</span></div>
-                        <div class="flex gap-2"><span class="text-gray-400 w-10 flex-shrink-0">계좌</span><span class="font-bold">추후 안내 예정</span></div>
-                        <div class="flex gap-2"><span class="text-gray-400 w-10 flex-shrink-0">예금주</span><span class="font-bold">추후 안내 예정</span></div>
+                        <div class="flex gap-2"><span class="text-gray-400 w-10 flex-shrink-0">은행</span><span class="font-bold">NH농협</span></div>
+                        <div class="flex gap-2"><span class="text-gray-400 w-10 flex-shrink-0">계좌</span><span class="font-bold tracking-wide">351-1411-4182-63</span></div>
+                        <div class="flex gap-2"><span class="text-gray-400 w-10 flex-shrink-0">예금주</span><span class="font-bold">김재현</span></div>
                     </div>
                 </div>
                 <!-- 네이버 예약 -->
@@ -2526,6 +2531,16 @@ window.copyPhoneNumber = function(num) {
     }
 };
 
+window.copyAccountNumber = function(acc) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(acc)
+            .then(() => showToast(`계좌번호가 복사되었습니다: ${acc}`))
+            .catch(() => showToast(`NH농협 ${acc} (예금주: 김재현)`));
+    } else {
+        showToast(`NH농협 ${acc} (예금주: 김재현)`);
+    }
+};
+
 // ===== 예약 완료 모달 =====
 function openConfirm(data) {
     document.getElementById('confirm-success').classList.toggle('hidden', !data);
@@ -2660,6 +2675,11 @@ window.lookupReservation = async function() {
                     <div class="h-px bg-gray-100"></div>
                     <div class="flex justify-between"><span class="text-gray-400">방문 일시</span><span class="font-bold text-[#0f172a]">${r.visit_date} ${r.visit_time}</span></div>
                     <div class="flex justify-between"><span class="text-gray-400">접수 일시</span><span class="font-bold text-[#0f172a]">${new Date(r.created_at).toLocaleDateString('ko-KR')}</span></div>
+                    ${r.deposit_status !== '입금' ? `
+                    <div class="bg-violet-50 border border-violet-100 rounded-lg p-2.5 mt-2 flex items-center justify-between text-[11px]">
+                        <div><span class="font-bold text-[#6d5acd]">입금계좌</span> <span class="font-bold text-[#0f172a] ml-1">NH농협 351-1411-4182-63 (김재현)</span></div>
+                        <button type="button" onclick="copyAccountNumber('351-1411-4182-63')" class="text-[10px] font-bold text-[#6d5acd] bg-white border border-violet-200 rounded px-2 py-0.5 hover:bg-violet-100 transition flex-shrink-0">복사</button>
+                    </div>` : ''}
                 </div>`).join('');
         }
         result.classList.remove('hidden');
