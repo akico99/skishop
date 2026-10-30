@@ -117,18 +117,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family:'Pretendard',sans-serif; background:#f1f5f9; display:flex; justify-content:center; margin:0; min-height:100vh; }
-        .mobile-app { width:100%; max-width:414px; background:#fff; position:relative; overflow-x:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,.25); }
-        .soft-shadow { box-shadow:0 10px 25px -5px rgba(109,90,205,.15),0 8px 10px -6px rgba(109,90,205,.1); }
+        body { font-family:'Pretendard',sans-serif; background:#f4f6f8; display:flex; justify-content:center; margin:0; min-height:100vh; }
+        .mobile-app { width:100%; max-width:414px; background:#fff; position:relative; overflow-x:hidden; box-shadow:0 12px 32px rgba(15,23,42,.08); }
+        .soft-shadow { box-shadow:0 4px 16px rgba(15,23,42,.06); }
         .hide-scrollbar::-webkit-scrollbar { display:none; }
         .hide-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
         #main-slide-wrapper { transition:opacity .2s ease-in-out; }
 
         /* 의류·장비 룩북: SNS 프로필 그리드와 스토리형 사진 뷰어 */
-        .rental-feature-card { position:relative; isolation:isolate; overflow:hidden; color:#fff; background:linear-gradient(130deg,#5744b4 0%,#765bd2 58%,#a064c6 100%); }
-        .rental-feature-card::after { content:''; position:absolute; z-index:-1; width:220px; height:220px; right:-74px; top:-100px; border:1px solid rgba(255,255,255,.2); border-radius:50%; box-shadow:0 0 0 24px rgba(255,255,255,.05),0 0 0 48px rgba(255,255,255,.04); }
-        .rental-price-chip { background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.18); }
-        .lookbook-profile-avatar { background:linear-gradient(135deg,#6d5acd,#bf66c8); box-shadow:0 0 0 3px #fff,0 0 0 5px rgba(109,90,205,.3); }
+        .rental-feature-card { position:relative; isolation:isolate; overflow:hidden; color:#fff; background:#0f172a; border:1px solid #1e293b; }
+        .rental-price-chip { background:#f8fafc; border:1px solid #e2e8f0; }
+        .rental-feature-card .rental-price-chip { background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16); color:#e2e8f0; }
+        .lookbook-profile-avatar { background:#0f172a; }
         .lookbook-tabs { display:grid; grid-template-columns:1fr 1fr; border-bottom:1px solid #e2e8f0; }
         .lookbook-tab { position:relative; padding:12px 8px; color:#64748b; font-size:13px; font-weight:800; }
         .lookbook-tab[aria-selected="true"] { color:#6d5acd; }
@@ -137,15 +137,12 @@
         .lookbook-tile { position:relative; display:block; overflow:hidden; aspect-ratio:1; background:#f1f5f9; text-align:left; }
         .lookbook-tile img { width:100%; height:100%; object-fit:cover; transition:transform .35s ease,filter .35s ease; }
         .lookbook-tile:hover img,.lookbook-tile:focus-visible img { transform:scale(1.045); filter:saturate(1.08); }
-        .lookbook-tile::after { content:''; position:absolute; inset:35% 0 0; background:linear-gradient(transparent,rgba(15,23,42,.66)); pointer-events:none; }
+        .lookbook-tile::after { content:''; position:absolute; inset:45% 0 0; background:linear-gradient(transparent,rgba(15,23,42,.62)); pointer-events:none; }
         .lookbook-tile-label { position:absolute; z-index:1; left:8px; right:8px; bottom:7px; color:white; font-size:10px; font-weight:800; line-height:1.25; text-shadow:0 1px 4px rgba(0,0,0,.5); }
-        .lookbook-tile-tag { position:absolute; z-index:1; top:7px; left:7px; max-width:calc(100% - 14px); padding:3px 7px; overflow:hidden; border-radius:999px; background:rgba(15,23,42,.48); color:#fff; font-size:9px; font-weight:700; text-overflow:ellipsis; white-space:nowrap; backdrop-filter:blur(8px); }
-        .lookbook-deck { position:relative; height:238px; display:grid; place-items:center; isolation:isolate; }
-        .lookbook-deck::before,.lookbook-deck::after { content:''; position:absolute; width:min(66%,250px); height:212px; border:1px solid rgba(109,90,205,.16); border-radius:18px; background:#fff; box-shadow:0 14px 35px rgba(15,23,42,.12); }
-        .lookbook-deck::before { transform:translateX(15px) rotate(7deg); z-index:-2; }
-        .lookbook-deck::after { transform:translateX(-13px) rotate(-6deg); z-index:-1; }
-        .lookbook-deck-main { position:relative; width:min(66%,250px); height:212px; padding:0; border:0; border-radius:18px; overflow:hidden; background:#e2e8f0; box-shadow:0 16px 36px rgba(15,23,42,.22); transform:rotate(-1deg); transition:transform .25s ease,opacity .2s ease; }
-        .lookbook-deck-main:hover { transform:rotate(0) translateY(-3px); }
+        .lookbook-tile-tag { position:absolute; z-index:1; top:7px; left:7px; max-width:calc(100% - 14px); padding:3px 7px; overflow:hidden; border-radius:6px; background:rgba(15,23,42,.65); color:#fff; font-size:9px; font-weight:700; text-overflow:ellipsis; white-space:nowrap; }
+        .lookbook-deck { position:relative; height:236px; display:grid; place-items:center; isolation:isolate; }
+        .lookbook-deck-main { position:relative; width:min(86%,310px); height:216px; padding:0; border:1px solid #e2e8f0; border-radius:14px; overflow:hidden; background:#e2e8f0; box-shadow:0 8px 20px rgba(15,23,42,.1); transition:transform .25s ease,opacity .2s ease; }
+        .lookbook-deck-main:hover { transform:translateY(-2px); }
         .lookbook-deck-main img { width:100%; height:100%; object-fit:cover; }
         .lookbook-deck-main::after { content:''; position:absolute; inset:50% 0 0; background:linear-gradient(transparent,rgba(15,23,42,.65)); }
         .lookbook-deck-copy { position:absolute; z-index:1; left:13px; bottom:12px; color:#fff; text-align:left; text-shadow:0 1px 6px rgba(0,0,0,.55); }
@@ -237,7 +234,7 @@
         body { padding-bottom: 76px; }
 
         @media (min-width: 1024px) {
-            body { display: block; background: #f1edfa; padding-bottom: 0; }
+            body { display: block; background: #f4f6f8; padding-bottom: 0; }
             .mobile-app {
                 width: 100%;
                 max-width: 1400px !important; /* 넓은 화면에서 양옆 여백이 과하게 보이지 않도록 확장 */
@@ -256,7 +253,7 @@
                 margin: 0 -24px !important;
                 padding-left: 24px !important;
                 padding-right: 24px !important;
-                background: rgba(255,255,255,.92) !important;
+                background: rgba(255,255,255,.95) !important;
                 backdrop-filter: blur(8px);
             }
 
@@ -275,7 +272,7 @@
                 column-gap: 28px;
                 align-items: start;
             }
-            .pc-slide { grid-area: slide; margin-top: 20px; border-radius: 20px; overflow: hidden; }
+            .pc-slide { grid-area: slide; margin-top: 20px; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; }
             .pc-menu  { grid-area: menu; }
             .pc-rest  { grid-area: rest; }
 
@@ -288,9 +285,9 @@
                 overflow-y: auto;
                 margin-top: 20px;
                 background: #fff;
-                border: 1px solid #ece7f9;
-                border-radius: 20px;
-                box-shadow: 0 16px 36px -12px rgba(76,29,149,.18);
+                border: 1px solid #e2e8f0;
+                border-radius: 16px;
+                box-shadow: 0 8px 24px rgba(15,23,42,.06);
             }
 
             /* PC에서 본문 큰 견적 카드(트리거)는 숨기고, 우측 패널 헤더만 보이게 */
@@ -387,8 +384,8 @@
                 position: fixed; left: 0; right: 0; bottom: 0;
                 z-index: 45;
                 background: #fff;
-                border-top: 1px solid #ece7f9;
-                box-shadow: 0 -12px 32px rgba(76,29,149,.15);
+                border-top: 1px solid #e2e8f0;
+                box-shadow: 0 -8px 24px rgba(15,23,42,.08);
                 padding: 14px max(24px, calc(50vw - 620px + 24px));
                 gap: 16px;
             }
@@ -396,26 +393,26 @@
                 flex: 1 1 0;
                 display: flex; align-items: center; justify-content: center; gap: 14px;
                 padding: 14px 20px;
-                border-radius: 16px;
+                border-radius: 12px;
                 text-align: left;
                 transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
             }
-            .pc-bottom-bar > *:hover { transform: translateY(-3px); }
+            .pc-bottom-bar > *:hover { transform: translateY(-2px); }
             .pc-bottom-bar .pbb-icon {
-                flex-shrink: 0; width: 46px; height: 46px; border-radius: 13px;
+                flex-shrink: 0; width: 44px; height: 44px; border-radius: 10px;
                 display: flex; align-items: center; justify-content: center;
-                font-size: 20px; background: rgba(255,255,255,.35);
+                font-size: 19px; background: rgba(255,255,255,.2);
             }
             .pc-bottom-bar .pbb-text { display: flex; flex-direction: column; gap: 2px; line-height: 1.3; }
-            .pc-bottom-bar .pbb-text b { font-size: 18px; font-weight: 800; }
+            .pc-bottom-bar .pbb-text b { font-size: 17px; font-weight: 800; }
             .pc-bottom-bar .pbb-text small { font-size: 12px; font-weight: 600; opacity: .75; }
             .pc-bottom-bar a[href*="kakao"] { background: #FEE500; color: #3A1D1D; }
-            .pc-bottom-bar a[href*="kakao"] .pbb-icon { background: rgba(58,29,29,.1); }
+            .pc-bottom-bar a[href*="kakao"] .pbb-icon { background: rgba(58,29,29,.08); }
             .pc-bottom-bar a[href*="kakao"]:hover { filter: brightness(.97); }
             .pc-bottom-bar a[aria-label="예약 확인하기"] { background: #0f172a; color: #fff; }
             .pc-bottom-bar a[aria-label="예약 확인하기"]:hover { background: #1e293b; }
-            .pc-bottom-bar button { background: #6d5acd; color: #fff; box-shadow: 0 10px 24px -6px rgba(109,90,205,.55); border: 0; cursor: pointer; }
-            .pc-bottom-bar button:hover { background: #5b4bb3; box-shadow: 0 14px 28px -6px rgba(109,90,205,.65); }
+            .pc-bottom-bar button { background: #6d5acd; color: #fff; border: 0; cursor: pointer; }
+            .pc-bottom-bar button:hover { background: #5b4bb3; }
         }
         @media (min-width: 1024px) and (max-width: 1360px) {
             .pc-wrapper { grid-template-columns: minmax(0,1fr) 288px; }
@@ -906,19 +903,19 @@
     <!-- 실시간 견적 및 간편 예약 (맨 위 핵심) -->
     <section class="quote-section-wrap px-4 pt-5 pb-4 bg-white relative z-20">
         <button id="quote-btn" aria-expanded="false" aria-controls="quote-section"
-                class="w-full bg-gradient-to-r from-[#f3eeff] to-white border-2 border-[#6d5acd] rounded-2xl py-4 pl-5 pr-4 flex items-center justify-between soft-shadow hover:from-[#ede4ff] transition duration-200 relative overflow-hidden">
-            <span class="flex items-center gap-3 text-left z-10 pr-16">
-                <span class="w-10 h-10 rounded-full bg-[#6d5acd] flex items-center justify-center flex-shrink-0">
-                    <i id="quote-icon" class="fa-solid fa-plus text-white text-[16px] transition-transform duration-300" style="transform:rotate(0deg)"></i>
+                class="w-full bg-white border-2 border-[#6d5acd] rounded-xl py-4 pl-4 pr-4 flex items-center justify-between soft-shadow hover:bg-slate-50 transition duration-200 relative overflow-hidden">
+            <span class="flex items-center gap-3 text-left z-10">
+                <span class="w-10 h-10 rounded-lg bg-[#6d5acd] flex items-center justify-center flex-shrink-0">
+                    <i id="quote-icon" class="fa-solid fa-plus text-white text-[15px] transition-transform duration-300" style="transform:rotate(0deg)"></i>
                 </span>
                 <span>
-                    <span id="quote-mode-title" class="block font-black text-[#6d5acd] text-[17px] leading-tight">실시간 견적 및 간편 예약</span>
+                    <span id="quote-mode-title" class="block font-black text-[#0f172a] text-[16px] leading-tight">실시간 견적 및 간편 예약</span>
                     <span id="quote-mode-description" class="block text-[12px] text-gray-500 font-medium mt-1">탭 한 번이면 내 가격이 바로 나와요</span>
-                    <span id="quote-mode-badge" class="inline-block text-[10px] text-[#6d5acd] font-bold bg-violet-100/70 px-2 py-0.5 rounded-md mt-2">예약금 없음 · 3초 견적</span>
+                    <span id="quote-mode-badge" class="inline-block text-[10px] text-[#6d5acd] font-bold bg-violet-50 border border-violet-100 px-2 py-0.5 rounded mt-2">예약금 없음 · 3초 견적</span>
                 </span>
             </span>
-            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[#6d5acd]/15 z-0" aria-hidden="true">
-                <i class="fa-solid fa-person-skiing text-[56px]"></i>
+            <span class="text-slate-400 z-10 pr-1" aria-hidden="true">
+                <i class="fa-solid fa-chevron-right text-[14px]"></i>
             </span>
         </button>
 
@@ -1242,14 +1239,14 @@
         <!-- ===== 패널: 의류·장비 ===== -->
         <section id="outfit-section" class="hidden mt-3 rounded-xl border border-gray-100 overflow-hidden bg-white" aria-labelledby="lookbook-heading">
             <div class="px-4 pt-4 pb-4" aria-labelledby="rental-price-title">
-                <div data-rental-offer class="rental-feature-card rounded-3xl p-5 shadow-lg">
+                <div data-rental-offer class="rental-feature-card rounded-2xl p-5">
                     <div class="flex items-center justify-between gap-2">
-                        <span class="rounded-full bg-white/15 border border-white/25 px-3 py-1 text-[10px] font-black tracking-[.14em]">OPEN SPECIAL</span>
-                        <span class="text-[10px] font-semibold text-white/80">예약금 없음 · 실시간 견적</span>
+                        <span class="rounded bg-[#6d5acd] px-2.5 py-1 text-[10px] font-black tracking-[.12em] text-white">OPEN SPECIAL</span>
+                        <span class="text-[11px] font-semibold text-slate-300">예약금 없음 · 실시간 견적</span>
                     </div>
-                    <p class="mt-5 text-[13px] font-bold text-white/85">이번 시즌, 장비와 의류를 한 번에</p>
+                    <p class="mt-4 text-[13px] font-bold text-slate-300">이번 시즌, 장비와 의류를 한 번에</p>
                     <h3 id="rental-price-title" class="mt-1 text-[25px] leading-tight font-black tracking-tight">풀세트 <span class="text-[34px]">40,000원</span></h3>
-                    <p class="mt-2 text-[12px] font-semibold text-white/90">장비 + 의류 + 헬멧 + 고글</p>
+                    <p class="mt-2 text-[12px] font-semibold text-slate-200">장비 + 의류 + 헬멧 + 고글</p>
                     <div class="mt-4 flex items-center gap-2 text-[11px]">
                         <span class="rental-price-chip rounded-lg px-2.5 py-1.5">개별 선택 합계 45,000원</span>
                         <span class="rounded-lg bg-white px-2.5 py-1.5 font-black text-[#5744b4]">5,000원 할인</span>
@@ -1267,14 +1264,14 @@
                 <p class="mt-2 text-[10px] leading-relaxed text-slate-500">장갑·양말은 위생상 대여하지 않고 매장에서 판매합니다.</p>
             </div>
 
-            <div class="mx-4 rounded-2xl border border-violet-100 bg-gradient-to-br from-[#faf8ff] via-white to-[#f4f1ff] p-4">
+            <div class="mx-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <div class="flex items-end justify-between gap-2">
                     <div>
                         <p class="text-[10px] font-black tracking-[.12em] text-[#6d5acd]">26/27 SEASON LOOKBOOK</p>
                         <h3 class="mt-1 text-[15px] font-black text-[#0f172a]">이번 시즌 룩, 먼저 둘러보기</h3>
                         <p class="mt-1 text-[10px] text-slate-500">카드를 넘기거나 눌러 크게 확인하세요</p>
                     </div>
-                    <span class="shrink-0 rounded-full bg-white px-2 py-1 text-[9px] font-bold text-slate-500 shadow-sm">REAL PHOTO</span>
+                    <span class="shrink-0 rounded bg-white border border-slate-200 px-2 py-1 text-[9px] font-bold text-slate-600">REAL PHOTO</span>
                 </div>
                 <div class="lookbook-deck mt-1">
                     <button id="lookbook-deck-main" type="button" class="lookbook-deck-main" data-deck-open aria-label="시즌 룩북 크게 보기">
@@ -1470,15 +1467,15 @@
 
     <!-- 신뢰 섹션 (신규 오픈 · 리뷰 대체) -->
     <div class="w-full h-2 bg-gray-100 lg:hidden" role="separator"></div>
-    <section id="trust-section" class="px-4 py-6 bg-white lg:bg-violet-50/60 lg:rounded-2xl lg:my-4">
+    <section id="trust-section" class="px-4 py-6 bg-white lg:border lg:border-slate-200 lg:rounded-2xl lg:my-4">
         <!-- 헤더 -->
         <div class="flex items-center justify-between mb-4">
             <div>
                 <h3 class="sec-title font-black text-[#0f172a] text-[16px]">놀러와를 믿을 수 있는 이유</h3>
                 <p class="text-[11px] text-gray-400 mt-0.5">26/27 시즌, 새로 문을 열었습니다</p>
             </div>
-            <span class="inline-flex items-center gap-1 bg-[#6d5acd] text-white text-[11px] font-bold px-2.5 py-1 rounded-full flex-shrink-0">
-                <i class="fa-regular fa-snowflake text-[10px]"></i> NEW OPEN
+            <span class="inline-flex items-center gap-1 bg-[#0f172a] text-white text-[11px] font-bold px-2.5 py-1 rounded-md flex-shrink-0">
+                <i class="fa-regular fa-snowflake text-[10px] text-[#a78bfa]"></i> NEW OPEN
             </span>
         </div>
 
@@ -1492,23 +1489,23 @@
 
         <!-- 차별점 카드 -->
         <div class="trust-cards flex overflow-x-auto snap-x snap-mandatory gap-3 pb-2 hide-scrollbar">
-            <div class="snap-center flex-none w-[220px] bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                <div class="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center mb-3"><i class="fa-solid fa-ruler-combined text-[#6d5acd] text-[16px]"></i></div>
+            <div class="snap-center flex-none w-[220px] bg-slate-50/70 rounded-xl p-4 border border-slate-200/80">
+                <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center mb-3"><i class="fa-solid fa-ruler-combined text-[#6d5acd] text-[16px]"></i></div>
                 <p class="font-bold text-[#0f172a] text-[14px] mb-1.5">사이즈 걱정 끝</p>
                 <p class="text-[12px] text-gray-500 leading-relaxed">아동부터 성인 XXL까지 전 사이즈 보유, 맞지 않으면 현장에서 바로 교체해 드려요.</p>
             </div>
-            <div class="snap-center flex-none w-[220px] bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                <div class="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center mb-3"><i class="fa-solid fa-truck-fast text-[#6d5acd] text-[16px]"></i></div>
+            <div class="snap-center flex-none w-[220px] bg-slate-50/70 rounded-xl p-4 border border-slate-200/80">
+                <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center mb-3"><i class="fa-solid fa-truck-fast text-[#6d5acd] text-[16px]"></i></div>
                 <p class="font-bold text-[#0f172a] text-[14px] mb-1.5">슬로프 앞까지 배달</p>
                 <p class="text-[12px] text-gray-500 leading-relaxed">무거운 장비를 들고 이동할 필요 없이, 지정 장소로 픽업·반납해 드립니다.</p>
             </div>
-            <div class="snap-center flex-none w-[220px] bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                <div class="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center mb-3"><i class="fa-solid fa-person-chalkboard text-[#6d5acd] text-[16px]"></i></div>
+            <div class="snap-center flex-none w-[220px] bg-slate-50/70 rounded-xl p-4 border border-slate-200/80">
+                <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center mb-3"><i class="fa-solid fa-person-chalkboard text-[#6d5acd] text-[16px]"></i></div>
                 <p class="font-bold text-[#0f172a] text-[14px] mb-1.5">강사, 직접 골라요</p>
                 <p class="text-[12px] text-gray-500 leading-relaxed">강사 프로필과 후기를 미리 확인하고, 원하는 강사를 직접 선택할 수 있어요.</p>
             </div>
-            <div class="snap-center flex-none w-[220px] bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                <div class="w-10 h-10 rounded-full bg-violet-50 flex items-center justify-center mb-3"><i class="fa-solid fa-shield-halved text-[#6d5acd] text-[16px]"></i></div>
+            <div class="snap-center flex-none w-[220px] bg-slate-50/70 rounded-xl p-4 border border-slate-200/80">
+                <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center mb-3"><i class="fa-solid fa-shield-halved text-[#6d5acd] text-[16px]"></i></div>
                 <p class="font-bold text-[#0f172a] text-[14px] mb-1.5">투명한 보상 정책</p>
                 <p class="text-[12px] text-gray-500 leading-relaxed">파손·오염 보상 기준을 예약 전에 미리 확인할 수 있어 걱정 없이 이용하세요.</p>
             </div>
@@ -2401,9 +2398,9 @@ function renderMenuGrid() {
             : '';
         return `
         <button data-panel="${m.panel}" aria-expanded="false"
-                class="menu-btn bg-white rounded-xl py-4 flex flex-col items-center shadow-sm border border-gray-100 transition relative overflow-hidden">
+                class="menu-btn bg-white rounded-xl py-3.5 flex flex-col items-center border border-slate-200/80 hover:border-slate-300 transition relative overflow-hidden">
             ${badge}
-            <div class="menu-icon w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center mb-2 overflow-hidden transition">
+            <div class="menu-icon w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-2 overflow-hidden transition">
                 ${visual}
             </div>
             <span class="menu-label text-[12px] font-bold text-[#0f172a]">${m.label}</span>
