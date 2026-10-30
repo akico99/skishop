@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/branding/favicon-32.png">
+  <link rel="apple-touch-icon" href="/assets/branding/apple-touch-icon.png">
+  <title>무주놀러와스키샵 제휴펜션 숙박할인쿠폰</title>
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="무주놀러와스키샵&amp;렌탈샵">
+  <meta property="og:title" content="무주놀러와스키샵 제휴펜션 숙박할인쿠폰">
+  <meta property="og:description" content="놀러와스키 고객전용 · 주중숙박 20% / 주말숙박 10% 제휴펜션 할인쿠폰">
+  <meta property="og:image" content="https://www.nolleowaski.com/assets/photos/og-main.jpg">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0 0 60px;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+      background: #ffffff;
+      color: #1e293b;
+      word-break: keep-all;
+    }
+    #cp_wrap {
+      max-width: 920px;
+      width: 92%;
+      margin: 0 auto;
+    }
+
+    /* ===== 상단 숙박할인쿠폰 티켓 헤더 ===== */
+    .cp_header {
+      text-align: center;
+      padding: 44px 12px 24px;
+    }
+    .cp_sub_title {
+      font-size: clamp(18px, 3.6vw, 28px);
+      font-weight: 800;
+      color: #2b2b2b;
+      letter-spacing: -0.04em;
+      margin: 0 0 6px;
+    }
+    .cp_main_title {
+      font-size: clamp(42px, 9vw, 76px);
+      font-weight: 900;
+      color: #6d5acd;
+      letter-spacing: -0.05em;
+      line-height: 1.08;
+      margin: 0 0 28px;
+    }
+
+    .cp_ticket_wrap {
+      position: relative;
+      max-width: 580px;
+      margin: 34px auto 0;
+      padding-top: 32px;
+    }
+    .cp_badge {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 118px;
+      height: 118px;
+      border-radius: 50%;
+      background: #6d5acd;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1.3;
+      letter-spacing: -0.03em;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.22);
+      z-index: 3;
+      border: 3px solid #ffffff;
+    }
+    .cp_ticket {
+      position: relative;
+      background: #2b2b2b;
+      color: #ffffff;
+      padding: 48px 28px 34px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      overflow: hidden;
+      border-radius: 4px;
+    }
+    /* 양옆 티켓 펀칭 홈 + 절취선 */
+    .cp_ticket::before,
+    .cp_ticket::after {
+      content: "";
+      position: absolute;
+      top: 54%;
+      transform: translateY(-50%);
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #ffffff;
+      z-index: 2;
+    }
+    .cp_ticket::before { left: -26px; }
+    .cp_ticket::after  { right: -26px; }
+
+    .cp_rate_col {
+      text-align: center;
+      padding: 0 10px;
+    }
+    .cp_rate_col + .cp_rate_col {
+      border-left: 1px dashed rgba(255, 255, 255, 0.22);
+    }
+    .cp_rate_label {
+      font-size: clamp(15px, 3vw, 22px);
+      font-weight: 500;
+      color: #e2e8f0;
+      margin-bottom: 4px;
+      letter-spacing: -0.03em;
+    }
+    .cp_rate_num {
+      font-size: clamp(58px, 13vw, 108px);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+    }
+    .cp_rate_num small {
+      font-size: 0.34em;
+      font-weight: 700;
+      margin-left: 2px;
+    }
+
+    .cp_notice {
+      max-width: 580px;
+      margin: 14px auto 0;
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    .cp_notice strong {
+      color: #0f172a;
+    }
+
+    .cp_section_bar {
+      margin: 28px 0 28px;
+      background: #e9ecef;
+      padding: 16px 12px;
+      text-align: center;
+      font-size: clamp(17px, 3.2vw, 23px);
+      font-weight: 800;
+      color: #2b2b2b;
+      letter-spacing: -0.03em;
+    }
+
+    /* ===== 무곡펜션 (상단 와이드 단독 블록) ===== */
+    .cp_featured {
+      margin-bottom: 36px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 24px;
+    }
+    .cp_featured_thumb {
+      width: 100%;
+      aspect-ratio: 1200 / 344;
+      overflow: hidden;
+      background: #f1f5f9;
+      margin-bottom: 12px;
+    }
+    .cp_featured_thumb img {
+      width: 100%;
+      height: calc(100% * 440 / 344);
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+    }
+
+    /* ===== 2열 펜션 목록 (스케치, 로베, 루마인, 모모) ===== */
+    .cp_list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 20px;
+      row-gap: 36px;
+    }
+    .cp_list > li .thumb {
+      width: 100%;
+      aspect-ratio: 580 / 344;
+      overflow: hidden;
+      background: #f1f5f9;
+      margin-bottom: 10px;
+    }
+    .cp_list > li .thumb img {
+      width: 100%;
+      height: calc(100% * 440 / 344);
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+    }
+
+    /* 펜션 이름 + 우측 아이콘 버튼 (홈페이지 / 전화) */
+    .info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .subject {
+      font-size: 21px;
+      font-weight: 800;
+      color: #1e293b;
+      letter-spacing: -0.03em;
+    }
+    .cp_btn {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .cp_btn a {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 17px;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+    .cp_btn a:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+    .cp_btn a.btn_home {
+      background: #1e293b;
+      color: #ffffff;
+    }
+    .cp_btn a.btn_tel {
+      background: #6d5acd;
+      color: #ffffff;
+    }
+
+    .cp_footer {
+      margin-top: 48px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+      text-align: center;
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.6;
+    }
+    .cp_footer strong {
+      color: #0f172a;
+    }
+
+    @media screen and (max-width: 680px) {
+      .cp_header { padding: 28px 6px 16px; }
+      .cp_ticket_wrap { margin-top: 24px; padding-top: 26px; }
+      .cp_badge {
+        width: 92px;
+        height: 92px;
+        font-size: 13.5px;
+      }
+      .cp_ticket {
+        padding: 38px 16px 24px;
+      }
+      .cp_ticket::before,
+      .cp_ticket::after {
+        width: 36px;
+        height: 36px;
+      }
+      .cp_ticket::before { left: -18px; }
+      .cp_ticket::after  { right: -18px; }
+
+      .cp_list {
+        column-gap: 10px;
+        row-gap: 26px;
+      }
+      .subject {
+        font-size: 14px;
+      }
+      .cp_btn {
+        gap: 5px;
+      }
+      .cp_btn a {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="cp_wrap">
+    <!-- 상단 쿠폰 헤더 -->
+    <div class="cp_header">
+      <p class="cp_sub_title">무주놀러와스키샵 제휴펜션</p>
+      <h1 class="cp_main_title">숙박할인쿠폰</h1>
+
+      <div class="cp_ticket_wrap">
+        <div class="cp_badge">
+          <span>놀러와스키</span>
+          <span>고객전용</span>
+        </div>
+        <div class="cp_ticket">
+          <div class="cp_rate_col">
+            <div class="cp_rate_label">주중숙박</div>
+            <div class="cp_rate_num">20<small>%</small></div>
+          </div>
+          <div class="cp_rate_col">
+            <div class="cp_rate_label">주말숙박</div>
+            <div class="cp_rate_num">10<small>%</small></div>
+          </div>
+        </div>
+      </div>
+
+      <p class="cp_notice">
+        펜션 예약·문의 시 <strong>"무주놀러와스키샵 렌탈 고객"</strong>임을 말씀해 주시면 제휴 할인이 적용됩니다.
+      </p>
+
+      <div class="cp_section_bar">쿠폰사용 가능펜션</div>
+    </div>
+
+    <!-- 무곡펜션 (단독 와이드 배너) -->
+    <div class="cp_featured">
+      <div class="cp_featured_thumb">
+        <img src="../p/무곡1.PNG" alt="무곡펜션">
+      </div>
+      <div class="info">
+        <div class="subject">무곡펜션</div>
+        <ul class="cp_btn">
+          <li><a class="btn_home" href="https://mugok.co.kr/" target="_blank" rel="noopener" aria-label="무곡펜션 홈페이지"><i class="fa-solid fa-house"></i></a></li>
+          <li><a class="btn_tel" href="tel:010-9813-3421" aria-label="무곡펜션 전화걸기"><i class="fa-solid fa-phone"></i></a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 나머지 제휴펜션 4곳 (빌라드무주·라비앙로즈 제외) -->
+    <ul class="cp_list">
+      <li>
+        <div class="thumb"><img src="../p/스케치.PNG" alt="스케치펜션"></div>
+        <div class="info">
+          <div class="subject">스케치펜션</div>
+          <ul class="cp_btn">
+            <li><a class="btn_home" href="http://mujusketch.com" target="_blank" rel="noopener" aria-label="스케치펜션 홈페이지"><i class="fa-solid fa-house"></i></a></li>
+            <li><a class="btn_tel" href="tel:010-4747-6747" aria-label="스케치펜션 전화걸기"><i class="fa-solid fa-phone"></i></a></li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <div class="thumb"><img src="../p/로베.PNG" alt="로베펜션"></div>
+        <div class="info">
+          <div class="subject">로베펜션</div>
+          <ul class="cp_btn">
+            <li><a class="btn_home" href="http://mujulaube.com" target="_blank" rel="noopener" aria-label="로베펜션 홈페이지"><i class="fa-solid fa-house"></i></a></li>
+            <li><a class="btn_tel" href="tel:010-4656-1048" aria-label="로베펜션 전화걸기"><i class="fa-solid fa-phone"></i></a></li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <div class="thumb"><img src="../p/루마인.PNG" alt="루마인펜션"></div>
+        <div class="info">
+          <div class="subject">루마인펜션</div>
+          <ul class="cp_btn">
+            <li><a class="btn_home" href="http://rumine.kr/" target="_blank" rel="noopener" aria-label="루마인펜션 홈페이지"><i class="fa-solid fa-house"></i></a></li>
+            <li><a class="btn_tel" href="tel:010-9000-9396" aria-label="루마인펜션 전화걸기"><i class="fa-solid fa-phone"></i></a></li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <div class="thumb"><img src="../p/모모.PNG" alt="모모펜션"></div>
+        <div class="info">
+          <div class="subject">모모펜션</div>
+          <ul class="cp_btn">
+            <li><a class="btn_home" href="https://www.guesthousemomo.com" target="_blank" rel="noopener" aria-label="모모펜션 홈페이지"><i class="fa-solid fa-house"></i></a></li>
+            <li><a class="btn_tel" href="tel:010-5401-2408" aria-label="모모펜션 전화걸기"><i class="fa-solid fa-phone"></i></a></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+
+    <div class="cp_footer">
+      <strong>무주놀러와스키샵&amp;렌탈샵</strong> · 전북특별자치도 무주군 설천면 구천동로 1050 · 문의 <a href="tel:010-9616-3421" style="color:#6d5acd;font-weight:700;text-decoration:none;">010-9616-3421</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -4,45 +4,55 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /coupon/
 
 # 네이버 검색로봇
 User-agent: Yeti
 Allow: /
 Disallow: /admin.html
+Disallow: /coupon/
 
 # OpenAI
 User-agent: GPTBot
 Allow: /
 Disallow: /admin.html
+Disallow: /coupon/
 
 User-agent: OAI-SearchBot
 Allow: /
 Disallow: /admin.html
+Disallow: /coupon/
 
 User-agent: ChatGPT-User
 Allow: /
 Disallow: /admin.html
+Disallow: /coupon/
 
 # Anthropic
 User-agent: ClaudeBot
 Allow: /
 Disallow: /admin.html
+Disallow: /coupon/
 
 User-agent: Claude-SearchBot
 Allow: /
 Disallow: /admin.html
+Disallow: /coupon/
 
 User-agent: Claude-User
 Allow: /
 Disallow: /admin.html
+Disallow: /coupon/
 
 # Perplexity
 User-agent: PerplexityBot
 Allow: /
 Disallow: /admin.html
+Disallow: /coupon/
 
 User-agent: Perplexity-User
 Allow: /
 Disallow: /admin.html
+Disallow: /coupon/
 
 Sitemap: https://www.nolleowaski.com/sitemap.xml
