@@ -14,7 +14,7 @@ const quoteLogic = html.slice(quoteLogicStart, quoteLogicEnd);
 
 test('mobile estimate opens calculation mode while reservation keeps the step form', () => {
   assert.ok(/onclick="openEstimate\(\)"/.test(mobileBar), 'estimate button opens estimate mode');
-  assert.ok(/onclick="openQuote\(\)"[^>]*>[\s\S]*?예약신청/.test(mobileBar), 'reservation button retains its booking action');
+  assert.ok(/onclick="openQuote\(\)"[^>]*>[\s\S]*?(예약신청|실시간 예약)/.test(mobileBar), 'reservation button retains its booking action');
 
   const classes = new Set();
   const attributes = {};
