@@ -2666,7 +2666,23 @@ window.lookupReservation = async function() {
         } else {
             const statusColor = { '접수':'bg-violet-100 text-violet-700', '확인':'bg-green-100 text-green-700', '완료':'bg-gray-100 text-gray-600', '취소':'bg-red-100 text-red-600' };
             const depColor    = { '미입금':'bg-amber-100 text-amber-700', '부분입금':'bg-orange-100 text-orange-700', '입금':'bg-green-100 text-green-700' };
-            result.innerHTML = data.map(r => `
+            const hasUnpaid   = data.some(r => r.deposit_status !== '입금' && r.status !== '취소');
+            const unpaidNotice = hasUnpaid ? `
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 mb-3 text-left">
+                    <p class="text-[12.5px] font-black text-amber-800 flex items-center gap-1.5 mb-1">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500 text-[12px]"></i> 예약금 입금 후 예약이 최종 확정됩니다
+                    </p>
+                    <p class="text-[11.5px] text-amber-700 leading-relaxed mb-2.5">
+                        예약 확정을 위해 아래 계좌로 <strong class="font-extrabold text-amber-900">예약금 50,000원</strong>을 입금해 주세요. (나머지 잔금은 매장 현장 결제)
+                    </p>
+                    <div class="bg-white border border-amber-200/80 rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+                        <span class="text-[12px] font-bold text-[#0f172a]">NH농협 351-1411-4182-63 (김재현)</span>
+                        <button type="button" onclick="copyAccountNumber('351-1411-4182-63')" class="text-[11px] font-bold text-[#6d5acd] bg-violet-50 border border-violet-200 rounded-md px-2.5 py-1 hover:bg-violet-100 transition flex-shrink-0 flex items-center gap-1">
+                            <i class="fa-regular fa-copy text-[10px]"></i> 계좌 복사
+                        </button>
+                    </div>
+                </div>` : '';
+            result.innerHTML = unpaidNotice + data.map(r => `
                 <div class="bg-white border border-gray-200 rounded-xl p-4 space-y-2.5 text-[13px] mb-2">
                     <div class="flex justify-between items-center">
                         <span class="font-black text-[#6d5acd] text-[15px]">#${String(r.reservation_no).padStart(4,'0')}</span>
@@ -2678,11 +2694,6 @@ window.lookupReservation = async function() {
                     <div class="h-px bg-gray-100"></div>
                     <div class="flex justify-between"><span class="text-gray-400">방문 일시</span><span class="font-bold text-[#0f172a]">${r.visit_date} ${r.visit_time}</span></div>
                     <div class="flex justify-between"><span class="text-gray-400">접수 일시</span><span class="font-bold text-[#0f172a]">${new Date(r.created_at).toLocaleDateString('ko-KR')}</span></div>
-                    ${r.deposit_status !== '입금' ? `
-                    <div class="bg-violet-50 border border-violet-100 rounded-lg p-2.5 mt-2 flex items-center justify-between text-[11px]">
-                        <div><span class="font-bold text-[#6d5acd]">입금계좌</span> <span class="font-bold text-[#0f172a] ml-1">NH농협 351-1411-4182-63 (김재현)</span></div>
-                        <button type="button" onclick="copyAccountNumber('351-1411-4182-63')" class="text-[10px] font-bold text-[#6d5acd] bg-white border border-violet-200 rounded px-2 py-0.5 hover:bg-violet-100 transition flex-shrink-0">복사</button>
-                    </div>` : ''}
                 </div>`).join('');
         }
         result.classList.remove('hidden');
