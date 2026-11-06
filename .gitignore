@@ -15,6 +15,9 @@
 # Supabase 운영용 SQL — 사이트 동작과 무관하고, 보안 설정 내역이라 비공개 유지
 *.sql
 
+# Supabase Edge Function 원본 — 알림톡 발송 서버 코드라 공개 사이트에 올리지 않음
+supabase/
+
 # 구글 Apps Script 원본 (참고용, 실제 배포는 구글 쪽에 되어 있음)
 *.gs
 
