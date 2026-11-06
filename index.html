@@ -137,15 +137,45 @@
         .lookbook-tile { position:relative; display:block; overflow:hidden; aspect-ratio:1; background:#f1f5f9; text-align:left; }
         .lookbook-tile img { width:100%; height:100%; object-fit:cover; transition:transform .35s ease,filter .35s ease; }
         .lookbook-tile:hover img,.lookbook-tile:focus-visible img { transform:scale(1.045); filter:saturate(1.08); }
-        .lookbook-tile::after { content:''; position:absolute; inset:45% 0 0; background:linear-gradient(transparent,rgba(15,23,42,.62)); pointer-events:none; }
+        .lookbook-tile::after { content:''; position:absolute; inset:62% 0 0; background:linear-gradient(transparent,rgba(15,23,42,.6)); pointer-events:none; }
         .lookbook-tile-label { position:absolute; z-index:1; left:8px; right:8px; bottom:7px; color:white; font-size:10px; font-weight:800; line-height:1.25; text-shadow:0 1px 4px rgba(0,0,0,.5); }
         .lookbook-tile-tag { position:absolute; z-index:1; top:7px; left:7px; max-width:calc(100% - 14px); padding:3px 7px; overflow:hidden; border-radius:6px; background:rgba(15,23,42,.65); color:#fff; font-size:9px; font-weight:700; text-overflow:ellipsis; white-space:nowrap; }
-        .lookbook-deck { position:relative; height:236px; display:grid; place-items:center; isolation:isolate; }
-        .lookbook-deck-main { position:relative; width:min(86%,310px); height:216px; padding:0; border:1px solid #e2e8f0; border-radius:14px; overflow:hidden; background:#e2e8f0; box-shadow:0 8px 20px rgba(15,23,42,.1); transition:transform .25s ease,opacity .2s ease; }
+        /* 모델 사진은 원본 비율(3:4) 그대로 보여 머리·발이 잘리지 않게 함 */
+        .lookbook-grid-portrait .lookbook-tile { aspect-ratio:3/4; }
+        .lookbook-grid-portrait .lookbook-tile img { object-position:50% 0; }
+        .lookbook-grid-equip { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        .lookbook-group-head { display:flex; align-items:baseline; justify-content:space-between; gap:8px; padding:16px 16px 8px; }
+        .lookbook-group-title { color:#0f172a; font-size:13px; font-weight:900; }
+        .lookbook-group-note { color:#64748b; font-size:10px; font-weight:600; }
+        .lookbook-deck-box { container-type:inline-size; }
+        .lookbook-deck { position:relative; display:flex; align-items:center; justify-content:center; gap:4%; padding:14px 0 12px; isolation:isolate; }
+        .lookbook-deck-main { position:relative; flex:0 0 auto; width:min(86%,300px); aspect-ratio:3/4; padding:0; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden; background:#eef0f3; box-shadow:0 14px 30px rgba(15,23,42,.16); transition:transform .25s ease,opacity .2s ease; }
         .lookbook-deck-main:hover { transform:translateY(-2px); }
-        .lookbook-deck-main img { width:100%; height:100%; object-fit:cover; }
-        .lookbook-deck-main::after { content:''; position:absolute; inset:50% 0 0; background:linear-gradient(transparent,rgba(15,23,42,.65)); }
+        .lookbook-deck-main img { width:100%; height:100%; object-fit:cover; object-position:50% 0; }
+        .lookbook-deck-main::after { content:''; position:absolute; inset:68% 0 0; background:linear-gradient(transparent,rgba(15,23,42,.62)); }
+        .lookbook-deck-side { display:none; }
         .lookbook-deck-copy { position:absolute; z-index:1; left:13px; bottom:12px; color:#fff; text-align:left; text-shadow:0 1px 6px rgba(0,0,0,.55); }
+        /* 넓은 화면(PC): 큰 중앙 카드 + 양옆 이전·다음 미리보기 */
+        @container (min-width:560px) {
+            .lookbook-deck { padding:20px 0 16px; }
+            .lookbook-deck-main { width:min(46%,420px); border-radius:20px; }
+            .lookbook-deck-copy { left:20px; bottom:18px; }
+            #lookbook-deck-tag { font-size:12px; }
+            #lookbook-deck-title { font-size:19px; }
+            .lookbook-deck-side { display:block; position:relative; flex:0 0 auto; width:min(23%,240px); aspect-ratio:3/4; overflow:hidden; border:1px solid #e2e8f0; border-radius:16px; background:#eef0f3; opacity:.5; cursor:pointer; transition:opacity .2s ease,transform .2s ease; }
+            .lookbook-deck-side:hover { opacity:.85; transform:translateY(-2px); }
+            .lookbook-deck-side img { width:100%; height:100%; object-fit:cover; object-position:50% 0; }
+        }
+        @media (min-width:1024px) {
+            .lookbook-grid { gap:6px; }
+            .lookbook-grid-equip { grid-template-columns:repeat(4,minmax(0,1fr)); }
+            .lookbook-group-head { padding:24px 16px 10px; }
+            .lookbook-group-title { font-size:16px; }
+            .lookbook-group-note { font-size:12px; }
+            .lookbook-tile-label { left:12px; right:12px; bottom:10px; font-size:13px; }
+            .lookbook-tile-tag { top:10px; left:10px; padding:4px 9px; font-size:11px; }
+            .lookbook-story-panel { width:min(100%,600px); height:min(880px,calc(100dvh - 48px)); }
+        }
         .lookbook-story-viewer { position:fixed; inset:0; z-index:450; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(7,10,20,.88); backdrop-filter:blur(12px); }
         .lookbook-story-viewer.open { display:flex; }
         .lookbook-story-panel { position:relative; width:min(100%,430px); height:min(780px,calc(100dvh - 32px)); overflow:hidden; border:1px solid rgba(255,255,255,.22); border-radius:24px; background:#111827; box-shadow:0 28px 80px rgba(0,0,0,.45); }
@@ -1259,7 +1289,7 @@
                 <p class="mt-2 text-[10px] leading-relaxed text-slate-500">장갑·양말은 위생상 대여하지 않고 매장에서 판매합니다.</p>
             </div>
 
-            <div class="mx-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div class="lookbook-deck-box mx-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <div class="flex items-end justify-between gap-2">
                     <div>
                         <p class="text-[10px] font-black tracking-[.12em] text-[#6d5acd]">26/27 SEASON LOOKBOOK</p>
@@ -1269,14 +1299,16 @@
                     <span class="shrink-0 rounded bg-white border border-slate-200 px-2 py-1 text-[9px] font-bold text-slate-600">REAL PHOTO</span>
                 </div>
                 <div class="lookbook-deck mt-1">
+                    <div class="lookbook-deck-side" data-deck-step="-1" aria-hidden="true"><img id="lookbook-deck-prev-image" src="./assets/photos/lookbook/full-forest.jpg" alt="" width="900" height="1200" loading="lazy" decoding="async"></div>
                     <button id="lookbook-deck-main" type="button" class="lookbook-deck-main" data-deck-open aria-label="시즌 룩북 크게 보기">
-                        <img id="lookbook-deck-image" src="./assets/photos/model-mj-blue.jpg" alt="블루·화이트 MJ-03 스키복 상하의를 입은 모델" width="1080" height="1080" loading="lazy" decoding="async">
+                        <img id="lookbook-deck-image" src="./assets/photos/lookbook/full-mj03-blue.jpg" alt="블루·화이트 MJ-03 스키복 상하의를 입은 여성 모델 전신 사진" width="900" height="1200" loading="lazy" decoding="async">
                         <span class="lookbook-deck-copy"><span id="lookbook-deck-tag" class="block text-[10px] font-bold">#시즌룩북</span><span id="lookbook-deck-title" class="mt-1 block text-[14px] font-black">MJ-03 블루·화이트 스키복</span></span>
                     </button>
+                    <div class="lookbook-deck-side" data-deck-step="1" aria-hidden="true"><img id="lookbook-deck-next-image" src="./assets/photos/lookbook/full-mj03-purple.jpg" alt="" width="900" height="1200" loading="lazy" decoding="async"></div>
                 </div>
                 <div class="flex items-center justify-center gap-6">
                     <button type="button" data-deck-prev class="grid h-9 w-9 place-items-center rounded-full border border-violet-100 bg-white text-[#6d5acd] shadow-sm" aria-label="이전 룩북 카드"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
-                    <span id="lookbook-deck-count" class="min-w-14 text-center text-[11px] font-black tabular-nums text-slate-500" aria-live="polite">01 / 05</span>
+                    <span id="lookbook-deck-count" class="min-w-14 text-center text-[11px] font-black tabular-nums text-slate-500" aria-live="polite">01 / 09</span>
                     <button type="button" data-deck-next class="grid h-9 w-9 place-items-center rounded-full border border-violet-100 bg-white text-[#6d5acd] shadow-sm" aria-label="다음 룩북 카드"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
                 </div>
             </div>
@@ -1291,9 +1323,9 @@
                     <span class="rounded-full bg-violet-50 px-2.5 py-1 text-[9px] font-black text-[#6d5acd]">26/27</span>
                 </div>
                 <div class="mt-4 grid grid-cols-3 divide-x divide-slate-100 rounded-xl bg-slate-50 py-2.5 text-center">
-                    <div><strong class="block text-[13px] font-black text-[#0f172a]">6</strong><span class="text-[9px] text-slate-500">실제 매장 사진</span></div>
-                    <div><strong class="block text-[13px] font-black text-[#0f172a]">5</strong><span class="text-[9px] text-slate-500">실제 장비 사진</span></div>
-                    <div><strong class="block text-[13px] font-black text-[#0f172a]">6</strong><span class="text-[9px] text-slate-500">26/27 모델컷</span></div>
+                    <div><strong class="block text-[13px] font-black text-[#0f172a]">18</strong><span class="text-[9px] text-slate-500">26/27 모델컷</span></div>
+                    <div><strong class="block text-[13px] font-black text-[#0f172a]">3</strong><span class="text-[9px] text-slate-500">실제 매장 사진</span></div>
+                    <div><strong class="block text-[13px] font-black text-[#0f172a]">4</strong><span class="text-[9px] text-slate-500">실제 장비 사진</span></div>
                 </div>
             </div>
 
@@ -1302,55 +1334,102 @@
                 <button id="lookbook-tab-equipment" type="button" class="lookbook-tab" role="tab" data-lookbook-tab="equipment" aria-selected="false" aria-controls="lookbook-grid-equipment" tabindex="-1">장비 <span class="ml-1 text-[10px] font-semibold">부츠·헬멧</span></button>
             </div>
 
-            <div id="lookbook-grid-outfit" class="lookbook-grid" data-lookbook-grid="outfit" role="tabpanel" aria-labelledby="lookbook-tab-outfit" aria-label="무주 스키복 모델컷과 실제 매장 사진">
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/model-mj-blue.jpg" data-story-title="MJ-03 블루·화이트 스키복" data-story-tag="#시즌룩북" data-story-note="26/27 모델컷">
-                    <img src="./assets/photos/model-mj-blue.jpg" alt="블루·화이트 MJ-03 스키복 상하의를 입은 모델" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">26/27 모델컷</span><span class="lookbook-tile-label">#시즌룩북 · 블루·화이트</span>
-                </button>
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/model-tpc-white-f.jpg" data-story-title="화이트·라임 포인트 스키복" data-story-tag="#포인트컬러" data-story-note="26/27 모델컷">
-                    <img src="./assets/photos/model-tpc-white-f.jpg" alt="화이트에 라임 포인트가 들어간 스키복을 입고 스키를 든 여성 모델" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">26/27 모델컷</span><span class="lookbook-tile-label">#포인트컬러 · 화이트·라임</span>
-                </button>
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/model-tpr-pair.jpg" data-story-title="라벤더 타이드 남녀 스키복" data-story-tag="#커플룩" data-story-note="26/27 모델컷">
-                    <img src="./assets/photos/model-tpr-pair.jpg" alt="같은 라벤더 타이드 스키복을 입은 남녀 모델" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">26/27 모델컷</span><span class="lookbook-tile-label">#커플룩 · 라벤더</span>
-                </button>
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/store-racks-main.jpg" data-story-title="벽면 가득 걸린 시즌 스키복" data-story-tag="#매장전경" data-story-note="실제 매장">
-                    <img src="./assets/photos/store-racks-main.jpg" alt="무주놀러와스키샵 매장 벽면에 걸린 블루·화이트 계열 26/27 시즌 스키복" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#매장전경</span>
-                </button>
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/store-racks-long.jpg" data-story-title="사이즈별 스키복 진열" data-story-tag="#전사이즈보유" data-story-note="실제 매장">
-                    <img src="./assets/photos/store-racks-long.jpg" alt="무주놀러와스키샵 매장에 사이즈별로 길게 걸린 대여용 스키복" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#전사이즈보유</span>
-                </button>
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/store-racks-lime.jpg" data-story-title="화이트·형광 포인트 스키복" data-story-tag="#세이프티컬러" data-story-note="실제 매장">
-                    <img src="./assets/photos/store-racks-lime.jpg" alt="무주놀러와스키샵 매장의 화이트·그레이 바탕에 형광 포인트가 들어간 스키복" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#세이프티컬러</span>
-                </button>
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/store-racks-color.jpg" data-story-title="레드·블루 컬러 스키복" data-story-tag="#레드블루" data-story-note="실제 매장">
-                    <img src="./assets/photos/store-racks-color.jpg" alt="무주놀러와스키샵 매장에 걸린 레드·블루·블랙 스키복 상하의" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#레드블루</span>
-                </button>
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/store-fitting.jpg" data-story-title="커튼으로 가려지는 탈의실" data-story-tag="#탈의실" data-story-note="실제 매장">
-                    <img src="./assets/photos/store-fitting.jpg" alt="무주놀러와스키샵 매장 안쪽의 커튼식 탈의실" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#탈의실</span>
-                </button>
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/store-exterior.jpg" data-story-title="덕유산리조트 정문 앞 매장" data-story-tag="#정문앞" data-story-note="실제 매장">
-                    <img src="./assets/photos/store-exterior.jpg" alt="덕유산리조트 정문 앞 무주놀러와스키샵 건물 외관" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#정문앞</span>
-                </button>
+            <div id="lookbook-grid-outfit" class="lookbook-panel" data-lookbook-grid="outfit" role="tabpanel" aria-labelledby="lookbook-tab-outfit" aria-label="무주 스키복 모델 전신·상의 컷과 실제 매장 사진">
+                <section class="lookbook-group" aria-labelledby="lookbook-group-full">
+                    <div class="lookbook-group-head"><h4 id="lookbook-group-full" class="lookbook-group-title">전신 컷</h4><span class="lookbook-group-note">상하의 핏 · 9개 디자인</span></div>
+                    <div class="lookbook-grid lookbook-grid-portrait">
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/full-mj03-blue.jpg" data-story-title="MJ-03 블루·화이트 스키복" data-story-tag="#전신핏" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/full-mj03-blue.jpg" alt="블루·화이트 MJ-03 스키복 상하의를 입은 여성 모델 전신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">MJ-03 블루·화이트</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/full-mj03-purple.jpg" data-story-title="MJ-03 퍼플·베이지 스키복" data-story-tag="#전신핏" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/full-mj03-purple.jpg" alt="퍼플·베이지 MJ-03 스키복 상하의를 입은 여성 모델 전신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">MJ-03 퍼플·베이지</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/full-mj03-silver.jpg" data-story-title="MJ-03 실버·블랙 스키복" data-story-tag="#전신핏" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/full-mj03-silver.jpg" alt="실버·블랙 MJ-03 스키복 상하의를 입은 여성 모델 전신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">MJ-03 실버·블랙</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/full-mj01-white.jpg" data-story-title="MJ-01 올화이트 스키복" data-story-tag="#전신핏" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/full-mj01-white.jpg" alt="올화이트 MJ-01 스키복 상하의를 입은 여성 모델 전신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">MJ-01 올화이트</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/full-tpc-white-f.jpg" data-story-title="TPC 화이트·라임 여성 스키복" data-story-tag="#전신핏" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/full-tpc-white-f.jpg" alt="라임 포인트가 들어간 화이트 TPC 스키복 상하의를 입은 여성 모델 전신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">TPC 화이트·라임 여성</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/full-tpc-white-m.jpg" data-story-title="TPC 화이트·라임 남성 스키복" data-story-tag="#전신핏" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/full-tpc-white-m.jpg" alt="라임 포인트가 들어간 화이트 TPC 스키복 상하의를 입은 남성 모델 전신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">TPC 화이트·라임 남성</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/full-tpr-tide-f.jpg" data-story-title="TPR 라벤더 타이드 여성 스키복" data-story-tag="#전신핏" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/full-tpr-tide-f.jpg" alt="라벤더 타이드 TPR 스키복을 입고 스키를 든 여성 모델 전신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">TPR 라벤더 타이드 여성</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/full-tpr-tide-m.jpg" data-story-title="TPR 라벤더 타이드 남성 스키복" data-story-tag="#전신핏" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/full-tpr-tide-m.jpg" alt="라벤더 타이드 TPR 스키복 상하의를 입은 남성 모델 전신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">TPR 라벤더 타이드 남성</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/full-forest.jpg" data-story-title="FOREST 다크그린·그레이 스키복" data-story-tag="#전신핏" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/full-forest.jpg" alt="다크그린·그레이 FOREST 스키복 상하의를 입은 여성 모델 전신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">FOREST 다크그린·그레이</span>
+                        </button>
+                    </div>
+                </section>
+                <section class="lookbook-group" aria-labelledby="lookbook-group-upper">
+                    <div class="lookbook-group-head"><h4 id="lookbook-group-upper" class="lookbook-group-title">상의 위주</h4><span class="lookbook-group-note">재킷 디테일 · 9개 디자인</span></div>
+                    <div class="lookbook-grid lookbook-grid-portrait">
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/upper-mj03-blue.jpg" data-story-title="MJ-03 블루·화이트 재킷" data-story-tag="#상의디테일" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/upper-mj03-blue.jpg" alt="블루·화이트 MJ-03 스키 재킷을 입은 여성 모델 상반신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">MJ-03 블루·화이트</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/upper-mj03-purple.jpg" data-story-title="MJ-03 퍼플·베이지 재킷" data-story-tag="#상의디테일" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/upper-mj03-purple.jpg" alt="퍼플·베이지 MJ-03 스키 재킷을 입은 여성 모델 상반신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">MJ-03 퍼플·베이지</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/upper-mj03-silver.jpg" data-story-title="MJ-03 실버·블랙 재킷" data-story-tag="#상의디테일" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/upper-mj03-silver.jpg" alt="실버·블랙 MJ-03 스키 재킷을 입은 여성 모델 상반신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">MJ-03 실버·블랙</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/upper-mj01-white.jpg" data-story-title="MJ-01 올화이트 재킷" data-story-tag="#상의디테일" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/upper-mj01-white.jpg" alt="올화이트 MJ-01 스키 재킷을 입은 여성 모델 상반신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">MJ-01 올화이트</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/upper-tpc-white-f.jpg" data-story-title="TPC 화이트·라임 여성 재킷" data-story-tag="#상의디테일" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/upper-tpc-white-f.jpg" alt="라임 포인트가 들어간 화이트 TPC 스키 재킷을 입은 여성 모델 상반신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">TPC 화이트·라임 여성</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/upper-tpc-white-m.jpg" data-story-title="TPC 화이트·라임 남성 재킷" data-story-tag="#상의디테일" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/upper-tpc-white-m.jpg" alt="라임 포인트가 들어간 화이트 TPC 스키 재킷을 입은 남성 모델 상반신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">TPC 화이트·라임 남성</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/upper-tpr-tide-f.jpg" data-story-title="TPR 라벤더 타이드 여성 재킷" data-story-tag="#상의디테일" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/upper-tpr-tide-f.jpg" alt="라벤더 타이드 TPR 스키 재킷을 입은 여성 모델 상반신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">TPR 라벤더 타이드 여성</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/upper-tpr-tide-m.jpg" data-story-title="TPR 라벤더 타이드 남성 재킷" data-story-tag="#상의디테일" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/upper-tpr-tide-m.jpg" alt="라벤더 타이드 TPR 스키 재킷을 입은 남성 모델 상반신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">TPR 라벤더 타이드 남성</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/upper-forest.jpg" data-story-title="FOREST 다크그린·그레이 재킷" data-story-tag="#상의디테일" data-story-note="26/27 모델컷">
+                            <img src="./assets/photos/lookbook/upper-forest.jpg" alt="다크그린·그레이 FOREST 스키 재킷을 입은 여성 모델 상반신 사진" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-label">FOREST 다크그린·그레이</span>
+                        </button>
+                    </div>
+                </section>
+                <section class="lookbook-group" aria-labelledby="lookbook-group-store">
+                    <div class="lookbook-group-head"><h4 id="lookbook-group-store" class="lookbook-group-title">실제 매장</h4><span class="lookbook-group-note">매장에 걸린 대여용 스키복</span></div>
+                    <div class="lookbook-grid lookbook-grid-portrait">
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/store-racks-main.jpg" data-story-title="벽면 가득 걸린 시즌 스키복" data-story-tag="#매장전경" data-story-note="실제 매장">
+                            <img src="./assets/photos/lookbook/store-racks-main.jpg" alt="무주놀러와스키샵 매장 벽면에 걸린 블루·화이트 계열 26/27 시즌 스키복" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#매장전경</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/store-racks-long.jpg" data-story-title="사이즈별 스키복 진열" data-story-tag="#전사이즈보유" data-story-note="실제 매장">
+                            <img src="./assets/photos/lookbook/store-racks-long.jpg" alt="무주놀러와스키샵 매장에 사이즈별로 길게 걸린 대여용 스키복" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#전사이즈보유</span>
+                        </button>
+                        <button type="button" class="lookbook-tile" data-story-item data-story-category="outfit" data-story-src="./assets/photos/lookbook/store-racks-lime.jpg" data-story-title="화이트·형광 포인트 스키복" data-story-tag="#세이프티컬러" data-story-note="실제 매장">
+                            <img src="./assets/photos/lookbook/store-racks-lime.jpg" alt="무주놀러와스키샵 매장의 화이트·그레이 바탕에 형광 포인트가 들어간 스키복" width="900" height="1200" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 매장</span><span class="lookbook-tile-label">#세이프티컬러</span>
+                        </button>
+                    </div>
+                </section>
             </div>
 
-            <div id="lookbook-grid-equipment" class="lookbook-grid" data-lookbook-grid="equipment" role="tabpanel" aria-labelledby="lookbook-tab-equipment" aria-label="무주 스키샵의 실제 부츠·헬멧 보유 사진" hidden>
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./assets/photos/store-boots.jpg" data-story-title="사이즈별 보드 부츠" data-story-tag="#부츠전사이즈" data-story-note="실제 보유 장비">
-                    <img src="./assets/photos/store-boots.jpg" alt="무주놀러와스키샵 매장 선반에 사이즈별로 정리된 보드 부츠" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 보유 장비</span><span class="lookbook-tile-label">#부츠전사이즈</span>
-                </button>
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./assets/photos/store-boots-side.jpg" data-story-title="아동·성인 부츠 진열" data-story-tag="#아동부터성인까지" data-story-note="실제 보유 장비">
-                    <img src="./assets/photos/store-boots-side.jpg" alt="무주놀러와스키샵 매장의 아동용부터 성인용까지 진열된 부츠" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 보유 장비</span><span class="lookbook-tile-label">#아동부터성인까지</span>
-                </button>
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./assets/photos/store-helmets.jpg" data-story-title="고글 일체형 헬멧" data-story-tag="#헬멧고글" data-story-note="실제 보유 장비">
-                    <img src="./assets/photos/store-helmets.jpg" alt="무주놀러와스키샵 매장 선반에 놓인 고글 일체형 헬멧" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 보유 장비</span><span class="lookbook-tile-label">#헬멧고글</span>
-                </button>
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./assets/photos/store-helmets-side.jpg" data-story-title="헬멧 사이즈별 진열" data-story-tag="#헬멧사이즈" data-story-note="실제 보유 장비">
-                    <img src="./assets/photos/store-helmets-side.jpg" alt="무주놀러와스키샵 매장의 헬멧 진열장" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 보유 장비</span><span class="lookbook-tile-label">#헬멧사이즈</span>
-                </button>
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./assets/photos/store-helmet-aisle.jpg" data-story-title="입구부터 이어진 헬멧 진열장" data-story-tag="#헬멧진열" data-story-note="실제 보유 장비">
-                    <img src="./assets/photos/store-helmet-aisle.jpg" alt="무주놀러와스키샵 입구 쪽 벽면을 채운 헬멧 진열장" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 보유 장비</span><span class="lookbook-tile-label">#헬멧진열</span>
-                </button>
-                <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./assets/photos/model-tpr-tide-f.jpg" data-story-title="스키와 함께 맞춘 시즌룩" data-story-tag="#스키룩" data-story-note="26/27 모델컷">
-                    <img src="./assets/photos/model-tpr-tide-f.jpg" alt="라벤더 타이드 스키복을 입고 스키를 든 여성 모델" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">26/27 모델컷</span><span class="lookbook-tile-label">#스키룩</span>
-                </button>
+            <div id="lookbook-grid-equipment" class="lookbook-panel" data-lookbook-grid="equipment" role="tabpanel" aria-labelledby="lookbook-tab-equipment" aria-label="무주 스키샵의 실제 부츠·헬멧 보유 사진" hidden>
+                <div class="lookbook-grid lookbook-grid-equip">
+                    <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./assets/photos/lookbook/equip-boots.jpg" data-story-title="사이즈별 보드 부츠" data-story-tag="#부츠전사이즈" data-story-note="실제 보유 장비">
+                        <img src="./assets/photos/lookbook/equip-boots.jpg" alt="무주놀러와스키샵 매장 선반에 사이즈별로 정리된 보드 부츠" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 보유 장비</span><span class="lookbook-tile-label">#부츠전사이즈</span>
+                    </button>
+                    <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./assets/photos/lookbook/equip-helmets.jpg" data-story-title="고글 일체형 헬멧" data-story-tag="#헬멧고글" data-story-note="실제 보유 장비">
+                        <img src="./assets/photos/lookbook/equip-helmets.jpg" alt="무주놀러와스키샵 매장 선반에 놓인 고글 일체형 헬멧" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 보유 장비</span><span class="lookbook-tile-label">#헬멧고글</span>
+                    </button>
+                    <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./assets/photos/lookbook/equip-helmets-side.jpg" data-story-title="헬멧 사이즈별 진열" data-story-tag="#헬멧사이즈" data-story-note="실제 보유 장비">
+                        <img src="./assets/photos/lookbook/equip-helmets-side.jpg" alt="무주놀러와스키샵 매장의 헬멧 진열장" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 보유 장비</span><span class="lookbook-tile-label">#헬멧사이즈</span>
+                    </button>
+                    <button type="button" class="lookbook-tile" data-story-item data-story-category="equipment" data-story-src="./assets/photos/lookbook/equip-helmet-aisle.jpg" data-story-title="입구부터 이어진 헬멧 진열장" data-story-tag="#헬멧진열" data-story-note="실제 보유 장비">
+                        <img src="./assets/photos/lookbook/equip-helmet-aisle.jpg" alt="무주놀러와스키샵 입구 쪽 벽면을 채운 헬멧 진열장" width="1080" height="1080" loading="lazy" decoding="async"><span class="lookbook-tile-tag">실제 보유 장비</span><span class="lookbook-tile-label">#헬멧진열</span>
+                    </button>
+                </div>
             </div>
 
             <div class="px-4 pb-4 pt-4">
@@ -2970,13 +3049,20 @@ function promoHexToRgba(hex, alpha) {
     const tabs = Array.from(document.querySelectorAll('[data-lookbook-tab]'));
     const grids = Array.from(document.querySelectorAll('[data-lookbook-grid]'));
     const deckImages = [
-        { src:'./assets/photos/model-mj-blue.jpg', title:'MJ-03 블루·화이트 스키복', tag:'#시즌룩북', alt:'블루·화이트 MJ-03 스키복 상하의를 입은 모델' },
-        { src:'./assets/photos/model-tpc-white-f.jpg', title:'화이트·라임 포인트 스키복', tag:'#포인트컬러', alt:'화이트에 라임 포인트가 들어간 스키복을 입은 여성 모델' },
-        { src:'./assets/photos/model-tpc-white-m.jpg', title:'화이트·라임 남성 스키복', tag:'#남성룩', alt:'화이트에 라임 포인트가 들어간 스키복을 입은 남성 모델' },
-        { src:'./assets/photos/model-tpr-tide-f.jpg', title:'라벤더 타이드 스키복', tag:'#라벤더톤', alt:'라벤더 타이드 스키복을 입고 스키를 든 여성 모델' },
-        { src:'./assets/photos/model-tpr-tide-m.jpg', title:'라벤더 타이드 남성 스키복', tag:'#남녀공용', alt:'라벤더 타이드 스키복을 입고 스키를 든 남성 모델' }
+        // 의류 탭 '전신 컷' 9장과 같은 순서 — 카드를 누르면 같은 사진부터 크게 보기가 열림
+        { src:'./assets/photos/lookbook/full-mj03-blue.jpg', title:'MJ-03 블루·화이트 스키복', tag:'#시즌룩북', alt:'블루·화이트 MJ-03 스키복 상하의를 입은 여성 모델 전신 사진' },
+        { src:'./assets/photos/lookbook/full-mj03-purple.jpg', title:'MJ-03 퍼플·베이지 스키복', tag:'#퍼플베이지', alt:'퍼플·베이지 MJ-03 스키복 상하의를 입은 여성 모델 전신 사진' },
+        { src:'./assets/photos/lookbook/full-mj03-silver.jpg', title:'MJ-03 실버·블랙 스키복', tag:'#실버톤', alt:'실버·블랙 MJ-03 스키복 상하의를 입은 여성 모델 전신 사진' },
+        { src:'./assets/photos/lookbook/full-mj01-white.jpg', title:'MJ-01 올화이트 스키복', tag:'#올화이트', alt:'올화이트 MJ-01 스키복 상하의를 입은 여성 모델 전신 사진' },
+        { src:'./assets/photos/lookbook/full-tpc-white-f.jpg', title:'TPC 화이트·라임 여성 스키복', tag:'#포인트컬러', alt:'라임 포인트가 들어간 화이트 TPC 스키복 상하의를 입은 여성 모델 전신 사진' },
+        { src:'./assets/photos/lookbook/full-tpc-white-m.jpg', title:'TPC 화이트·라임 남성 스키복', tag:'#남성룩', alt:'라임 포인트가 들어간 화이트 TPC 스키복 상하의를 입은 남성 모델 전신 사진' },
+        { src:'./assets/photos/lookbook/full-tpr-tide-f.jpg', title:'TPR 라벤더 타이드 여성 스키복', tag:'#라벤더톤', alt:'라벤더 타이드 TPR 스키복을 입고 스키를 든 여성 모델 전신 사진' },
+        { src:'./assets/photos/lookbook/full-tpr-tide-m.jpg', title:'TPR 라벤더 타이드 남성 스키복', tag:'#남녀공용', alt:'라벤더 타이드 TPR 스키복 상하의를 입은 남성 모델 전신 사진' },
+        { src:'./assets/photos/lookbook/full-forest.jpg', title:'FOREST 다크그린·그레이 스키복', tag:'#포레스트', alt:'다크그린·그레이 FOREST 스키복 상하의를 입은 여성 모델 전신 사진' }
     ];
     const deckImage = document.getElementById('lookbook-deck-image');
+    const deckPrevImage = document.getElementById('lookbook-deck-prev-image');
+    const deckNextImage = document.getElementById('lookbook-deck-next-image');
     const deckTitle = document.getElementById('lookbook-deck-title');
     const deckTag = document.getElementById('lookbook-deck-tag');
     const deckCount = document.getElementById('lookbook-deck-count');
@@ -2987,6 +3073,8 @@ function promoHexToRgba(hex, alpha) {
         const item = deckImages[deckIndex];
         deckImage.src = item.src;
         deckImage.alt = item.alt;
+        deckPrevImage.src = deckImages[(deckIndex - 1 + deckImages.length) % deckImages.length].src;
+        deckNextImage.src = deckImages[(deckIndex + 1) % deckImages.length].src;
         deckTitle.textContent = item.title;
         deckTag.textContent = item.tag;
         deckCount.textContent = String(deckIndex + 1).padStart(2, '0') + ' / ' + String(deckImages.length).padStart(2, '0');
@@ -3021,6 +3109,9 @@ function promoHexToRgba(hex, alpha) {
     });
     document.querySelector('[data-deck-prev]').addEventListener('click', function() { changeDeck(-1); });
     document.querySelector('[data-deck-next]').addEventListener('click', function() { changeDeck(1); });
+    document.querySelectorAll('[data-deck-step]').forEach(function(side) {
+        side.addEventListener('click', function() { changeDeck(Number(side.dataset.deckStep)); });
+    });
 
     const viewer = document.getElementById('lookbook-story-viewer');
     const storyImage = document.getElementById('lookbook-story-image');

@@ -48,11 +48,14 @@ test('uses factual, descriptive alternative text for hero slide photos', () => {
   assert.doesNotMatch(html, /desc:'장비 \+ 의류 \+ 헬멧 \+ 고글 \+ 장갑/);
 });
 
-test('shows five real model shots in the season lookbook carousel', () => {
+test('shows the nine full-body model shots in the season lookbook carousel', () => {
   const deck = html.match(/const deckImages = \[([\s\S]*?)\];/);
   assert.ok(deck, 'deck image list should exist');
-  const srcs = [...deck[1].matchAll(/src:'\.\/(assets\/photos\/model-[^']+)'/g)].map((m) => m[1]);
-  assert.equal(srcs.length, 5);
+  const srcs = [...deck[1].matchAll(/src:'\.\/(assets\/photos\/lookbook\/full-[^']+)'/g)].map((m) => m[1]);
+  assert.equal(srcs.length, 9);
   for (const rel of srcs) assert.ok(fs.existsSync(path.join(root, rel)), `Missing model photo: ${rel}`);
-  requires(html, /id="lookbook-deck-count"[^>]*>01 \/ 05</, 'a deck counter matching five photos');
+  requires(html, /id="lookbook-deck-count"[^>]*>01 \/ 09</, 'a deck counter matching nine photos');
+  // 카드를 누르면 같은 사진부터 크게 보기가 열리도록 의류 탭 첫 9장과 순서가 같아야 함
+  const outfitSrcs = [...outfitSection.matchAll(/data-story-category="outfit" data-story-src="\.\/([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(outfitSrcs.slice(0, 9), srcs);
 });
