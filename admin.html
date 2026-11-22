@@ -36,6 +36,20 @@
         .res-card { transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s; }
         .res-card:active { transform: scale(0.99); }
 
+        /* 예약 보기 방식 탭 · 실시간 연결 표시 · 새 예약 강조 */
+        .view-tab { padding:7px 14px; border-radius:10px; font-size:12px; font-weight:800; color:#64748b; transition:background .15s,color .15s; }
+        .view-tab[aria-selected="true"] { background:#fff; color:#004de6; box-shadow:0 1px 3px rgba(15,23,42,.12); }
+        .live-dot { width:8px; height:8px; border-radius:50%; background:#cbd5e1; flex-shrink:0; }
+        .live-on .live-dot { background:#22c55e; box-shadow:0 0 0 0 rgba(34,197,94,.5); animation:live-pulse 1.8s ease-out infinite; }
+        .live-off .live-dot { background:#f59e0b; }
+        @keyframes live-pulse { 70% { box-shadow:0 0 0 7px rgba(34,197,94,0); } 100% { box-shadow:0 0 0 0 rgba(34,197,94,0); } }
+        .res-card.is-new { border-color:#93c5fd; background:#f8fbff; }
+        .res-card.is-flash { animation:card-flash 1.6s ease-out 1; }
+        @keyframes card-flash { 0% { box-shadow:0 0 0 4px rgba(0,77,230,.35); } 100% { box-shadow:0 0 0 0 rgba(0,77,230,0); } }
+        .new-badge { background:#004de6; color:#fff; }
+        .day-head { position:sticky; top:0; z-index:5; background:#f8fafc; }
+        @media (prefers-reduced-motion: reduce) { .live-on .live-dot, .res-card.is-flash { animation:none; } }
+
         /* ===== 히어로 슬라이드 미리보기 + 편집기 (index.html과 동일한 스타일 + 드래그/선택) ===== */
         /* 모바일/PC 모드에 따라 미리보기 틀 비율 자체가 바뀜(세로 3:4 ↔ 가로 1.5:1) */
         .hero-frame { position:relative; width:min(100%, 45vh); aspect-ratio:3/4; margin:0 auto; border-radius:16px; overflow:hidden; background:#1e293b; user-select:none; }
@@ -493,20 +507,26 @@
 
         <!-- 필터 패널 -->
         <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
-            <h2 class="font-bold text-[#0f172a] text-[13px] mb-3 flex items-center gap-1.5">
-                <i class="fa-solid fa-filter text-[#004de6] text-[11px]" aria-hidden="true"></i> 검색 / 필터
-            </h2>
+            <!-- 보기 방식: 실시간 접수순(기본) / 방문일별 -->
+            <div class="flex items-center justify-between gap-2 mb-2">
+                <div class="inline-flex bg-gray-100 rounded-xl p-1" role="tablist" aria-label="예약 보기 방식">
+                    <button type="button" id="view-queue" class="view-tab" role="tab" aria-selected="true" onclick="setViewMode('queue')">실시간 접수순</button>
+                    <button type="button" id="view-date" class="view-tab" role="tab" aria-selected="false" onclick="setViewMode('date')">방문일별</button>
+                </div>
+                <span id="live-status" class="flex items-center gap-1.5 text-[11px] font-bold text-gray-400" aria-live="polite"><span class="live-dot"></span><span id="live-status-text">연결 중</span></span>
+            </div>
+            <p id="view-hint" class="text-[11px] text-gray-400 mb-3">새로 들어온 예약이 맨 위에 쌓입니다. 방문일을 고르면 날짜별로 정리됩니다.</p>
             <div class="space-y-2.5">
                 <!-- 날짜 범위 -->
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-[10px] text-gray-400 font-medium mb-1">방문일 시작</label>
-                        <input type="date" id="filter-start"
+                        <label for="filter-start" class="block text-[10px] text-gray-400 font-medium mb-1">방문일</label>
+                        <input type="date" id="filter-start" onchange="onDateFilterChange()"
                                class="w-full border border-gray-200 rounded-xl px-2.5 py-2 text-[12px] outline-none focus:border-[#004de6] transition">
                     </div>
                     <div>
-                        <label class="block text-[10px] text-gray-400 font-medium mb-1">방문일 종료</label>
-                        <input type="date" id="filter-end"
+                        <label for="filter-end" class="block text-[10px] text-gray-400 font-medium mb-1">~ 까지 (선택)</label>
+                        <input type="date" id="filter-end" onchange="onDateFilterChange()"
                                class="w-full border border-gray-200 rounded-xl px-2.5 py-2 text-[12px] outline-none focus:border-[#004de6] transition">
                     </div>
                 </div>
@@ -553,7 +573,10 @@
 
         <!-- 예약 목록 -->
         <div class="flex items-center justify-between mb-2 px-1">
-            <div id="reservation-count" class="text-[12px] text-gray-400 font-medium"></div>
+            <div class="flex items-center gap-2">
+                <div id="reservation-count" class="text-[12px] text-gray-400 font-medium"></div>
+                <button type="button" id="mark-all-seen" onclick="markAllSeen()" class="hidden text-[11px] font-bold text-[#004de6] bg-white border border-blue-100 px-2.5 py-1 rounded-lg hover:bg-blue-50 transition">새 예약 모두 확인</button>
+            </div>
             <button onclick="printReservations()"
                     class="text-[12px] font-bold text-[#004de6] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
                 <i class="fa-solid fa-print"></i> 목록 인쇄
@@ -561,8 +584,8 @@
         </div>
         <div id="reservation-list" class="space-y-2.5 pb-10">
             <div class="text-center py-12 text-gray-300">
-                <i class="fa-solid fa-magnifying-glass text-2xl mb-3 block" aria-hidden="true"></i>
-                <p class="text-[13px]">날짜·조건을 선택한 뒤 <b class="text-gray-400">검색</b> 버튼을 눌러주세요</p>
+                <i class="fa-solid fa-rotate spin text-2xl mb-3 block" aria-hidden="true"></i>
+                <p class="text-[13px]">예약을 불러오는 중...</p>
             </div>
         </div>
     </div>
@@ -618,6 +641,10 @@
                     <span class="text-gray-400">방문일시</span>
                     <span id="d-date" class="font-bold text-[#0f172a]"></span>
                 </div>
+                <div id="d-cancel-row" class="hidden flex justify-between">
+                    <span class="text-gray-400">취소</span>
+                    <span id="d-cancel" class="font-bold text-red-600 text-right"></span>
+                </div>
             </div>
 
             <!-- 렌탈 내역 -->
@@ -656,8 +683,12 @@
                     <span class="text-gray-400">확정 안내</span>
                     <span id="d-notify-confirmed" class="font-bold text-right text-gray-400">-</span>
                 </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">취소 안내</span>
+                    <span id="d-notify-cancelled" class="font-bold text-right text-gray-400">-</span>
+                </div>
                 <p id="d-notify-error" class="hidden text-[11px] text-red-500 leading-relaxed whitespace-pre-line"></p>
-                <p class="text-[11px] text-gray-400 leading-relaxed">입금 상태를 '입금'으로 저장하면 확정 안내가 발송됩니다. 발송에 실패한 건은 다시 저장하면 한 번 더 보냅니다.</p>
+                <p class="text-[11px] text-gray-400 leading-relaxed">입금 상태를 '입금'으로 저장하면 확정 안내, 예약 상태를 '취소'로 저장하면 취소 안내가 발송됩니다. 발송에 실패한 건은 다시 저장하면 한 번 더 보냅니다.</p>
             </div>
 
             <!-- 상태 변경 -->
@@ -776,6 +807,7 @@ async function adminLogin() {
 }
 
 async function adminLogout() {
+    stopLive();
     await _supabase.auth.signOut();
     document.getElementById('dashboard').classList.add('hidden');
     document.getElementById('login-screen').classList.remove('hidden');
@@ -790,10 +822,9 @@ function showDashboard() {
     document.getElementById('header-today').innerText =
         today.toLocaleDateString('ko-KR', { month:'long', day:'numeric', weekday:'short' });
 
-    // 기본 필터: 오늘 (조회는 사용자가 직접 '조회' 버튼을 눌러 실행)
-    const todayStr = today.toISOString().split('T')[0];
-    document.getElementById('filter-start').value = todayStr;
-    document.getElementById('filter-end').value   = todayStr;
+    // 첫 화면: 새로 들어온 예약이 위에 쌓이는 '실시간 접수순' + 실시간 구독
+    setViewMode('queue');
+    startLive();
 
     initHeroPanel();
     initPromoPanel();
@@ -1914,23 +1945,115 @@ _supabase.auth.getSession().then(function (res) {
 
 
 // ====================================================
-// 예약 목록 로드
+// 예약 목록 — 보기 방식(실시간 접수순 / 방문일별) · 새 예약 표시 · 실시간 반영
 // ====================================================
-async function loadReservations() {
+const QUEUE_LIMIT = 100;                       // 실시간 접수순에서 보여줄 최근 예약 수
+const SEEN_KEY    = 'nolleowa_admin_seen_v1';  // 관리자가 이미 확인한 예약 id (이 브라우저에만 저장)
+const BASE_TITLE  = document.title;
+let viewMode = 'queue';
+let seenIds = new Set();
+let seenReady = false;
+try {
+    const saved = JSON.parse(localStorage.getItem(SEEN_KEY) || 'null');
+    if (Array.isArray(saved)) { seenIds = new Set(saved); seenReady = true; }
+} catch (e) { /* 저장값이 깨졌으면 새로 시작 */ }
+let flashIds = new Set();      // 방금 실시간으로 들어오거나 바뀐 카드 (한 번 반짝임)
+
+function escHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+function localDateStr(d) {
+    const p = n => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
+function resNo(r) { return '#' + String(r.reservation_no || 0).padStart(4, '0'); }
+function formatDay(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    if (isNaN(d)) return dateStr || '날짜 미정';
+    return d.toLocaleDateString('ko-KR', { month:'long', day:'numeric', weekday:'short' });
+}
+function timeAgo(iso) {
+    const t = new Date(iso);
+    const sec = (Date.now() - t.getTime()) / 1000;
+    if (!isFinite(sec)) return '';
+    if (sec < 60) return '방금 접수';
+    if (sec < 3600) return Math.floor(sec / 60) + '분 전 접수';
+    if (sec < 86400) return Math.floor(sec / 3600) + '시간 전 접수';
+    return t.toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' }) + ' 접수';
+}
+
+function saveSeen() {
+    const arr = Array.from(seenIds).slice(-500);
+    seenIds = new Set(arr);
+    try { localStorage.setItem(SEEN_KEY, JSON.stringify(arr)); } catch (e) {}
+    seenReady = true;
+}
+function markSeen(id) {
+    if (!id || seenIds.has(id)) return;
+    seenIds.add(id);
+    saveSeen();
+    updateUnseen();
+}
+window.markAllSeen = function() {
+    Object.keys(_reservationMap).forEach(id => seenIds.add(id));
+    saveSeen();
+    renderList(Object.values(_reservationMap));
+    updateUnseen();
+};
+function unseenRows() {
+    return Object.values(_reservationMap).filter(r => !seenIds.has(r.id));
+}
+function updateUnseen() {
+    const n = unseenRows().length;
+    document.title = n ? '(' + n + ') 새 예약 · ' + BASE_TITLE : BASE_TITLE;
+    const btn = document.getElementById('mark-all-seen');
+    if (btn) btn.classList.toggle('hidden', n === 0);
+}
+
+window.setViewMode = function(mode) {
+    viewMode = mode === 'date' ? 'date' : 'queue';
+    document.getElementById('view-queue').setAttribute('aria-selected', String(viewMode === 'queue'));
+    document.getElementById('view-date').setAttribute('aria-selected', String(viewMode === 'date'));
+    const start = document.getElementById('filter-start');
+    const end   = document.getElementById('filter-end');
+    if (viewMode === 'queue') {
+        start.value = '';
+        end.value = '';
+    } else if (!start.value) {
+        start.value = localDateStr(new Date());
+        end.value = start.value;
+    }
+    document.getElementById('view-hint').innerText = viewMode === 'queue'
+        ? '새로 들어온 예약이 맨 위에 쌓입니다. 방문일을 고르면 날짜별로 정리됩니다.'
+        : '고른 방문일의 예약을 날짜·시간 순으로 정리했습니다.';
+    loadReservations();
+};
+window.onDateFilterChange = function() {
+    const start = document.getElementById('filter-start');
+    const end   = document.getElementById('filter-end');
+    if (!start.value && end.value) start.value = end.value;
+    if (start.value && (!end.value || end.value < start.value)) end.value = start.value;
+    if (!start.value) { setViewMode('queue'); return; }
+    if (viewMode !== 'date') {
+        viewMode = 'date';
+        document.getElementById('view-queue').setAttribute('aria-selected', 'false');
+        document.getElementById('view-date').setAttribute('aria-selected', 'true');
+        document.getElementById('view-hint').innerText = '고른 방문일의 예약을 날짜·시간 순으로 정리했습니다.';
+    }
+    loadReservations();
+};
+
+async function loadReservations(opts) {
+    const quiet = !!(opts && opts.quiet);
     const list = document.getElementById('reservation-list');
     const cnt  = document.getElementById('reservation-count');
-    list.innerHTML = `
-        <div class="text-center py-12 text-gray-300">
-            <i class="fa-solid fa-rotate spin text-2xl mb-3 block"></i>
-            <p class="text-[13px]">불러오는 중...</p>
-        </div>`;
-    cnt.innerText = '';
+    if (!quiet) {
+        list.innerHTML = '<div class="text-center py-12 text-gray-300"><i class="fa-solid fa-rotate spin text-2xl mb-3 block"></i><p class="text-[13px]">불러오는 중...</p></div>';
+        cnt.innerText = '';
+    }
 
     try {
-        let q = _supabase
-            .from('reservations')
-            .select('*')
-            .order('created_at', { ascending: false });
+        let q = _supabase.from('reservations').select('*');
 
         const start  = document.getElementById('filter-start').value;
         const end    = document.getElementById('filter-end').value;
@@ -1938,27 +2061,38 @@ async function loadReservations() {
         const dep    = document.getElementById('filter-deposit').value;
         const search = document.getElementById('filter-search').value.trim();
 
-        if (start)  q = q.gte('visit_date', start);
-        if (end)    q = q.lte('visit_date', end);
+        if (viewMode === 'date') {
+            if (start) q = q.gte('visit_date', start);
+            if (end)   q = q.lte('visit_date', end || start);
+            q = q.order('visit_date', { ascending: true })
+                 .order('visit_time', { ascending: true })
+                 .order('created_at', { ascending: true });
+        } else {
+            q = q.order('created_at', { ascending: false }).limit(QUEUE_LIMIT);
+        }
         if (status) q = q.eq('status', status);
         if (dep)    q = q.eq('deposit_status', dep);
-        if (search) q = q.or(`name.ilike.%${search}%,phone.ilike.%${search}%`);
+        if (search) q = q.or('name.ilike.%' + search + '%,phone.ilike.%' + search + '%');
 
         const { data, error } = await q;
         if (error) throw error;
+        const rows = data || [];
 
-        _reservationMap = Object.fromEntries((data || []).map(r => [r.id, r]));
-        updateStats(data || []);
-        renderList(data || []);
-        cnt.innerText = `총 ${data.length}건`;
+        // 이 브라우저에서 처음 열면 지금 있는 예약은 모두 '확인함'으로 두고, 이후 들어오는 예약만 새 예약으로 표시
+        if (!seenReady) { rows.forEach(r => seenIds.add(r.id)); saveSeen(); }
+
+        _reservationMap = Object.fromEntries(rows.map(r => [r.id, r]));
+        updateStats(rows);
+        renderList(rows);
+        cnt.innerText = viewMode === 'queue'
+            ? '최근 접수 ' + rows.length + '건' + (rows.length >= QUEUE_LIMIT ? ' (최근 ' + QUEUE_LIMIT + '건까지)' : '')
+            : '방문 예정 ' + rows.length + '건';
+        updateUnseen();
 
     } catch (err) {
-        list.innerHTML = `
-            <div class="text-center py-12 text-red-300">
-                <i class="fa-solid fa-triangle-exclamation text-2xl mb-3 block"></i>
-                <p class="text-[13px] font-bold">데이터를 불러올 수 없습니다</p>
-                <p class="text-[11px] text-gray-400 mt-1">${err.message}</p>
-            </div>`;
+        if (quiet) { console.warn('예약 새로고침 실패', err); return; }
+        list.innerHTML = '<div class="text-center py-12 text-red-300"><i class="fa-solid fa-triangle-exclamation text-2xl mb-3 block"></i>'
+            + '<p class="text-[13px] font-bold">데이터를 불러올 수 없습니다</p><p class="text-[11px] text-gray-400 mt-1">' + escHtml(err.message) + '</p></div>';
     }
 }
 
@@ -1977,56 +2111,161 @@ function updateStats(data) {
 // ====================================================
 // 목록 렌더링
 // ====================================================
+function itemSummary(r) {
+    const equip = (r.equip_normal||0) + (r.equip_premium||0);
+    const cloth = (r.cloth_normal||0) + (r.cloth_premium||0);
+    const opt   = (r.helmet_count||0) + (r.goggle_count||0) + (r.visor_count||0);
+    const lift  = (r.lift_3h_adult||0) + (r.lift_3h_child||0) + (r.lift_4h_adult||0) + (r.lift_4h_child||0) + (r.lift_6h_adult||0) + (r.lift_6h_child||0);
+    return { equip, cloth, opt, lift,
+             text: [equip ? '장비 ' + equip + '명' : '', cloth ? '의류 ' + cloth + '명' : '', opt ? '옵션 ' + opt + '개' : '', lift ? '리프트 ' + lift + '명' : ''].filter(Boolean).join(' · ') };
+}
+
+function cardHtml(r) {
+    const isNew = !seenIds.has(r.id);
+    const items = itemSummary(r).text;
+    const customerCancel = r.status === '취소' && r.cancelled_by === 'customer';
+    const when = viewMode === 'queue'
+        ? '<span class="text-gray-500"><i class="fa-regular fa-calendar mr-1 text-gray-300"></i>방문 ' + escHtml(r.visit_date) + ' ' + escHtml(r.visit_time) + '</span>'
+        : '<span class="text-[#0f172a] font-black text-[14px]"><i class="fa-regular fa-clock mr-1 text-gray-300"></i>' + escHtml(r.visit_time) + '</span>';
+    return ''
+      + '<div onclick="openDetail(\'' + escHtml(r.id) + '\')" data-res-id="' + escHtml(r.id) + '"'
+      + ' class="res-card bg-white rounded-2xl p-4 shadow-sm border-2 border-transparent hover:border-blue-200 hover:shadow-md cursor-pointer'
+      + (isNew ? ' is-new' : '') + (flashIds.has(r.id) ? ' is-flash' : '') + (r.status === '취소' ? ' opacity-70' : '') + '">'
+      +   '<div class="flex justify-between items-start mb-2.5 gap-2">'
+      +     '<div class="flex items-center gap-2 flex-wrap min-w-0">'
+      +       (isNew ? '<span class="new-badge text-[9px] font-black px-1.5 py-0.5 rounded">NEW</span>' : '')
+      +       '<span class="text-[#004de6] font-black text-[13px]">' + escHtml(resNo(r)) + '</span>'
+      +       '<span class="font-bold text-[#0f172a] text-[15px]">' + escHtml(r.name) + '</span>'
+      +       '<span class="text-gray-400 text-[12px]">' + escHtml(r.phone) + '</span>'
+      +     '</div>'
+      +     '<div class="flex gap-1.5 flex-shrink-0">'
+      +       (customerCancel ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-600 text-white">고객 취소</span>'
+                              : '<span class="badge-' + escHtml(r.status) + ' text-[10px] font-bold px-2 py-0.5 rounded-full">' + escHtml(r.status) + '</span>')
+      +       '<span class="badge-' + escHtml(r.deposit_status) + ' text-[10px] font-bold px-2 py-0.5 rounded-full">' + escHtml(r.deposit_status) + '</span>'
+      +     '</div>'
+      +   '</div>'
+      +   '<div class="flex justify-between items-center gap-2 text-[12px]">'
+      +     when
+      +     '<span class="text-gray-400 text-right">' + escHtml(items || '항목 없음') + '</span>'
+      +   '</div>'
+      +   (viewMode === 'queue' ? '<div class="mt-1.5 text-[11px] text-gray-400">' + escHtml(timeAgo(r.created_at)) + '</div>' : '')
+      +   (r.admin_memo ? '<div class="mt-2 pt-2 border-t border-gray-100 text-[11px] text-blue-500 flex items-center gap-1"><i class="fa-solid fa-note-sticky"></i> ' + escHtml(r.admin_memo) + '</div>' : '')
+      + '</div>';
+}
+
 function renderList(data) {
     const list = document.getElementById('reservation-list');
     if (!data.length) {
-        list.innerHTML = `
-            <div class="text-center py-12 text-gray-300">
-                <i class="fa-solid fa-calendar-xmark text-3xl mb-3 block"></i>
-                <p class="text-[13px]">해당 조건의 예약이 없습니다</p>
-            </div>`;
+        list.innerHTML = '<div class="text-center py-12 text-gray-300"><i class="fa-solid fa-calendar-xmark text-3xl mb-3 block"></i>'
+            + '<p class="text-[13px]">' + (viewMode === 'queue' ? '아직 들어온 예약이 없습니다' : '해당 날짜의 예약이 없습니다') + '</p></div>';
         return;
     }
 
-    list.innerHTML = data.map(r => {
-        const items = [
-            ((r.equip_normal||0)+(r.equip_premium||0)) > 0 ? `장비 ${(r.equip_normal||0)+(r.equip_premium||0)}명` : '',
-            ((r.cloth_normal||0)+(r.cloth_premium||0)) > 0 ? `의류 ${(r.cloth_normal||0)+(r.cloth_premium||0)}명` : '',
-            ((r.helmet_count||0)+(r.goggle_count||0)+(r.visor_count||0)) > 0 ? `옵션 ${(r.helmet_count||0)+(r.goggle_count||0)+(r.visor_count||0)}개` : '',
-            ((r.lift_3h_adult||0)+(r.lift_3h_child||0)+(r.lift_4h_adult||0)+(r.lift_4h_child||0)+(r.lift_6h_adult||0)+(r.lift_6h_child||0)) > 0
-                ? `리프트 ${(r.lift_3h_adult||0)+(r.lift_3h_child||0)+(r.lift_4h_adult||0)+(r.lift_4h_child||0)+(r.lift_6h_adult||0)+(r.lift_6h_child||0)}명` : ''
-        ].filter(Boolean).join(' · ');
-
-        const no = '#' + String(r.reservation_no || 0).padStart(4, '0');
-
-        return `
-        <div onclick="openDetail('${r.id}')"
-             class="res-card bg-white rounded-2xl p-4 shadow-sm border-2 border-transparent hover:border-blue-200 hover:shadow-md cursor-pointer">
-            <div class="flex justify-between items-start mb-2.5">
-                <div class="flex items-center gap-2 flex-wrap">
-                    <span class="text-[#004de6] font-black text-[13px]">${no}</span>
-                    <span class="font-bold text-[#0f172a] text-[15px]">${r.name}</span>
-                    <span class="text-gray-400 text-[12px]">${r.phone}</span>
-                </div>
-                <div class="flex gap-1.5 flex-shrink-0">
-                    <span class="badge-${r.status} text-[10px] font-bold px-2 py-0.5 rounded-full">${r.status}</span>
-                    <span class="badge-${r.deposit_status} text-[10px] font-bold px-2 py-0.5 rounded-full">${r.deposit_status}</span>
-                </div>
-            </div>
-            <div class="flex justify-between items-center text-[12px]">
-                <span class="text-gray-500">
-                    <i class="fa-regular fa-calendar mr-1 text-gray-300"></i>
-                    ${r.visit_date} ${r.visit_time}
-                </span>
-                <span class="text-gray-400">${items || '항목 없음'}</span>
-            </div>
-            ${r.admin_memo ? `
-            <div class="mt-2 pt-2 border-t border-gray-100 text-[11px] text-blue-500 flex items-center gap-1">
-                <i class="fa-solid fa-note-sticky"></i> ${r.admin_memo}
-            </div>` : ''}
-        </div>`;
-    }).join('');
+    if (viewMode === 'queue') {
+        list.innerHTML = data.map(cardHtml).join('');
+    } else {
+        // 방문일별 묶음: 날짜 머리글에 예약 수와 준비할 수량(취소 제외)
+        const groups = [];
+        data.forEach(r => {
+            const key = r.visit_date || '';
+            let g = groups[groups.length - 1];
+            if (!g || g.key !== key) { g = { key, rows: [] }; groups.push(g); }
+            g.rows.push(r);
+        });
+        list.innerHTML = groups.map(g => {
+            const active = g.rows.filter(r => r.status !== '취소');
+            const sum = active.reduce((s, r) => { const x = itemSummary(r); s.equip += x.equip; s.cloth += x.cloth; s.lift += x.lift; return s; }, { equip:0, cloth:0, lift:0 });
+            const prep = [sum.equip ? '장비 ' + sum.equip : '', sum.cloth ? '의류 ' + sum.cloth : '', sum.lift ? '리프트 ' + sum.lift + '명' : ''].filter(Boolean).join(' · ');
+            const cancelled = g.rows.length - active.length;
+            return '<section aria-label="' + escHtml(formatDay(g.key)) + ' 예약">'
+                + '<div class="day-head flex items-baseline justify-between px-1 pt-3 pb-2">'
+                +   '<h3 class="font-black text-[#0f172a] text-[14px]">' + escHtml(formatDay(g.key)) + ' <span class="text-[#004de6]">' + active.length + '건</span>'
+                +   (cancelled ? ' <span class="text-[11px] font-bold text-red-400">취소 ' + cancelled + '</span>' : '') + '</h3>'
+                +   '<span class="text-[11px] text-gray-400">' + escHtml(prep) + '</span>'
+                + '</div>'
+                + '<div class="space-y-2.5">' + g.rows.map(cardHtml).join('') + '</div>'
+                + '</section>';
+        }).join('');
+    }
+    flashIds.clear();
 }
+
+
+// ====================================================
+// 실시간 반영 — 새 예약·고객 취소가 들어오면 바로 목록을 갱신
+// ====================================================
+let liveChannel = null;
+let liveState = 'off';
+let livePoll = null;
+let liveReload = null;
+
+function renderLiveStatus() {
+    const box = document.getElementById('live-status');
+    const txt = document.getElementById('live-status-text');
+    if (!box || !txt) return;
+    box.classList.toggle('live-on', liveState === 'SUBSCRIBED');
+    box.classList.toggle('live-off', liveState !== 'SUBSCRIBED' && liveState !== 'connecting');
+    box.classList.toggle('text-green-600', liveState === 'SUBSCRIBED');
+    txt.innerText = liveState === 'SUBSCRIBED' ? '실시간 연결됨'
+        : liveState === 'connecting' ? '연결 중'
+        : '1분마다 자동 새로고침';
+}
+
+function scheduleLiveReload() {
+    clearTimeout(liveReload);
+    liveReload = setTimeout(() => loadReservations({ quiet: true }), 400);
+}
+
+function onLiveChange(payload) {
+    const row = payload.new || {};
+    const prev = row.id ? _reservationMap[row.id] : null;
+    if (payload.eventType === 'INSERT' && row.id) {
+        flashIds.add(row.id);
+        showToast('새 예약 ' + resNo(row) + ' ' + (row.name || '') + ' · 방문 ' + (row.visit_date || '') + ' ' + (row.visit_time || ''));
+    } else if (payload.eventType === 'UPDATE' && row.id && row.status === '취소'
+               && row.cancelled_by === 'customer' && (!prev || prev.status !== '취소')) {
+        seenIds.delete(row.id);
+        saveSeen();
+        flashIds.add(row.id);
+        showToast('고객 취소 ' + resNo(row) + ' ' + (row.name || '') + ' · 방문 ' + (row.visit_date || ''));
+    }
+    scheduleLiveReload();
+}
+
+function startLive() {
+    if (liveChannel || typeof _supabase.channel !== 'function') return;
+    liveState = 'connecting';
+    renderLiveStatus();
+    liveChannel = _supabase
+        .channel('admin-reservations')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'reservations' }, onLiveChange)
+        .subscribe(status => {
+            const wasLive = liveState === 'SUBSCRIBED';
+            liveState = status;
+            renderLiveStatus();
+            // 연결이 끊겼다가 다시 붙으면 그사이 들어온 예약을 한 번 불러옴
+            if (status === 'SUBSCRIBED' && !wasLive) scheduleLiveReload();
+        });
+    // 실시간 알림이 빠지는 경우를 대비해, 화면이 보이는 동안 1분마다 조용히 새로고침
+    livePoll = setInterval(() => {
+        if (!document.hidden) loadReservations({ quiet: true });
+    }, 60000);
+}
+
+// 다른 탭을 보다가 돌아오면 바로 최신 예약을 불러옴
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && liveChannel) scheduleLiveReload();
+});
+
+function stopLive() {
+    if (liveChannel) { _supabase.removeChannel(liveChannel); liveChannel = null; }
+    clearInterval(livePoll);
+    clearTimeout(liveReload);
+    liveState = 'off';
+    renderLiveStatus();
+    document.title = BASE_TITLE;
+}
+
 
 
 // ====================================================
@@ -2036,6 +2275,7 @@ function openDetail(id) {
     const r = _reservationMap[id];
     if (!r) return;
     currentId = id;
+    markSeen(id);
 
     const no = '#' + String(r.reservation_no || 0).padStart(4, '0');
 
@@ -2046,6 +2286,16 @@ function openDetail(id) {
     document.getElementById('d-phone').href        = `tel:${r.phone}`;
     document.getElementById('d-phone-text').innerText = r.phone;
     document.getElementById('d-date').innerText    = `${r.visit_date} ${r.visit_time}`;
+
+    const cancelRow = document.getElementById('d-cancel-row');
+    if (r.status === '취소') {
+        const who  = r.cancelled_by === 'customer' ? '고객 취소' : '관리자 취소';
+        const when = r.cancelled_at ? new Date(r.cancelled_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+        document.getElementById('d-cancel').innerText = who + (when ? ' · ' + when : '');
+        cancelRow.classList.remove('hidden');
+    } else {
+        cancelRow.classList.add('hidden');
+    }
 
     document.getElementById('d-equip').innerText  =
         [r.equip_normal  > 0 ? `일반 ${r.equip_normal}명`  : '',
@@ -2106,8 +2356,10 @@ const NOTIFY_COLOR = { pending: 'text-gray-500', sending: 'text-gray-500', sent:
 async function loadNotifyStatus(id) {
     const targets = {
         received:  document.getElementById('d-notify-received'),
-        confirmed: document.getElementById('d-notify-confirmed')
+        confirmed: document.getElementById('d-notify-confirmed'),
+        cancelled: document.getElementById('d-notify-cancelled')
     };
+    const KIND_LABEL = { received: '접수', confirmed: '확정', cancelled: '취소' };
     const errorBox = document.getElementById('d-notify-error');
     Object.values(targets).forEach(el => { el.textContent = '확인 중'; el.className = 'font-bold text-right text-gray-400'; });
     errorBox.classList.add('hidden');
@@ -2134,7 +2386,7 @@ async function loadNotifyStatus(id) {
             : '';
         el.textContent = (NOTIFY_LABEL[n.status] || n.status) + (when ? ' · ' + when : '');
         el.className = 'font-bold text-right ' + (NOTIFY_COLOR[n.status] || 'text-gray-500');
-        if (n.status === 'failed' && n.error) errors.push((kind === 'received' ? '접수' : '확정') + ' 안내 실패 사유: ' + n.error);
+        if (n.status === 'failed' && n.error) errors.push((KIND_LABEL[kind] || kind) + ' 안내 실패 사유: ' + n.error);
     });
     if (errors.length) {
         errorBox.textContent = errors.join('\n');
@@ -2171,7 +2423,9 @@ async function saveDetail() {
 
         closeDetail();
         await loadReservations();
-        if (nextDep === '입금' && before.deposit_status !== '입금' && nextState !== '취소') {
+        if (nextState === '취소' && before.status !== '취소') {
+            showToast('취소로 저장했습니다. 취소 안내 알림톡이 켜져 있으면 고객에게 발송됩니다.');
+        } else if (nextDep === '입금' && before.deposit_status !== '입금' && nextState !== '취소') {
             showToast('저장했습니다. 예약 확정 알림톡을 보냅니다.');
         }
 
@@ -2188,13 +2442,10 @@ async function saveDetail() {
 // 필터 초기화
 // ====================================================
 function resetFilter() {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('filter-start').value   = today;
-    document.getElementById('filter-end').value     = today;
     document.getElementById('filter-status').value  = '';
     document.getElementById('filter-deposit').value = '';
     document.getElementById('filter-search').value  = '';
-    loadReservations();
+    setViewMode('queue');
 }
 
 // ====================================================
