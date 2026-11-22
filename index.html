@@ -621,6 +621,16 @@
         .sq-sum-total { border-top:1px dashed #dbe3ec; margin-top:9px; padding-top:10px; display:flex; justify-content:space-between; align-items:baseline; }
         .sq-sum-total span { font-size:12px; color:#64748b; font-weight:700; }
         .sq-sum-total b { font-size:20px; color:#6d5acd; font-weight:800; }
+        .sq-sum-row small { display:block; font-size:11px; color:#94a3b8; font-weight:600; margin-top:1px; }
+        .sq-sum-row small s { margin-right:3px; }
+        .sq-sum-save { margin-top:6px; text-align:right; font-size:11.5px; font-weight:800; color:#e11d48; }
+        .sq-price { margin-top:10px; background:#faf8ff; border:1px solid #ede9fe; border-radius:12px; padding:10px 12px; }
+        .sq-price-head { font-size:11px; font-weight:800; color:#6d5acd; margin:0 0 6px; }
+        .sq-price-row { display:flex; justify-content:space-between; align-items:baseline; padding:3px 0; font-size:12.5px; color:#475569; font-weight:700; }
+        .sq-price-row s { color:#94a3b8; font-weight:500; font-size:11.5px; margin-right:6px; }
+        .sq-price-row b { color:#5b4bb3; font-size:16px; font-weight:900; }
+        .sq-price-save { margin:5px 0 0; font-size:11.5px; font-weight:800; color:#e11d48; }
+        .sq-warn { margin:10px 0 0; color:#dc2626; font-size:12px; font-weight:800; display:flex; gap:6px; align-items:flex-start; line-height:1.5; }
         .sq-agree { display:flex; align-items:flex-start; gap:8px; margin-top:14px; cursor:pointer; }
         .sq-agree input { flex:none; width:17px; height:17px; margin-top:1px; accent-color:#6d5acd; }
         .sq-agree span { font-size:11.5px; color:#475569; font-weight:600; line-height:1.55; }
@@ -744,7 +754,10 @@
                 <div class="flex justify-between"><span class="text-gray-400">예약자</span><span id="confirm-name" class="font-bold text-[#0f172a]"></span></div>
                 <div class="flex justify-between"><span class="text-gray-400">연락처</span><span id="confirm-phone" class="font-bold text-[#0f172a]"></span></div>
                 <div class="flex justify-between"><span class="text-gray-400">방문 일시</span><span id="confirm-date" class="font-bold text-[#0f172a]"></span></div>
-                <div class="flex justify-between"><span class="text-gray-400">예상 금액</span><span id="confirm-price" class="font-bold text-[#6d5acd]"></span></div>
+                <div class="h-px bg-gray-200"></div>
+                <div id="confirm-breakdown" class="space-y-1.5"></div>
+                <div class="flex justify-between items-baseline pt-1"><span class="text-gray-500 font-bold">예상 합계</span><span id="confirm-price" class="font-black text-[#6d5acd] text-[17px]"></span></div>
+                <p id="confirm-saving" class="hidden text-right text-[11.5px] font-extrabold text-rose-600"></p>
             </div>
             <!-- 예약 확정 안내 -->
             <div class="mb-4">
@@ -2005,6 +2018,53 @@ const PRICES = {
     cloth: 15000,
     helmet: 10000, goggle: 10000, visor: 15000
 };
+// 리프트권 정상가 (리조트 판매가) — 예약 화면에서 할인가와 함께 보여 줌
+PRICES.liftNormal = {
+    '3h': { wday:{ adult:60000, child:48000 }, wend:{ adult:74000, child:59000 } },
+    '4h': { wday:{ adult:70000, child:56000 }, wend:{ adult:84000, child:67000 } },
+    '6h': { wday:{ adult:80000, child:64000 }, wend:{ adult:94000, child:75000 } }
+};
+let helmetOwn = false;   // 단계형 예약에서 '헬멧 지참'을 고른 경우
+
+// 항목별 가격 (예약 행 형식: lift_3h_adult, equip_normal, visor_count ...)
+function priceLines(src, dateStr) {
+    const wend = isWeekend(dateStr) === true;
+    const dk = wend ? 'wend' : 'wday';
+    const dayLabel = wend ? '주말' : '주중';
+    const n = v => Number(v) || 0;
+    const lines = [];
+    [['3h', '3시간권'], ['4h', '4시간권'], ['6h', '6시간권']].forEach(([t, tl]) => {
+        [['adult', '대인'], ['child', '소인']].forEach(([k, kl]) => {
+            const q = n(src['lift_' + t + '_' + k]);
+            if (!q) return;
+            const unit = PRICES.lift[t][dk][k], normal = PRICES.liftNormal[t][dk][k];
+            lines.push({ label: '리프트권 ' + tl + ' ' + kl + ' (' + dayLabel + ')', qty: q, unit, normal, amount: unit * q, normalAmount: normal * q });
+        });
+    });
+    const add = (label, unit, q) => { q = n(q); if (q) lines.push({ label, qty: q, unit, normal: unit, amount: unit * q, normalAmount: unit * q }); };
+    add('장비 렌탈', PRICES.equip, n(src.equip_normal) + n(src.equip_premium));
+    add('의류 렌탈', PRICES.cloth, n(src.cloth_normal) + n(src.cloth_premium));
+    add('헬멧+고글 세트', PRICES.visor, src.visor_count);
+    add('헬멧', PRICES.helmet, src.helmet_count);
+    add('고글', PRICES.goggle, src.goggle_count);
+    const total = lines.reduce((s, l) => s + l.amount, 0);
+    const saving = lines.reduce((s, l) => s + l.normalAmount, 0) - total;
+    return { lines, total, saving, helmetOwn: !!src.helmet_own };
+}
+function won(v) { return Number(v).toLocaleString() + '원'; }
+function priceUnitText(l) {
+    return (l.normal > l.unit ? '<s>' + won(l.normal) + '</s> ' : '') + won(l.unit) + ' × ' + l.qty;
+}
+function qtysAsRow() {
+    return {
+        lift_3h_adult: qtys.lift3hAdult, lift_3h_child: qtys.lift3hChild,
+        lift_4h_adult: qtys.lift4hAdult, lift_4h_child: qtys.lift4hChild,
+        lift_6h_adult: qtys.lift6hAdult, lift_6h_child: qtys.lift6hChild,
+        equip_normal: qtys.equip, cloth_normal: qtys.cloth,
+        helmet_count: qtys.helmet, goggle_count: qtys.goggle, visor_count: qtys.visor,
+        helmet_own: helmetOwn
+    };
+}
 
 // ===== 수량 상태 =====
 const qtys = {
@@ -2173,10 +2233,31 @@ window.sqEdit     = function(i) { sqIdx = i; renderStepForm(); };
 window.sqPick = function(key, v) {
     sqAns[key] = v;
     if (key === 'lift'  && v === 'none') { sqAns.liftAdult = 0; sqAns.liftChild = 0; }
-    if (key === 'extra' && v === 'none') { sqAns.extraCount = 0; }
-    if (key === 'extra' && v !== 'none' && sqAns.extraCount === 0) sqAns.extraCount = 1;
+    if (key === 'extra' && sqNoCount(v)) { sqAns.extraCount = 0; }
+    if (key === 'extra' && !sqNoCount(v) && sqAns.extraCount === 0) sqAns.extraCount = 1;
     renderStepForm();
 };
+// '헬멧 지참'(own)은 대여 개수가 없는 선택지
+function sqNoCount(v) { return v === 'none' || v === 'own'; }
+
+// 리프트권 시간을 고르면 바로 아래에 정상가·할인가 표시 (방문일의 주중/주말 기준)
+function sqLiftPriceBox(t) {
+    const wend = isWeekend(sqAns.date) === true;
+    const dk = wend ? 'wend' : 'wday';
+    const p = PRICES.lift[t][dk], np = PRICES.liftNormal[t][dk];
+    const row = (label, normal, price) =>
+        '<div class="sq-price-row"><span>' + label + '</span><span><s>' + won(normal) + '</s><b>' + won(price) + '</b></span></div>';
+    const a = sqAns.liftAdult || 0, c = sqAns.liftChild || 0;
+    let save = '대인 1명당 ' + won(np.adult - p.adult) + ' 할인';
+    if (a + c > 0) {
+        const sum = p.adult * a + p.child * c, normalSum = np.adult * a + np.child * c;
+        save = '선택 인원 ' + won(sum) + ' · 정상가보다 ' + won(normalSum - sum) + ' 할인';
+    }
+    return '<div class="sq-price">' +
+        '<p class="sq-price-head">' + SQ_LIFT_LABEL[t] + ' · ' + (wend ? '주말' : '주중') + ' 요금</p>' +
+        row('대인', np.adult, p.adult) + row('소인', np.child, p.child) +
+        '<p class="sq-price-save">' + save + '</p></div>';
+}
 
 function sqNumChips(key, val, max) {
     let h = '<div class="sq-chips">';
@@ -2231,6 +2312,7 @@ function sqBlock(i) {
                               '" onclick="sqPick(\'lift\',\'' + o[0] + '\')">' + o[1] + '</button>').join('') +
                 '</div>';
             if (sqAns.lift && sqAns.lift !== 'none') {
+                inner += sqLiftPriceBox(sqAns.lift);
                 inner += '<p class="sq-sub">대인 (만 13세 이상)</p>' + sqNumChips('liftAdult', sqAns.liftAdult);
                 inner += '<p class="sq-sub">소인 (만 12세 이하)</p>' + sqNumChips('liftChild', sqAns.liftChild);
             }
@@ -2251,15 +2333,17 @@ function sqBlock(i) {
     } else if (i === 5) {
         label = '헬멧·고글이 필요하세요?';
         if (done) {
-            inner = sqEditChip(sqAns.extra === 'none' ? '보호장비 필요 없음'
+            inner = sqEditChip(sqAns.extra === 'own' ? '헬멧 지참' : sqAns.extra === 'none' ? '보호장비 필요 없음'
                 : SQ_EXTRA_LABEL[sqAns.extra] + ' ' + sqAns.extraCount + '개', i);
         } else {
             inner = '<div class="sq-chips">' +
-                [['none','필요 없어요'],['visor','헬멧+고글 세트'],['helmet','헬멧만'],['goggle','고글만']]
+                [['visor','헬멧+고글 세트'],['helmet','헬멧만'],['goggle','고글만'],['own','헬멧 지참']]
                     .map(o => '<button type="button" class="sq-chip' + (sqAns.extra === o[0] ? ' on' : '') +
                               '" onclick="sqPick(\'extra\',\'' + o[0] + '\')">' + o[1] + '</button>').join('') +
                 '</div>';
-            if (sqAns.extra && sqAns.extra !== 'none') {
+            inner += '<p class="sq-warn"><i class="fa-solid fa-triangle-exclamation" style="margin-top:3px"></i><span>헬멧 미착용 시 리프트 이용이 제한됩니다.' +
+                     (sqAns.extra === 'own' ? ' 가져오신 헬멧을 꼭 착용해 주세요.' : '') + '</span></p>';
+            if (sqAns.extra && !sqNoCount(sqAns.extra)) {
                 inner += '<p class="sq-sub">개수</p>' + sqNumChips('extraCount', sqAns.extraCount);
             }
             if (sqAns.extra) inner += sqOkBtn(5, true);
@@ -2283,7 +2367,8 @@ function sqSyncToForm() {
     }
     qtys.equip = sqAns.equip;
     qtys.cloth = sqAns.cloth;
-    if (sqAns.extra && sqAns.extra !== 'none') qtys[sqAns.extra] = sqAns.extraCount;
+    if (sqAns.extra && !sqNoCount(sqAns.extra)) qtys[sqAns.extra] = sqAns.extraCount;
+    helmetOwn = sqAns.extra === 'own';
 
     const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
     setVal('reserver-name',  sqAns.name);
@@ -2301,24 +2386,21 @@ function sqSyncToForm() {
 
 function sqFinalBlock() {
     sqSyncToForm();
-    const total = calculateTotal();
-    const rows = [];
-    rows.push(['예약자', sqAns.name + ' · ' + sqAns.phone]);
-    rows.push(['방문 일시', sqAns.date + ' ' + sqAns.time]);
-    if (sqAns.lift && sqAns.lift !== 'none') {
-        rows.push(['리프트권', SQ_LIFT_LABEL[sqAns.lift] + ' · 대인 ' + sqAns.liftAdult + ' / 소인 ' + sqAns.liftChild]);
-    }
-    if (sqAns.equip) rows.push(['장비 렌탈', sqAns.equip + '명']);
-    if (sqAns.cloth) rows.push(['의류 렌탈', sqAns.cloth + '명']);
-    if (sqAns.extra && sqAns.extra !== 'none') rows.push([SQ_EXTRA_LABEL[sqAns.extra], sqAns.extraCount + '개']);
+    calculateTotal();
+    const pb = priceLines(qtysAsRow(), sqAns.date);
+    const info = [['예약자', sqAns.name + ' · ' + sqAns.phone], ['방문 일시', sqAns.date + ' ' + sqAns.time]];
 
     return '<div class="sq-final">' +
         '<div class="sq-label"><span class="sq-num" style="background:#6d5acd;color:#fff">' +
         '<i class="fa-solid fa-check" style="font-size:9px"></i></span>' +
         '<span class="sq-text">예약 내용을 확인해주세요</span></div>' +
         '<div class="sq-sum">' +
-            rows.map(r => '<div class="sq-sum-row"><span>' + sqEsc(r[0]) + '</span><b>' + sqEsc(r[1]) + '</b></div>').join('') +
-            '<div class="sq-sum-total"><span>예상 합계</span><b>' + total.toLocaleString() + '원</b></div>' +
+            info.map(r => '<div class="sq-sum-row"><span>' + sqEsc(r[0]) + '</span><b>' + sqEsc(r[1]) + '</b></div>').join('') +
+            '<div style="border-top:1px solid #eef2f7;margin:8px 0 4px"></div>' +
+            pb.lines.map(l => '<div class="sq-sum-row"><span>' + sqEsc(l.label) + '<small>' + priceUnitText(l) + '</small></span><b>' + won(l.amount) + '</b></div>').join('') +
+            (pb.helmetOwn ? '<div class="sq-sum-row"><span>헬멧 지참</span><b>대여 안 함</b></div>' : '') +
+            '<div class="sq-sum-total"><span>예상 합계</span><b>' + won(pb.total) + '</b></div>' +
+            (pb.saving > 0 ? '<p class="sq-sum-save">리프트권 정상가보다 ' + won(pb.saving) + ' 할인</p>' : '') +
         '</div>' +
         '<p class="sq-sub">요청사항 (선택)</p>' +
         '<div class="sq-row"><textarea id="sq-in-memo" rows="2" placeholder="키·발 사이즈, 픽업 장소 등 남기실 내용">' + sqEsc(sqAns.memo) + '</textarea></div>' +
@@ -2390,8 +2472,8 @@ window.sqConfirm = function(i) {
             return fail('리프트권 인원을 1명 이상 선택해주세요.');
         }
     } else if (i === 5) {
-        if (!sqAns.extra) return fail('보호장비 옵션을 선택해주세요.');
-        if (sqAns.extra !== 'none' && sqAns.extraCount < 1) return fail('개수를 1개 이상 선택해주세요.');
+        if (!sqAns.extra) return fail('헬멧·고글 옵션을 선택해주세요.');
+        if (!sqNoCount(sqAns.extra) && sqAns.extraCount < 1) return fail('개수를 1개 이상 선택해주세요.');
     }
 
     if (i >= sqFurthest) sqFurthest = i + 1;
@@ -2640,8 +2722,17 @@ function openConfirm(data) {
         document.getElementById('confirm-name').innerText  = data.name;
         document.getElementById('confirm-phone').innerText = data.phone;
         document.getElementById('confirm-date').innerText  = `${data.visit_date} ${data.visit_time}`;
-        const total = calculateTotal();
-        document.getElementById('confirm-price').innerText = `약 ${total.toLocaleString()}원`;
+        // 서버에 저장된 예약 내용 그대로 항목별 금액을 다시 계산해 보여 줌
+        const pb = priceLines(data, data.visit_date);
+        document.getElementById('confirm-breakdown').innerHTML =
+            pb.lines.map(l => '<div class="flex justify-between gap-3"><span class="text-gray-500">' + sqEsc(l.label) +
+                '<span class="block text-[11px] text-gray-400">' + priceUnitText(l) + '</span></span>' +
+                '<span class="font-bold text-[#0f172a] whitespace-nowrap">' + won(l.amount) + '</span></div>').join('') +
+            (pb.helmetOwn ? '<div class="flex justify-between gap-3"><span class="text-gray-500">헬멧 지참</span><span class="font-bold text-[#0f172a]">대여 안 함</span></div>' : '');
+        document.getElementById('confirm-price').innerText = '약 ' + won(pb.total);
+        const saving = document.getElementById('confirm-saving');
+        saving.innerText = pb.saving > 0 ? '리프트권 정상가보다 ' + won(pb.saving) + ' 할인' : '';
+        saving.classList.toggle('hidden', !(pb.saving > 0));
     }
     document.getElementById('confirm-overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -2687,8 +2778,8 @@ window.onReserve = async function() {
         equip_normal: qtys.equip, equip_premium: 0,
         cloth_normal: qtys.cloth, cloth_premium: 0,
         helmet_count: qtys.helmet, goggle_count: qtys.goggle, visor_count: qtys.visor,
-        memo: document.getElementById('reserver-memo').value.trim() || null,
-        status: '접수', deposit_status: '미입금'
+        helmet_own: helmetOwn,
+        memo: document.getElementById('reserver-memo').value.trim() || null
     };
 
     try {
@@ -2724,13 +2815,13 @@ const LOOKUP_TEL = '<a href="tel:010-9616-3421" class="font-bold text-[#6d5acd] 
 function lookupCancelBlock(r) {
     const no   = Number(r.reservation_no) || 0;
     const pad  = String(no).padStart(4, '0');
-    const paid = r.deposit_status === '입금' || r.deposit_status === '부분입금';
+    const st   = lookupState(r);
     const note = (html) => `<p class="text-[11.5px] text-gray-500 leading-relaxed bg-gray-50 rounded-lg px-3 py-2">${html}</p>`;
-    if (r.status === '취소') {
+    if (st === '취소') {
         const who  = r.cancelled_by === 'customer' ? '고객 취소' : '매장 취소';
         const when = r.cancelled_at ? new Date(r.cancelled_at).toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
         return `<div class="flex justify-between"><span class="text-gray-400">취소</span><span class="font-bold text-red-600">${who}${when ? ' · ' + lookupEsc(when) : ''}</span></div>`
-            + (paid ? note('입금하신 예약금은 매장에서 확인 후 환불해 드립니다. 문의 ' + LOOKUP_TEL) : '');
+            + note('예약금을 보내셨다면 매장에서 확인 후 환불해 드려요. 문의 ' + LOOKUP_TEL);
     }
     if (r.can_cancel === true) {
         return `<div class="pt-1">
@@ -2740,7 +2831,7 @@ function lookupCancelBlock(r) {
                 </button>
                 <div id="lk-confirm-${no}" class="hidden bg-red-50 border border-red-100 rounded-lg p-3 space-y-2">
                     <p class="text-[12.5px] font-black text-red-700">#${pad} 예약을 취소할까요?</p>
-                    <p class="text-[11.5px] text-red-700/80 leading-relaxed">취소한 예약은 되돌릴 수 없습니다.${paid ? ' 입금하신 예약금은 매장에서 확인 후 환불해 드립니다.' : ''}</p>
+                    <p class="text-[11.5px] text-red-700/80 leading-relaxed">취소한 예약은 되돌릴 수 없어요. 이미 예약금을 보내셨다면 매장에서 확인 후 환불해 드려요.</p>
                     <div class="grid grid-cols-2 gap-2">
                         <button type="button" onclick="keepReservation(${no})"
                                 class="bg-white border border-gray-200 text-gray-600 rounded-lg py-2 text-[12.5px] font-bold hover:bg-gray-50 transition">유지하기</button>
@@ -2750,13 +2841,22 @@ function lookupCancelBlock(r) {
                 </div>
             </div>`;
     }
-    if (r.status === '접수' && r.can_cancel === false) {
+    if (LOOKUP_UNPAID.includes(st) && r.can_cancel === false) {
         return note('예약 시간이 지나 온라인 취소가 마감되었습니다. 취소는 ' + LOOKUP_TEL + '로 문의해 주세요.');
     }
-    if (r.status === '확인') {
-        return note('매장에서 확인한 예약입니다. 취소·변경은 ' + LOOKUP_TEL + '로 문의해 주세요.');
+    if (st === '예약 완료') {
+        return note('예약이 확정되었어요. 취소·변경은 ' + LOOKUP_TEL + '로 연락 주세요.');
     }
     return '';
+}
+// 예약 진행 상태 4단계 (예전 값도 같은 뜻으로 읽음)
+const LOOKUP_UNPAID = ['예약 신청(미입금)', '예약 완료(미입금)'];
+const LOOKUP_STATE_COLOR = { '예약 신청(미입금)':'bg-violet-100 text-violet-700', '예약 완료(미입금)':'bg-amber-100 text-amber-700', '예약 완료':'bg-green-100 text-green-700', '취소':'bg-red-100 text-red-600' };
+function lookupState(r) {
+    if (r.status === '취소' || r.deposit_status === '취소') return '취소';
+    if (r.deposit_status === '입금' || r.deposit_status === '예약 완료') return '예약 완료';
+    if (r.deposit_status === '부분입금' || r.deposit_status === '예약 완료(미입금)') return '예약 완료(미입금)';
+    return '예약 신청(미입금)';
 }
 window.askCancelReservation = function(no) {
     document.getElementById('lk-ask-' + no)?.classList.add('hidden');
@@ -2778,8 +2878,7 @@ window.confirmCancelReservation = async function(no) {
         });
         if (error) throw error;
         if (data && data.ok) {
-            const paid = data.deposit_status === '입금' || data.deposit_status === '부분입금';
-            showToast(paid ? '예약을 취소했습니다. 예약금은 매장에서 확인 후 환불해 드립니다.' : '예약을 취소했습니다.');
+            showToast('예약을 취소했습니다.');
         } else {
             showToast((data && data.message) || '취소하지 못했습니다. 010-9616-3421로 문의해 주세요.');
         }
@@ -2827,9 +2926,7 @@ window.lookupReservation = async function() {
                     <p class="text-[11px] text-gray-400 mt-1">이름과 연락처를 다시 확인해주세요</p>
                 </div>`;
         } else {
-            const statusColor = { '접수':'bg-violet-100 text-violet-700', '확인':'bg-green-100 text-green-700', '완료':'bg-gray-100 text-gray-600', '취소':'bg-red-100 text-red-600' };
-            const depColor    = { '미입금':'bg-amber-100 text-amber-700', '부분입금':'bg-orange-100 text-orange-700', '입금':'bg-green-100 text-green-700' };
-            const hasUnpaid   = data.some(r => r.deposit_status !== '입금' && r.status !== '취소');
+            const hasUnpaid   = data.some(r => LOOKUP_UNPAID.includes(lookupState(r)));
             const unpaidNotice = hasUnpaid ? `
                 <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 mb-3 text-left">
                     <p class="text-[12.5px] font-black text-amber-800 flex items-center gap-1.5 mb-1">
@@ -2850,8 +2947,7 @@ window.lookupReservation = async function() {
                     <div class="flex justify-between items-center">
                         <span class="font-black text-[#6d5acd] text-[15px]">#${lookupEsc(String(r.reservation_no).padStart(4,'0'))}</span>
                         <div class="flex gap-1.5">
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusColor[r.status]||'bg-gray-100 text-gray-600'}">${lookupEsc(r.status)}</span>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${depColor[r.deposit_status]||'bg-gray-100 text-gray-600'}">${lookupEsc(r.deposit_status)}</span>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${LOOKUP_STATE_COLOR[lookupState(r)]}">${lookupEsc(lookupState(r))}</span>
                         </div>
                     </div>
                     <div class="h-px bg-gray-100"></div>

@@ -19,6 +19,20 @@
         .badge-미입금   { background:#fef9c3; color:#a16207; }
         .badge-부분입금 { background:#ffedd5; color:#c2410c; }
         .badge-입금     { background:#dcfce7; color:#15803d; }
+        /* 진행 상태 4단계 */
+        .st-req    { background:#dbeafe; color:#1d4ed8; }
+        .st-hold   { background:#fef3c7; color:#b45309; }
+        .st-done   { background:#dcfce7; color:#15803d; }
+        .st-cancel { background:#fee2e2; color:#dc2626; }
+        .stat-card { cursor:pointer; transition:box-shadow .15s, transform .1s; }
+        .stat-card:hover { box-shadow:0 4px 12px rgba(15,23,42,.08); }
+        .stat-card[aria-pressed="true"] { outline:2px solid #004de6; outline-offset:-2px; }
+        /* 여러 건 선택 */
+        .res-check { width:20px; height:20px; border-radius:6px; border:2px solid #cbd5e1; background:#fff; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; transition:background .15s,border-color .15s; }
+        .res-card.is-selected { border-color:#004de6 !important; background:#f5f8ff; }
+        .res-card.is-selected .res-check { background:#004de6; border-color:#004de6; }
+        #select-bar { transform:translateY(120%); transition:transform .25s ease; }
+        #select-bar.show { transform:translateY(0); }
 
         /* 모달 슬라이드업 */
         #detail-box {
@@ -485,24 +499,24 @@
             </div>
         </div>
 
-        <!-- 요약 통계 -->
+        <!-- 요약 통계 (누르면 그 상태만 보기) -->
         <div class="grid grid-cols-4 gap-2 mb-5">
-            <div class="bg-white rounded-2xl p-3.5 text-center shadow-sm border border-gray-100">
-                <div id="stat-total" class="font-black text-[#0f172a] text-[22px] leading-none">-</div>
-                <div class="text-gray-400 text-[10px] mt-1 font-medium">전체</div>
-            </div>
-            <div class="bg-blue-50 rounded-2xl p-3.5 text-center shadow-sm border border-blue-100">
-                <div id="stat-접수" class="font-black text-[#1d4ed8] text-[22px] leading-none">-</div>
-                <div class="text-blue-400 text-[10px] mt-1 font-medium">접수</div>
-            </div>
-            <div class="bg-amber-50 rounded-2xl p-3.5 text-center shadow-sm border border-amber-100">
-                <div id="stat-미입금" class="font-black text-amber-600 text-[22px] leading-none">-</div>
-                <div class="text-amber-400 text-[10px] mt-1 font-medium">미입금</div>
-            </div>
-            <div class="bg-green-50 rounded-2xl p-3.5 text-center shadow-sm border border-green-100">
-                <div id="stat-입금" class="font-black text-green-600 text-[22px] leading-none">-</div>
-                <div class="text-green-400 text-[10px] mt-1 font-medium">입금</div>
-            </div>
+            <button type="button" class="stat-card bg-blue-50 rounded-2xl p-3 text-center shadow-sm border border-blue-100" data-state="예약 신청(미입금)" aria-pressed="false" onclick="quickFilter(this.dataset.state)">
+                <div id="stat-req" class="font-black text-[#1d4ed8] text-[22px] leading-none">-</div>
+                <div class="text-blue-500 text-[10px] mt-1 font-bold leading-tight">예약 신청<br><span class="font-medium">(미입금)</span></div>
+            </button>
+            <button type="button" class="stat-card bg-amber-50 rounded-2xl p-3 text-center shadow-sm border border-amber-100" data-state="예약 완료(미입금)" aria-pressed="false" onclick="quickFilter(this.dataset.state)">
+                <div id="stat-hold" class="font-black text-amber-600 text-[22px] leading-none">-</div>
+                <div class="text-amber-500 text-[10px] mt-1 font-bold leading-tight">예약 완료<br><span class="font-medium">(미입금)</span></div>
+            </button>
+            <button type="button" class="stat-card bg-green-50 rounded-2xl p-3 text-center shadow-sm border border-green-100" data-state="예약 완료" aria-pressed="false" onclick="quickFilter(this.dataset.state)">
+                <div id="stat-done" class="font-black text-green-600 text-[22px] leading-none">-</div>
+                <div class="text-green-500 text-[10px] mt-1 font-bold leading-tight">예약 완료<br><span class="font-medium">&nbsp;</span></div>
+            </button>
+            <button type="button" class="stat-card bg-red-50 rounded-2xl p-3 text-center shadow-sm border border-red-100" data-state="취소" aria-pressed="false" onclick="quickFilter(this.dataset.state)">
+                <div id="stat-cancel" class="font-black text-red-500 text-[22px] leading-none">-</div>
+                <div class="text-red-400 text-[10px] mt-1 font-bold leading-tight">취소<br><span class="font-medium">&nbsp;</span></div>
+            </button>
         </div>
 
         <!-- 필터 패널 -->
@@ -512,6 +526,7 @@
                 <div class="inline-flex bg-gray-100 rounded-xl p-1" role="tablist" aria-label="예약 보기 방식">
                     <button type="button" id="view-queue" class="view-tab" role="tab" aria-selected="true" onclick="setViewMode('queue')">실시간 접수순</button>
                     <button type="button" id="view-date" class="view-tab" role="tab" aria-selected="false" onclick="setViewMode('date')">방문일별</button>
+                    <button type="button" id="view-trash" class="view-tab" role="tab" aria-selected="false" onclick="setViewMode('trash')"><i class="fa-regular fa-trash-can mr-1" aria-hidden="true"></i>휴지통</button>
                 </div>
                 <span id="live-status" class="flex items-center gap-1.5 text-[11px] font-bold text-gray-400" aria-live="polite"><span class="live-dot"></span><span id="live-status-text">연결 중</span></span>
             </div>
@@ -530,29 +545,17 @@
                                class="w-full border border-gray-200 rounded-xl px-2.5 py-2 text-[12px] outline-none focus:border-[#004de6] transition">
                     </div>
                 </div>
-                <!-- 상태 필터 -->
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-[10px] text-gray-400 font-medium mb-1">예약 상태</label>
-                        <select id="filter-status"
-                                class="w-full border border-gray-200 rounded-xl px-2.5 py-2 text-[12px] outline-none focus:border-[#004de6] bg-white transition">
-                            <option value="">전체</option>
-                            <option>접수</option>
-                            <option>확인</option>
-                            <option>완료</option>
-                            <option>취소</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-gray-400 font-medium mb-1">입금 상태</label>
-                        <select id="filter-deposit"
-                                class="w-full border border-gray-200 rounded-xl px-2.5 py-2 text-[12px] outline-none focus:border-[#004de6] bg-white transition">
-                            <option value="">전체</option>
-                            <option>미입금</option>
-                            <option>부분입금</option>
-                            <option>입금</option>
-                        </select>
-                    </div>
+                <!-- 입금 상태 필터 -->
+                <div>
+                    <label for="filter-deposit" class="block text-[10px] text-gray-400 font-medium mb-1">입금 상태</label>
+                    <select id="filter-deposit" onchange="loadReservations()"
+                            class="w-full border border-gray-200 rounded-xl px-2.5 py-2 text-[12px] outline-none focus:border-[#004de6] bg-white transition">
+                        <option value="">전체</option>
+                        <option>예약 신청(미입금)</option>
+                        <option>예약 완료(미입금)</option>
+                        <option>예약 완료</option>
+                        <option>취소</option>
+                    </select>
                 </div>
                 <!-- 검색 + 버튼 -->
                 <div class="flex gap-2">
@@ -588,6 +591,20 @@
                 <p class="text-[13px]">예약을 불러오는 중...</p>
             </div>
         </div>
+        <div class="h-20" aria-hidden="true"></div>
+    </div>
+</div>
+
+<!-- 여러 건 선택 시 하단 작업 막대 -->
+<div id="select-bar" class="fixed bottom-0 inset-x-0 z-40 px-3 pb-3" role="region" aria-label="선택한 예약 작업">
+    <div class="max-w-lg mx-auto bg-[#0f172a] text-white rounded-2xl shadow-2xl px-3 py-2.5 flex items-center gap-2">
+        <span id="select-count" class="text-[12px] font-bold whitespace-nowrap pl-1">0건 선택</span>
+        <div class="flex-1"></div>
+        <button type="button" id="bar-request" onclick="requestDepositSelected()" class="bg-amber-400 text-[#0f172a] text-[12px] font-black px-3 py-2 rounded-xl hover:bg-amber-300 transition whitespace-nowrap"><i class="fa-regular fa-paper-plane mr-1" aria-hidden="true"></i>입금 요청 보내기</button>
+        <button type="button" id="bar-trash" onclick="trashSelected()" class="bg-white/10 text-white text-[12px] font-bold px-3 py-2 rounded-xl hover:bg-white/20 transition whitespace-nowrap"><i class="fa-regular fa-trash-can mr-1" aria-hidden="true"></i>휴지통</button>
+        <button type="button" id="bar-restore" onclick="restoreSelected()" class="hidden bg-white text-[#0f172a] text-[12px] font-black px-3 py-2 rounded-xl hover:bg-gray-100 transition whitespace-nowrap"><i class="fa-solid fa-rotate-left mr-1" aria-hidden="true"></i>복원</button>
+        <button type="button" id="bar-purge" onclick="purgeSelected()" class="hidden bg-red-500 text-white text-[12px] font-bold px-3 py-2 rounded-xl hover:bg-red-600 transition whitespace-nowrap">완전 삭제</button>
+        <button type="button" onclick="clearSelection()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center" aria-label="선택 해제"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
     </div>
 </div>
 
@@ -645,6 +662,10 @@
                     <span class="text-gray-400">취소</span>
                     <span id="d-cancel" class="font-bold text-red-600 text-right"></span>
                 </div>
+                <div id="d-trash-row" class="hidden flex justify-between">
+                    <span class="text-gray-400">휴지통</span>
+                    <span id="d-trash" class="font-bold text-gray-500 text-right"></span>
+                </div>
             </div>
 
             <!-- 렌탈 내역 -->
@@ -680,6 +701,10 @@
                     <span id="d-notify-received" class="font-bold text-right text-gray-400">-</span>
                 </div>
                 <div class="flex justify-between">
+                    <span class="text-gray-400">입금 요청 안내</span>
+                    <span id="d-notify-deposit_request" class="font-bold text-right text-gray-400">-</span>
+                </div>
+                <div class="flex justify-between">
                     <span class="text-gray-400">확정 안내</span>
                     <span id="d-notify-confirmed" class="font-bold text-right text-gray-400">-</span>
                 </div>
@@ -688,32 +713,31 @@
                     <span id="d-notify-cancelled" class="font-bold text-right text-gray-400">-</span>
                 </div>
                 <p id="d-notify-error" class="hidden text-[11px] text-red-500 leading-relaxed whitespace-pre-line"></p>
-                <p class="text-[11px] text-gray-400 leading-relaxed">입금 상태를 '입금'으로 저장하면 확정 안내, 예약 상태를 '취소'로 저장하면 취소 안내가 발송됩니다. 발송에 실패한 건은 다시 저장하면 한 번 더 보냅니다.</p>
+                <p class="text-[11px] text-gray-400 leading-relaxed">입금 상태를 '예약 완료'로 저장하면 확정 안내, '취소'로 저장하면 취소 안내가 나갑니다. 입금 요청 안내는 아래 '입금 요청 보내기' 버튼으로 보냅니다. 발송에 실패한 접수·확정·취소 안내는 다시 저장하면 한 번 더 보냅니다.</p>
             </div>
 
             <!-- 상태 변경 -->
-            <div class="space-y-3">
+            <div id="d-edit" class="space-y-3">
                 <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide">상태 변경</p>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[11px] text-gray-400 font-medium mb-1.5">예약 상태</label>
-                        <select id="d-status"
-                                class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 text-[13px] font-bold outline-none focus:border-[#004de6] bg-white transition">
-                            <option>접수</option>
-                            <option>확인</option>
-                            <option>완료</option>
-                            <option>취소</option>
-                        </select>
+                <div>
+                    <label for="d-deposit" class="block text-[11px] text-gray-400 font-medium mb-1.5">입금 상태</label>
+                    <select id="d-deposit"
+                            class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 text-[13px] font-bold outline-none focus:border-[#004de6] bg-white transition">
+                        <option>예약 신청(미입금)</option>
+                        <option>예약 완료(미입금)</option>
+                        <option>예약 완료</option>
+                        <option>취소</option>
+                    </select>
+                </div>
+                <div class="bg-amber-50 border border-amber-100 rounded-xl p-3 flex items-center gap-3">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[12px] font-bold text-amber-800">입금 요청 안내</p>
+                        <p id="d-request-info" class="text-[11px] text-amber-700/80 leading-relaxed">아직 보낸 적 없음</p>
                     </div>
-                    <div>
-                        <label class="block text-[11px] text-gray-400 font-medium mb-1.5">입금 상태</label>
-                        <select id="d-deposit"
-                                class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 text-[13px] font-bold outline-none focus:border-[#004de6] bg-white transition">
-                            <option>미입금</option>
-                            <option>부분입금</option>
-                            <option>입금</option>
-                        </select>
-                    </div>
+                    <button type="button" id="d-request-btn" onclick="requestDepositCurrent()"
+                            class="bg-amber-400 text-[#0f172a] text-[12px] font-black px-3 py-2 rounded-xl hover:bg-amber-300 transition whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed">
+                        입금 요청 보내기
+                    </button>
                 </div>
                 <div>
                     <label class="block text-[11px] text-gray-400 font-medium mb-1.5">관리자 메모 (내부용)</label>
@@ -727,6 +751,14 @@
             <button id="save-btn" onclick="saveDetail()"
                     class="w-full bg-[#004de6] text-white rounded-xl py-4 font-bold text-[15px] hover:bg-blue-700 transition shadow-sm">
                 <span id="save-btn-text">변경사항 저장</span>
+            </button>
+            <button type="button" id="d-trash-btn" onclick="trashCurrent()"
+                    class="w-full border border-red-200 text-red-500 rounded-xl py-3 font-bold text-[13px] hover:bg-red-50 transition">
+                <i class="fa-regular fa-trash-can mr-1" aria-hidden="true"></i> 예약 삭제 (휴지통으로)
+            </button>
+            <button type="button" id="d-restore-btn" onclick="restoreCurrent()"
+                    class="hidden w-full bg-[#0f172a] text-white rounded-xl py-3.5 font-bold text-[14px] hover:bg-slate-800 transition">
+                <i class="fa-solid fa-rotate-left mr-1" aria-hidden="true"></i> 휴지통에서 복원
             </button>
 
         </div>
@@ -825,6 +857,10 @@ function showDashboard() {
     // 첫 화면: 새로 들어온 예약이 위에 쌓이는 '실시간 접수순' + 실시간 구독
     setViewMode('queue');
     startLive();
+    // 휴지통에 30일 넘게 있던 예약은 완전히 삭제
+    _supabase.rpc('purge_old_trash').then(res => {
+        if (res && !res.error && res.data > 0) loadReservations({ quiet: true });
+    }, () => {});
 
     initHeroPanel();
     initPromoPanel();
@@ -1959,6 +1995,23 @@ try {
 } catch (e) { /* 저장값이 깨졌으면 새로 시작 */ }
 let flashIds = new Set();      // 방금 실시간으로 들어오거나 바뀐 카드 (한 번 반짝임)
 
+// 진행 상태(입금 상태) 4단계
+const STATES = ['예약 신청(미입금)', '예약 완료(미입금)', '예약 완료', '취소'];
+const UNPAID_STATES = ['예약 신청(미입금)', '예약 완료(미입금)'];
+const STATE_CLASS = { '예약 신청(미입금)': 'st-req', '예약 완료(미입금)': 'st-hold', '예약 완료': 'st-done', '취소': 'st-cancel' };
+function stateOf(r) {
+    if (!r) return STATES[0];
+    if (r.status === '취소' || r.deposit_status === '취소') return '취소';
+    if (r.deposit_status === '입금' || r.deposit_status === '예약 완료') return '예약 완료';
+    if (r.deposit_status === '부분입금' || r.deposit_status === '예약 완료(미입금)') return '예약 완료(미입금)';
+    return STATES[0];
+}
+function stateBadge(r) {
+    const st = stateOf(r);
+    return '<span class="' + STATE_CLASS[st] + ' text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">' + escHtml(st) + '</span>';
+}
+let selectedIds = new Set();   // 목록에서 체크한 예약 id
+
 function escHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 }
@@ -2001,6 +2054,7 @@ window.markAllSeen = function() {
     updateUnseen();
 };
 function unseenRows() {
+    if (viewMode === 'trash') return [];
     return Object.values(_reservationMap).filter(r => !seenIds.has(r.id));
 }
 function updateUnseen() {
@@ -2010,22 +2064,29 @@ function updateUnseen() {
     if (btn) btn.classList.toggle('hidden', n === 0);
 }
 
+const VIEW_HINT = {
+    queue: '새로 들어온 예약이 맨 위에 쌓입니다. 방문일을 고르면 날짜별로 정리됩니다.',
+    date:  '고른 방문일의 예약을 날짜·시간 순으로 정리했습니다.',
+    trash: '삭제한 예약입니다. 30일이 지나면 자동으로 완전히 삭제됩니다. 고객에게는 알림이 가지 않습니다.'
+};
+function applyViewTabs() {
+    ['queue', 'date', 'trash'].forEach(m =>
+        document.getElementById('view-' + m).setAttribute('aria-selected', String(viewMode === m)));
+    document.getElementById('view-hint').innerText = VIEW_HINT[viewMode];
+}
 window.setViewMode = function(mode) {
-    viewMode = mode === 'date' ? 'date' : 'queue';
-    document.getElementById('view-queue').setAttribute('aria-selected', String(viewMode === 'queue'));
-    document.getElementById('view-date').setAttribute('aria-selected', String(viewMode === 'date'));
+    viewMode = ['date', 'trash'].includes(mode) ? mode : 'queue';
     const start = document.getElementById('filter-start');
     const end   = document.getElementById('filter-end');
-    if (viewMode === 'queue') {
+    if (viewMode !== 'date') {
         start.value = '';
         end.value = '';
     } else if (!start.value) {
         start.value = localDateStr(new Date());
         end.value = start.value;
     }
-    document.getElementById('view-hint').innerText = viewMode === 'queue'
-        ? '새로 들어온 예약이 맨 위에 쌓입니다. 방문일을 고르면 날짜별로 정리됩니다.'
-        : '고른 방문일의 예약을 날짜·시간 순으로 정리했습니다.';
+    clearSelection();
+    applyViewTabs();
     loadReservations();
 };
 window.onDateFilterChange = function() {
@@ -2036,9 +2097,8 @@ window.onDateFilterChange = function() {
     if (!start.value) { setViewMode('queue'); return; }
     if (viewMode !== 'date') {
         viewMode = 'date';
-        document.getElementById('view-queue').setAttribute('aria-selected', 'false');
-        document.getElementById('view-date').setAttribute('aria-selected', 'true');
-        document.getElementById('view-hint').innerText = '고른 방문일의 예약을 날짜·시간 순으로 정리했습니다.';
+        clearSelection();
+        applyViewTabs();
     }
     loadReservations();
 };
@@ -2057,20 +2117,21 @@ async function loadReservations(opts) {
 
         const start  = document.getElementById('filter-start').value;
         const end    = document.getElementById('filter-end').value;
-        const status = document.getElementById('filter-status').value;
         const dep    = document.getElementById('filter-deposit').value;
         const search = document.getElementById('filter-search').value.trim();
 
-        if (viewMode === 'date') {
+        if (viewMode === 'trash') {
+            q = q.not('deleted_at', 'is', null).order('deleted_at', { ascending: false }).limit(200);
+        } else if (viewMode === 'date') {
+            q = q.is('deleted_at', null);
             if (start) q = q.gte('visit_date', start);
             if (end)   q = q.lte('visit_date', end || start);
             q = q.order('visit_date', { ascending: true })
                  .order('visit_time', { ascending: true })
                  .order('created_at', { ascending: true });
         } else {
-            q = q.order('created_at', { ascending: false }).limit(QUEUE_LIMIT);
+            q = q.is('deleted_at', null).order('created_at', { ascending: false }).limit(QUEUE_LIMIT);
         }
-        if (status) q = q.eq('status', status);
         if (dep)    q = q.eq('deposit_status', dep);
         if (search) q = q.or('name.ilike.%' + search + '%,phone.ilike.%' + search + '%');
 
@@ -2079,14 +2140,17 @@ async function loadReservations(opts) {
         const rows = data || [];
 
         // 이 브라우저에서 처음 열면 지금 있는 예약은 모두 '확인함'으로 두고, 이후 들어오는 예약만 새 예약으로 표시
-        if (!seenReady) { rows.forEach(r => seenIds.add(r.id)); saveSeen(); }
+        if (!seenReady && viewMode !== 'trash') { rows.forEach(r => seenIds.add(r.id)); saveSeen(); }
 
         _reservationMap = Object.fromEntries(rows.map(r => [r.id, r]));
-        updateStats(rows);
+        selectedIds.forEach(id => { if (!_reservationMap[id]) selectedIds.delete(id); });
+        if (viewMode !== 'trash') updateStats(rows);
+        syncStatButtons();
         renderList(rows);
+        updateSelectionBar();
         cnt.innerText = viewMode === 'queue'
             ? '최근 접수 ' + rows.length + '건' + (rows.length >= QUEUE_LIMIT ? ' (최근 ' + QUEUE_LIMIT + '건까지)' : '')
-            : '방문 예정 ' + rows.length + '건';
+            : viewMode === 'trash' ? '휴지통 ' + rows.length + '건' : '방문 예정 ' + rows.length + '건';
         updateUnseen();
 
     } catch (err) {
@@ -2101,11 +2165,23 @@ async function loadReservations(opts) {
 // 통계
 // ====================================================
 function updateStats(data) {
-    document.getElementById('stat-total').innerText   = data.length;
-    document.getElementById('stat-접수').innerText    = data.filter(r => r.status === '접수').length;
-    document.getElementById('stat-미입금').innerText  = data.filter(r => r.deposit_status === '미입금').length;
-    document.getElementById('stat-입금').innerText    = data.filter(r => r.deposit_status === '입금').length;
+    const count = st => data.filter(r => stateOf(r) === st).length;
+    document.getElementById('stat-req').innerText    = count('예약 신청(미입금)');
+    document.getElementById('stat-hold').innerText   = count('예약 완료(미입금)');
+    document.getElementById('stat-done').innerText   = count('예약 완료');
+    document.getElementById('stat-cancel').innerText = count('취소');
 }
+function syncStatButtons() {
+    const dep = document.getElementById('filter-deposit').value;
+    document.querySelectorAll('.stat-card').forEach(b => b.setAttribute('aria-pressed', String(!!dep && b.dataset.state === dep)));
+}
+// 통계 카드를 누르면 그 상태만 보기 (한 번 더 누르면 전체)
+window.quickFilter = function(state) {
+    const sel = document.getElementById('filter-deposit');
+    sel.value = sel.value === state ? '' : state;
+    if (viewMode === 'trash') { setViewMode('queue'); return; }
+    loadReservations();
+};
 
 
 // ====================================================
@@ -2121,27 +2197,32 @@ function itemSummary(r) {
 }
 
 function cardHtml(r) {
-    const isNew = !seenIds.has(r.id);
+    const trash = viewMode === 'trash';
+    const isNew = !trash && !seenIds.has(r.id);
+    const st = stateOf(r);
+    const selected = selectedIds.has(r.id);
     const items = itemSummary(r).text;
-    const customerCancel = r.status === '취소' && r.cancelled_by === 'customer';
+    const customerCancel = st === '취소' && r.cancelled_by === 'customer';
     const when = viewMode === 'queue'
         ? '<span class="text-gray-500"><i class="fa-regular fa-calendar mr-1 text-gray-300"></i>방문 ' + escHtml(r.visit_date) + ' ' + escHtml(r.visit_time) + '</span>'
+        : trash
+        ? '<span class="text-gray-500"><i class="fa-regular fa-calendar mr-1 text-gray-300"></i>방문 ' + escHtml(r.visit_date) + ' ' + escHtml(r.visit_time) + '</span>'
         : '<span class="text-[#0f172a] font-black text-[14px]"><i class="fa-regular fa-clock mr-1 text-gray-300"></i>' + escHtml(r.visit_time) + '</span>';
+    const id = escHtml(r.id);
     return ''
-      + '<div onclick="openDetail(\'' + escHtml(r.id) + '\')" data-res-id="' + escHtml(r.id) + '"'
+      + '<div onclick="openDetail(\'' + id + '\')" data-res-id="' + id + '"'
       + ' class="res-card bg-white rounded-2xl p-4 shadow-sm border-2 border-transparent hover:border-blue-200 hover:shadow-md cursor-pointer'
-      + (isNew ? ' is-new' : '') + (flashIds.has(r.id) ? ' is-flash' : '') + (r.status === '취소' ? ' opacity-70' : '') + '">'
+      + (isNew ? ' is-new' : '') + (flashIds.has(r.id) ? ' is-flash' : '') + (selected ? ' is-selected' : '') + (st === '취소' && !trash ? ' opacity-70' : '') + '">'
       +   '<div class="flex justify-between items-start mb-2.5 gap-2">'
       +     '<div class="flex items-center gap-2 flex-wrap min-w-0">'
+      +       '<button type="button" class="res-check" onclick="event.stopPropagation(); toggleSelect(\'' + id + '\')" aria-pressed="' + selected + '" aria-label="' + escHtml(resNo(r)) + ' 선택"><i class="fa-solid fa-check" aria-hidden="true"></i></button>'
       +       (isNew ? '<span class="new-badge text-[9px] font-black px-1.5 py-0.5 rounded">NEW</span>' : '')
       +       '<span class="text-[#004de6] font-black text-[13px]">' + escHtml(resNo(r)) + '</span>'
       +       '<span class="font-bold text-[#0f172a] text-[15px]">' + escHtml(r.name) + '</span>'
       +       '<span class="text-gray-400 text-[12px]">' + escHtml(r.phone) + '</span>'
       +     '</div>'
       +     '<div class="flex gap-1.5 flex-shrink-0">'
-      +       (customerCancel ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-600 text-white">고객 취소</span>'
-                              : '<span class="badge-' + escHtml(r.status) + ' text-[10px] font-bold px-2 py-0.5 rounded-full">' + escHtml(r.status) + '</span>')
-      +       '<span class="badge-' + escHtml(r.deposit_status) + ' text-[10px] font-bold px-2 py-0.5 rounded-full">' + escHtml(r.deposit_status) + '</span>'
+      +       (customerCancel ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-600 text-white whitespace-nowrap">고객 취소</span>' : stateBadge(r))
       +     '</div>'
       +   '</div>'
       +   '<div class="flex justify-between items-center gap-2 text-[12px]">'
@@ -2149,19 +2230,33 @@ function cardHtml(r) {
       +     '<span class="text-gray-400 text-right">' + escHtml(items || '항목 없음') + '</span>'
       +   '</div>'
       +   (viewMode === 'queue' ? '<div class="mt-1.5 text-[11px] text-gray-400">' + escHtml(timeAgo(r.created_at)) + '</div>' : '')
+      +   (trash ? '<div class="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between gap-2 text-[11px]">'
+               +   '<span class="text-gray-400">' + escHtml(trashLeft(r.deleted_at)) + '</span>'
+               +   '<span class="flex gap-1.5">'
+               +     '<button type="button" onclick="event.stopPropagation(); doRestore([\'' + id + '\'])" class="font-bold text-[#0f172a] bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded-lg">복원</button>'
+               +     '<button type="button" onclick="event.stopPropagation(); doPurge([\'' + id + '\'])" class="font-bold text-red-500 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-lg">완전 삭제</button>'
+               +   '</span></div>' : '')
       +   (r.admin_memo ? '<div class="mt-2 pt-2 border-t border-gray-100 text-[11px] text-blue-500 flex items-center gap-1"><i class="fa-solid fa-note-sticky"></i> ' + escHtml(r.admin_memo) + '</div>' : '')
       + '</div>';
+}
+
+function trashLeft(iso) {
+    const t = new Date(iso);
+    if (isNaN(t)) return '';
+    const days = Math.max(0, 30 - Math.floor((Date.now() - t.getTime()) / 86400000));
+    return t.toLocaleString('ko-KR', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' }) + ' 삭제 · ' + days + '일 뒤 완전 삭제';
 }
 
 function renderList(data) {
     const list = document.getElementById('reservation-list');
     if (!data.length) {
+        const empty = viewMode === 'queue' ? '아직 들어온 예약이 없습니다' : viewMode === 'trash' ? '휴지통이 비어 있습니다' : '해당 날짜의 예약이 없습니다';
         list.innerHTML = '<div class="text-center py-12 text-gray-300"><i class="fa-solid fa-calendar-xmark text-3xl mb-3 block"></i>'
-            + '<p class="text-[13px]">' + (viewMode === 'queue' ? '아직 들어온 예약이 없습니다' : '해당 날짜의 예약이 없습니다') + '</p></div>';
+            + '<p class="text-[13px]">' + empty + '</p></div>';
         return;
     }
 
-    if (viewMode === 'queue') {
+    if (viewMode !== 'date') {
         list.innerHTML = data.map(cardHtml).join('');
     } else {
         // 방문일별 묶음: 날짜 머리글에 예약 수와 준비할 수량(취소 제외)
@@ -2173,7 +2268,7 @@ function renderList(data) {
             g.rows.push(r);
         });
         list.innerHTML = groups.map(g => {
-            const active = g.rows.filter(r => r.status !== '취소');
+            const active = g.rows.filter(r => stateOf(r) !== '취소');
             const sum = active.reduce((s, r) => { const x = itemSummary(r); s.equip += x.equip; s.cloth += x.cloth; s.lift += x.lift; return s; }, { equip:0, cloth:0, lift:0 });
             const prep = [sum.equip ? '장비 ' + sum.equip : '', sum.cloth ? '의류 ' + sum.cloth : '', sum.lift ? '리프트 ' + sum.lift + '명' : ''].filter(Boolean).join(' · ');
             const cancelled = g.rows.length - active.length;
@@ -2222,8 +2317,8 @@ function onLiveChange(payload) {
     if (payload.eventType === 'INSERT' && row.id) {
         flashIds.add(row.id);
         showToast('새 예약 ' + resNo(row) + ' ' + (row.name || '') + ' · 방문 ' + (row.visit_date || '') + ' ' + (row.visit_time || ''));
-    } else if (payload.eventType === 'UPDATE' && row.id && row.status === '취소'
-               && row.cancelled_by === 'customer' && (!prev || prev.status !== '취소')) {
+    } else if (payload.eventType === 'UPDATE' && row.id && !row.deleted_at && stateOf(row) === '취소'
+               && row.cancelled_by === 'customer' && (!prev || stateOf(prev) !== '취소')) {
         seenIds.delete(row.id);
         saveSeen();
         flashIds.add(row.id);
@@ -2287,8 +2382,9 @@ function openDetail(id) {
     document.getElementById('d-phone-text').innerText = r.phone;
     document.getElementById('d-date').innerText    = `${r.visit_date} ${r.visit_time}`;
 
+    const st = stateOf(r);
     const cancelRow = document.getElementById('d-cancel-row');
-    if (r.status === '취소') {
+    if (st === '취소') {
         const who  = r.cancelled_by === 'customer' ? '고객 취소' : '관리자 취소';
         const when = r.cancelled_at ? new Date(r.cancelled_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
         document.getElementById('d-cancel').innerText = who + (when ? ' · ' + when : '');
@@ -2296,6 +2392,11 @@ function openDetail(id) {
     } else {
         cancelRow.classList.add('hidden');
     }
+    const inTrash = !!r.deleted_at;
+    document.getElementById('d-trash-row').classList.toggle('hidden', !inTrash);
+    document.getElementById('d-trash').innerText = inTrash ? trashLeft(r.deleted_at) : '';
+    ['d-edit', 'save-btn', 'd-trash-btn'].forEach(x => document.getElementById(x).classList.toggle('hidden', inTrash));
+    document.getElementById('d-restore-btn').classList.toggle('hidden', !inTrash);
 
     document.getElementById('d-equip').innerText  =
         [r.equip_normal  > 0 ? `일반 ${r.equip_normal}명`  : '',
@@ -2304,9 +2405,10 @@ function openDetail(id) {
         [r.cloth_normal  > 0 ? `일반 ${r.cloth_normal}명`  : '',
          r.cloth_premium > 0 ? `고급 ${r.cloth_premium}명` : ''].filter(Boolean).join(' / ') || '없음';
     document.getElementById('d-helmet').innerText =
-        [r.helmet_count > 0 ? `헬멧 ${r.helmet_count}개`   : '',
+        [r.visor_count   > 0 ? `헬멧+고글 세트 ${r.visor_count}개` : '',
+         r.helmet_count > 0 ? `헬멧 ${r.helmet_count}개`   : '',
          r.goggle_count  > 0 ? `고글 ${r.goggle_count}개`  : '',
-         r.visor_count   > 0 ? `바이저 ${r.visor_count}개` : ''].filter(Boolean).join(' / ') || '없음';
+         r.helmet_own ? '헬멧 지참' : ''].filter(Boolean).join(' / ') || '없음';
     const liftParts = [
         (r.lift_3h_adult > 0 || r.lift_3h_child > 0) ? `3시간권 대인${r.lift_3h_adult} 소인${r.lift_3h_child}` : '',
         (r.lift_4h_adult > 0 || r.lift_4h_child > 0) ? `4시간권 대인${r.lift_4h_adult} 소인${r.lift_4h_child}` : '',
@@ -2315,9 +2417,9 @@ function openDetail(id) {
     document.getElementById('d-lift').innerText = liftParts.join('\n') || '없음';
     document.getElementById('d-memo').innerText   = r.memo || '-';
 
-    document.getElementById('d-status').value      = r.status;
-    document.getElementById('d-deposit').value     = r.deposit_status;
+    document.getElementById('d-deposit').value     = st;
     document.getElementById('d-admin-memo').value  = r.admin_memo || '';
+    updateRequestButton();
     loadNotifyStatus(id);
 
     // 모달 열기
@@ -2356,17 +2458,18 @@ const NOTIFY_COLOR = { pending: 'text-gray-500', sending: 'text-gray-500', sent:
 async function loadNotifyStatus(id) {
     const targets = {
         received:  document.getElementById('d-notify-received'),
+        deposit_request: document.getElementById('d-notify-deposit_request'),
         confirmed: document.getElementById('d-notify-confirmed'),
         cancelled: document.getElementById('d-notify-cancelled')
     };
-    const KIND_LABEL = { received: '접수', confirmed: '확정', cancelled: '취소' };
+    const KIND_LABEL = { received: '접수', deposit_request: '입금 요청', confirmed: '확정', cancelled: '취소' };
     const errorBox = document.getElementById('d-notify-error');
     Object.values(targets).forEach(el => { el.textContent = '확인 중'; el.className = 'font-bold text-right text-gray-400'; });
     errorBox.classList.add('hidden');
     errorBox.textContent = '';
 
     const [{ data, error }, settingsRes] = await Promise.all([
-        _supabase.from('reservation_notifications').select('kind,status,error,updated_at').eq('reservation_id', id),
+        _supabase.from('reservation_notifications').select('kind,status,error,updated_at,attempts').eq('reservation_id', id),
         _supabase.from('reservation_notify_settings').select('kind,enabled')
     ]);
     if (currentId !== id) return;
@@ -2376,6 +2479,8 @@ async function loadNotifyStatus(id) {
     }
     const enabled = {};
     (settingsRes.data || []).forEach(s => { enabled[s.kind] = s.enabled; });
+    currentNotify = { rows: data || [], enabled };
+    updateRequestButton();
 
     const errors = [];
     Object.entries(targets).forEach(([kind, el]) => {
@@ -2394,6 +2499,31 @@ async function loadNotifyStatus(id) {
     }
 }
 
+// 상세 창의 '입금 요청 보내기' 버튼과 마지막 발송 정보
+let currentNotify = { rows: [], enabled: {} };
+function fmtShort(iso) {
+    return iso ? new Date(iso).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+}
+function updateRequestButton() {
+    const r = _reservationMap[currentId];
+    const btn = document.getElementById('d-request-btn');
+    const info = document.getElementById('d-request-info');
+    if (!r || !btn || !info) return;
+    const ok = !r.deleted_at && UNPAID_STATES.includes(stateOf(r));
+    btn.disabled = !ok;
+    const n = (currentNotify.rows || []).find(x => x.kind === 'deposit_request');
+    const off = currentNotify.enabled && currentNotify.enabled.deposit_request === false;
+    let text;
+    if (!ok) text = stateOf(r) === '취소' ? '취소된 예약입니다.' : '입금이 확인된 예약입니다.';
+    else if (!n) text = '아직 보낸 적 없음';
+    else if (n.status === 'sent') text = '마지막 발송 ' + fmtShort(n.updated_at) + (n.attempts > 1 ? ' · 총 ' + n.attempts + '회' : '');
+    else if (n.status === 'failed') text = '마지막 발송 실패 · ' + fmtShort(n.updated_at);
+    else if (n.status === 'skipped') text = '보내지 않음 · ' + fmtShort(n.updated_at);
+    else text = '발송 중 · ' + fmtShort(n.updated_at);
+    if (ok && off) text += ' (알림톡은 카카오 승인 후 켜짐)';
+    info.textContent = text;
+}
+
 
 // ====================================================
 // 상태 저장
@@ -2403,7 +2533,7 @@ async function saveDetail() {
 
     const before    = _reservationMap[currentId] || {};
     const nextDep   = document.getElementById('d-deposit').value;
-    const nextState = document.getElementById('d-status').value;
+    const prevState = stateOf(before);
     const btn     = document.getElementById('save-btn');
     const btnText = document.getElementById('save-btn-text');
     btn.disabled  = true;
@@ -2413,7 +2543,6 @@ async function saveDetail() {
         const { error } = await _supabase
             .from('reservations')
             .update({
-                status:         nextState,
                 deposit_status: nextDep,
                 admin_memo:     document.getElementById('d-admin-memo').value.trim() || null
             })
@@ -2423,10 +2552,14 @@ async function saveDetail() {
 
         closeDetail();
         await loadReservations();
-        if (nextState === '취소' && before.status !== '취소') {
+        if (nextDep === '취소' && prevState !== '취소') {
             showToast('취소로 저장했습니다. 취소 안내 알림톡이 켜져 있으면 고객에게 발송됩니다.');
-        } else if (nextDep === '입금' && before.deposit_status !== '입금' && nextState !== '취소') {
+        } else if (nextDep === '예약 완료' && prevState !== '예약 완료') {
             showToast('저장했습니다. 예약 확정 알림톡을 보냅니다.');
+        } else if (nextDep === '예약 완료(미입금)' && prevState !== '예약 완료(미입금)') {
+            showToast('저장했습니다. 입금 요청 안내는 \'입금 요청 보내기\' 버튼으로 보낼 수 있어요.');
+        } else {
+            showToast('저장했습니다.');
         }
 
     } catch (err) {
@@ -2442,11 +2575,137 @@ async function saveDetail() {
 // 필터 초기화
 // ====================================================
 function resetFilter() {
-    document.getElementById('filter-status').value  = '';
     document.getElementById('filter-deposit').value = '';
     document.getElementById('filter-search').value  = '';
     setViewMode('queue');
 }
+
+// ====================================================
+// 여러 건 선택 · 입금 요청 · 휴지통
+// ====================================================
+window.toggleSelect = function(id) {
+    if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+    const card = document.querySelector('[data-res-id="' + CSS.escape(id) + '"]');
+    if (card) {
+        card.classList.toggle('is-selected', selectedIds.has(id));
+        const b = card.querySelector('.res-check');
+        if (b) b.setAttribute('aria-pressed', String(selectedIds.has(id)));
+    }
+    updateSelectionBar();
+};
+function clearSelection() {
+    selectedIds.clear();
+    document.querySelectorAll('.res-card.is-selected').forEach(c => {
+        c.classList.remove('is-selected');
+        const b = c.querySelector('.res-check');
+        if (b) b.setAttribute('aria-pressed', 'false');
+    });
+    updateSelectionBar();
+}
+window.clearSelection = clearSelection;
+function updateSelectionBar() {
+    const bar = document.getElementById('select-bar');
+    if (!bar) return;
+    const n = selectedIds.size;
+    bar.classList.toggle('show', n > 0);
+    document.getElementById('select-count').innerText = n + '건 선택';
+    const trash = viewMode === 'trash';
+    document.getElementById('bar-request').classList.toggle('hidden', trash);
+    document.getElementById('bar-trash').classList.toggle('hidden', trash);
+    document.getElementById('bar-restore').classList.toggle('hidden', !trash);
+    document.getElementById('bar-purge').classList.toggle('hidden', !trash);
+}
+
+async function doRequestDeposit(ids) {
+    const rows = ids.map(id => _reservationMap[id]).filter(Boolean);
+    const targets = rows.filter(r => !r.deleted_at && UNPAID_STATES.includes(stateOf(r)));
+    const skipped = rows.length - targets.length;
+    if (!targets.length) {
+        showToast('입금 요청은 예약 신청(미입금)·예약 완료(미입금) 예약에만 보낼 수 있어요.');
+        return false;
+    }
+    const [notesRes, settingsRes] = await Promise.all([
+        _supabase.from('reservation_notifications').select('reservation_id,status,updated_at')
+            .eq('kind', 'deposit_request').in('reservation_id', targets.map(r => r.id)),
+        _supabase.from('reservation_notify_settings').select('kind,enabled').eq('kind', 'deposit_request')
+    ]);
+    const on = !!(settingsRes.data && settingsRes.data[0] && settingsRes.data[0].enabled);
+    const sentBefore = (notesRes.data || []).filter(n => n.status === 'sent');
+    let msg = targets.length === 1
+        ? resNo(targets[0]) + ' ' + targets[0].name + '님께 입금 요청을 보낼까요?'
+        : targets.length + '건에 입금 요청을 보낼까요?';
+    if (sentBefore.length) {
+        const last = sentBefore.map(n => n.updated_at).sort().pop();
+        msg += targets.length === 1
+            ? '\n\n이미 ' + fmtShort(last) + '에 보낸 적이 있어요. 한 번 더 보냅니다.'
+            : '\n\n그중 ' + sentBefore.length + '건은 이미 보낸 적이 있어요(마지막 ' + fmtShort(last) + '). 한 번 더 보냅니다.';
+    }
+    if (skipped) msg += '\n입금 요청 대상이 아닌 ' + skipped + '건(예약 완료·취소)은 빼고 보냅니다.';
+    msg += on ? '\n\n보내면 상태가 \'예약 완료(미입금)\'으로 바뀝니다.'
+              : '\n\n※ 입금 요청 알림톡은 카카오 승인 후 켜집니다. 지금은 상태만 \'예약 완료(미입금)\'으로 바뀝니다.';
+    if (!window.confirm(msg)) return false;
+
+    const { data, error } = await _supabase.rpc('request_deposit', { p_ids: targets.map(r => r.id) });
+    if (error) { showToast('입금 요청 실패: ' + error.message); return false; }
+    const res = data || {};
+    if (!res.notify_enabled) showToast(res.updated + '건을 예약 완료(미입금)으로 바꿨습니다. 알림톡은 카카오 승인 후 보낼 수 있어요.');
+    else if (res.queued < res.updated) showToast(res.queued + '건에 입금 요청을 보냈습니다. ' + (res.updated - res.queued) + '건은 지금 발송 중이라 건너뛰었어요.');
+    else showToast(res.queued + '건에 입금 요청 알림톡을 보냈습니다.');
+    await loadReservations({ quiet: true });
+    return true;
+}
+window.requestDepositSelected = async function() {
+    if (await doRequestDeposit([...selectedIds])) clearSelection();
+};
+window.requestDepositCurrent = async function() {
+    const id = currentId;
+    if (!id) return;
+    if (await doRequestDeposit([id]) && currentId === id) {
+        document.getElementById('d-deposit').value = stateOf(_reservationMap[id]);
+        loadNotifyStatus(id);
+    }
+};
+
+async function doTrash(ids) {
+    if (!ids.length) return false;
+    const one = ids.length === 1 && _reservationMap[ids[0]];
+    const label = one ? resNo(one) + ' ' + one.name + '님 예약을' : ids.length + '건을';
+    if (!window.confirm(label + ' 휴지통으로 옮길까요?\n\n고객에게 알림은 가지 않습니다. 휴지통에서 30일 안에 복원할 수 있고, 30일이 지나면 완전히 삭제됩니다.')) return false;
+    const { error } = await _supabase.from('reservations').update({ deleted_at: new Date().toISOString() }).in('id', ids);
+    if (error) { showToast('삭제 실패: ' + error.message); return false; }
+    showToast(ids.length + '건을 휴지통으로 옮겼습니다.');
+    clearSelection();
+    await loadReservations({ quiet: true });
+    return true;
+}
+window.doRestore = async function(ids) {
+    if (!ids.length) return false;
+    const { error } = await _supabase.from('reservations').update({ deleted_at: null }).in('id', ids);
+    if (error) { showToast('복원 실패: ' + error.message); return false; }
+    showToast(ids.length + '건을 복원했습니다.');
+    clearSelection();
+    await loadReservations({ quiet: true });
+    return true;
+};
+window.doPurge = async function(ids) {
+    if (!ids.length) return false;
+    if (!window.confirm(ids.length + '건을 완전히 삭제할까요?\n\n완전히 삭제하면 되돌릴 수 없습니다.')) return false;
+    const { error } = await _supabase.from('reservations').delete().in('id', ids);
+    if (error) { showToast('완전 삭제 실패: ' + error.message); return false; }
+    showToast(ids.length + '건을 완전히 삭제했습니다.');
+    clearSelection();
+    await loadReservations({ quiet: true });
+    return true;
+};
+window.trashSelected   = () => doTrash([...selectedIds]);
+window.restoreSelected = () => doRestore([...selectedIds]);
+window.purgeSelected   = () => doPurge([...selectedIds]);
+window.trashCurrent = async function() {
+    if (currentId && await doTrash([currentId])) closeDetail();
+};
+window.restoreCurrent = async function() {
+    if (currentId && await doRestore([currentId])) closeDetail();
+};
 
 // ====================================================
 // 목록 인쇄 (요약 + 상세, 새 창)
@@ -2503,8 +2762,7 @@ function printReservations() {
             <td>${esc(r.name)}<br><span class="phone">${esc(r.phone)}</span></td>
             <td class="lift">${liftStr}</td>
             <td>${esc(gear)}</td>
-            <td>${esc(r.deposit_status)}</td>
-            <td>${esc(r.status)}</td>
+            <td>${esc(stateOf(r))}</td>
             <td class="memo">${esc(r.admin_memo)}</td>
         </tr>`;
     }).join('');
@@ -2546,7 +2804,7 @@ function printReservations() {
         <table>
             <thead><tr>
                 <th>No</th><th>방문일</th><th>시간</th><th>성명/연락처</th>
-                <th>리프트권</th><th>장비/의류</th><th>입금</th><th>상태</th><th>메모</th>
+                <th>리프트권</th><th>장비/의류</th><th>입금 상태</th><th>메모</th>
             </tr></thead>
             <tbody>${detailRows}</tbody>
         </table>
