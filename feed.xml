@@ -3,16 +3,30 @@
   <channel>
     <title>무주놀러와스키샵 블로그</title>
     <link>https://www.nolleowaski.com/blog/</link>
-    <description>무주 스키장 렌탈 가격, 리프트권, 교통·셔틀, 강습과 시즌 일정 안내</description>
+    <description>무주 스키장 렌탈 가격, 리프트권, 셔틀버스 시간표, 운영시간, 준비물, 강습과 시즌 일정 안내</description>
     <language>ko-kr</language>
-    <lastBuildDate>Sun, 11 Oct 2026 16:00:00 +0900</lastBuildDate>
+    <lastBuildDate>Mon, 23 Nov 2026 12:00:00 +0900</lastBuildDate>
     <atom:link href="https://www.nolleowaski.com/feed.xml" rel="self" type="application/rss+xml" xmlns:atom="http://www.w3.org/2005/Atom" />
     <item>
-      <title>무주리조트 가는 법: 11개 도시 대중교통·셔틀</title>
+      <title>무주 스키장 준비물 체크리스트: 빌릴 것·챙길 것·현장에서 살 것</title>
+      <link>https://www.nolleowaski.com/blog/muju-ski-checklist.html</link>
+      <guid isPermaLink="true">https://www.nolleowaski.com/blog/muju-ski-checklist.html</guid>
+      <pubDate>Mon, 23 Nov 2026 12:00:00 +0900</pubDate>
+      <description>장비·스키복·헬멧·고글은 풀세트 40,000원에 빌리고, 장갑·양말·핫팩은 매장에서 살 수 있습니다. 출발 전 체크리스트를 확인하세요.</description>
+    </item>
+    <item>
+      <title>무주리조트 스키장 운영시간·야간스키 2026/27</title>
+      <link>https://www.nolleowaski.com/blog/muju-ski-hours.html</link>
+      <guid isPermaLink="true">https://www.nolleowaski.com/blog/muju-ski-hours.html</guid>
+      <pubDate>Mon, 23 Nov 2026 11:00:00 +0900</pubDate>
+      <description>주간 09:00~16:30, 야간 18:30~22:00, 날짜별 새벽·자정 운영과 3월 3일부터 바뀌는 주간 시간, 야간스키 셔틀 막차를 정리했습니다.</description>
+    </item>
+    <item>
+      <title>무주리조트 셔틀버스 시간표 2026/27·탑승 위치·가는 법 총정리</title>
       <link>https://www.nolleowaski.com/blog/muju-ski-getting-there.html</link>
       <guid isPermaLink="true">https://www.nolleowaski.com/blog/muju-ski-getting-there.html</guid>
       <pubDate>Sat, 03 Oct 2026 00:00:00 +0900</pubDate>
-      <description>대전·대구·부산·전주·창원·천안·청주·광주·군산·익산·울산 출발 교통과 시즌 셔틀 확인 방법을 안내합니다.</description>
+      <description>무주터미널 맞은편 P1 주차장에서 하루 4회, 리조트에서 하루 4회 출발하는 무료 셔틀 시간표와 탑승 위치, 지역별 제휴 스키버스 12곳 연락처를 정리했습니다.</description>
     </item>
     <item>
       <title>무주 스키·보드 강습: 성인 1:1·초보·어린이 예약 전 확인할 점</title>
@@ -22,11 +36,11 @@
       <description>성인 1:1 강습은 제휴 플랫폼에서 강사를 직접 선택해 신청합니다. 레벨별 팀당 요금과 시간대, 어린이·초보 과정의 연령·반별 인원을 함께 확인하세요.</description>
     </item>
     <item>
-      <title>무주리조트 2026/27 개장일·폐장일은 발표됐나요?</title>
+      <title>무주리조트 2026/27 개장일: 11월 27일(금) 오픈 예정</title>
       <link>https://www.nolleowaski.com/blog/muju-ski-season-dates.html</link>
       <guid isPermaLink="true">https://www.nolleowaski.com/blog/muju-ski-season-dates.html</guid>
       <pubDate>Sat, 03 Oct 2026 00:00:00 +0900</pubDate>
-      <description>2026-10-11 공식 확인 기준, 시즌권 안내와 11월 운영 캘린더에서 무주리조트 26/27 개장일 발표 여부를 확인하는 방법입니다.</description>
+      <description>11월 19일 첫 제설을 시작한 무주덕유산리조트가 11월 27일(금) 동계 시즌 오픈 예정입니다. 폐장일 공지 여부와 운영시간을 함께 정리했습니다.</description>
     </item>
     <item>
       <title>무주 스키장 렌탈 가격: 40,000원 풀세트·품목별 요금</title>

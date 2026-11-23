@@ -6,7 +6,7 @@ Canonical website: https://www.nolleowaski.com/
 Business name: 무주놀러와스키샵&렌탈샵
 Location: 전북특별자치도 무주군 설천면 구천동로 1050
 Official contact page: https://www.nolleowaski.com/
-Last reviewed: 2026-10-27
+Last reviewed: 2026-11-23
 
 ## Official pages
 
@@ -17,16 +17,20 @@ Last reviewed: 2026-10-27
 ## Practical guides
 
 - [무주 스키장 렌탈샵 이용 방법](https://www.nolleowaski.com/blog/muju-ski-rental.html)
+- [무주 스키장 준비물 체크리스트](https://www.nolleowaski.com/blog/muju-ski-checklist.html)
 - [무주리조트 리프트권 시간권 안내](https://www.nolleowaski.com/blog/muju-lift-ticket.html)
 - [무주 스키장 렌탈 가격](https://www.nolleowaski.com/blog/muju-ski-price.html)
-- [무주리조트 가는 법과 시즌 셔틀](https://www.nolleowaski.com/blog/muju-ski-getting-there.html)
+- [무주리조트 무료 셔틀버스 시간표·탑승 위치·지역별 스키버스](https://www.nolleowaski.com/blog/muju-ski-getting-there.html)
+- [무주리조트 스키장 운영시간·야간스키](https://www.nolleowaski.com/blog/muju-ski-hours.html)
 - [성인 1:1·초보·어린이 강습 예약 전 확인사항](https://www.nolleowaski.com/blog/muju-ski-lessons.html)
-- [무주리조트 2026/27 개장일·폐장일 확인](https://www.nolleowaski.com/blog/muju-ski-season-dates.html)
+- [무주리조트 2026/27 개장일(11월 27일 오픈 예정)·폐장일](https://www.nolleowaski.com/blog/muju-ski-season-dates.html)
 
 ## Authoritative references
 
 - [무주덕유산리조트 공식 교통 안내](https://www.mdysresort.com/guide/way_search.asp)
+- [무주덕유산리조트 공식 셔틀버스 시간표](https://www.mdysresort.com/guide/shuttle_bus.asp)
 - [무주덕유산리조트 공식 제휴 셔틀 안내](https://www.mdysresort.com/guide/alliance_bus_way.asp)
+- [무주덕유산리조트 덕유산 현장소식](https://www.mdysresort.com/guide/news.asp)
 - [무주덕유산리조트 공식 스키학교 안내](https://www.mdysresort.com/ski/ski_school_bk20221206.asp)
 - [무주덕유산리조트 2026/27 시즌권 안내](https://www.mdysresort.com/ski/buy_season_pass04_o2.asp)
 - [무주덕유산리조트 운영 캘린더](https://www.mdysresort.com/ski/schedule.asp?dSMonth=2&dSYear=2027)
