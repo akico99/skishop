@@ -2819,6 +2819,8 @@ window.onReserve = async function() {
         if (error) throw error;
         if (!data) throw new Error('예약 저장 결과를 받지 못했습니다.');
         openConfirm(data);
+        // 스마트로그 주문 전환: 서버에 저장된 예약만 보내고, 이름·연락처는 보내지 않습니다.
+        try { if (window.nolSmlogTrace) window.nolSmlogTrace('order', priceLines(data, data.visit_date).total); } catch (e) {}
         syncToSheet(data);
         // 폼 초기화
         ['reserver-name','reserver-phone','reserver-memo'].forEach(id => document.getElementById(id).value='');
@@ -3492,5 +3494,12 @@ function openFromHash() {
 window.addEventListener('load', openFromHash);
 window.addEventListener('hashchange', openFromHash);
 </script>
+<!-- Smartlog -->
+<script type="text/javascript">
+    var hpt_info={'_account':'UHPT-39509', '_server': 'a31'};
+</script>
+<script language="javascript" src="//cdn.smlog.co.kr/core/smart.js" charset="utf-8"></script>
+<noscript><img src="//a31.smlog.co.kr/smart_bda.php?_account=39509" style="display:none;width:0;height:0;" border="0"/></noscript>
+<script src="/assets/js/smlog-trace.js" defer></script>
 </body>
 </html>
