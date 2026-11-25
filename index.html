@@ -3024,6 +3024,13 @@ const PROMO_DEFAULT = {
     ]
 };
 let promoTextStyle = { order:['eyebrow','title','desc','buttonText'], mobile:PROMO_TEXT_DEFAULTS.mobile, pc:PROMO_TEXT_DEFAULTS.pc };
+// 슬라이드 사진·표시 여부는 모바일/PC 따로 저장(imgs.mobile/imgs.pc, show.mobile/show.pc).
+// 예전 데이터처럼 공용 사진(img) 하나만 있으면 양쪽 화면에 그 사진을 씀.
+function promoSlideImg(s, mode) {
+    if (s && s.imgs && s.imgs[mode] != null) return s.imgs[mode] || '';
+    return (s && s.img) || '';
+}
+function promoSlideShown(s, mode) { return !(s && s.show && s.show[mode] === false); }
 // 예전 방식(enabled 하나만 있거나, size가 숫자 하나뿐이거나, texts 없이 평평했거나, img/mobile/pc 없는 데이터)으로 저장됐어도 안전하게 채워 넣음
 function promoNormalizeSize(v, defW, defH) {
     if (v && typeof v === 'object') return { width: v.width || defW, height: v.height || defH };
@@ -3117,7 +3124,11 @@ function promoHexToRgba(hex, alpha) {
     // 모바일/PC 각각 따로 켜고 끌 수 있음 — 지금 화면 기준으로 꺼져 있으면 팝업 자체를 띄우지 않음
     if ((isPcMode() ? config.enabledPc : config.enabledMobile) === false) return;
 
-    const slides = config.slides;
+    // 지금 화면(모바일/PC)에 표시하기로 한 슬라이드만 사용 — 하나도 없으면 팝업을 띄우지 않음
+    const currentPromoMode = () => isPcMode() ? 'pc' : 'mobile';
+    let promoMode = currentPromoMode();
+    let slides = config.slides.filter(s => promoSlideShown(s, promoMode));
+    if (!slides.length) return;
 
     // 모바일/PC에 따라 팝업 박스 너비·높이(비율 유지) + 각 슬라이드 사진의 초점(모바일/PC 각각 저장된 값)을 반영
     function applyPromoSize() {
@@ -3167,12 +3178,13 @@ function promoHexToRgba(hex, alpha) {
             const hasColor = !!s.gradFrom;
             const gradient = hasColor ? `linear-gradient(to bottom right, ${promoEscapeHtml(s.gradFrom)}, ${promoEscapeHtml(s.gradTo || s.gradFrom)})` : '';
             const textsHtml = promoTextStyle.order.map(id => renderPromoTextEl(id, i, s, mode)).join('');
-            if (s.img) {
+            const slideImg = promoSlideImg(s, mode);
+            if (slideImg) {
                 const f = s[mode] || { focalX:50, focalY:50, zoom:1 };
                 const tint = hasColor ? `linear-gradient(to bottom right, ${promoHexToRgba(s.gradFrom, .68)}, ${promoHexToRgba(s.gradTo || s.gradFrom, .68)})` : 'transparent';
                 return `
         <div class="relative h-full" style="background:#1e293b;">
-            <img src="${promoEscapeHtml(s.img)}" alt="" class="absolute inset-0 w-full h-full object-cover" style="object-position:${f.focalX ?? 50}% ${f.focalY ?? 50}%; transform:scale(${f.zoom || 1}); transform-origin:${f.focalX ?? 50}% ${f.focalY ?? 50}%;">
+            <img src="${promoEscapeHtml(slideImg)}" alt="" class="absolute inset-0 w-full h-full object-cover" style="object-position:${f.focalX ?? 50}% ${f.focalY ?? 50}%; transform:scale(${f.zoom || 1}); transform-origin:${f.focalX ?? 50}% ${f.focalY ?? 50}%;">
             <div class="absolute inset-0" style="background:${tint}; pointer-events:none;"></div>
             ${textsHtml}
         </div>`;
@@ -3203,6 +3215,18 @@ function promoHexToRgba(hex, alpha) {
     window.addEventListener('resize', () => {
         clearTimeout(promoResizeTimer);
         promoResizeTimer = setTimeout(() => {
+            // 모바일↔PC 경계를 넘으면 그 화면용 슬라이드 목록으로 다시 고름
+            const nextMode = currentPromoMode();
+            if (nextMode !== promoMode) {
+                promoMode = nextMode;
+                slides = config.slides.filter(s => promoSlideShown(s, promoMode));
+                slideCount = slides.length;
+                const modeOff = (promoMode === 'pc' ? config.enabledPc : config.enabledMobile) === false;
+                if (!slideCount || modeOff) { promoClose(); return; }
+                if (promoIdx >= slideCount) promoIdx = 0;
+                renderDots();
+                startPromoTimer();
+            }
             applyPromoSize();
             applyPromoPosition();
             renderPromoSlides();
@@ -3210,7 +3234,7 @@ function promoHexToRgba(hex, alpha) {
         }, 200);
     });
 
-    const slideCount = slides.length;
+    let slideCount = slides.length;
     let promoIdx = 0;
     let promoTimer = null;
 

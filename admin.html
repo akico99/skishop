@@ -369,6 +369,12 @@
                 <!-- 슬라이드 탭 -->
                 <div id="promo-tabs" class="flex gap-2 mb-3 overflow-x-auto"></div>
 
+                <!-- 이 슬라이드를 지금 편집 중인 화면(모바일/PC)에 띄울지 — 화면마다 따로 -->
+                <label class="flex items-center gap-2 text-[12px] font-bold text-[#0f172a] border border-gray-100 rounded-xl px-3 py-2.5 mb-3">
+                    <input type="checkbox" id="promo-slide-show" class="w-4 h-4 accent-[#6d5acd]">
+                    이 슬라이드를 <span id="promo-show-mode-label" class="text-[#6d5acd]">모바일</span> 화면에 표시
+                </label>
+
                 <!-- 미리보기 (이미지가 있으면 배경 사진 위에 색 틴트 오버레이, 없으면 단색 배경) -->
                 <p class="text-[11px] text-gray-400 font-medium mb-1.5">
                     사진이 있으면 <b class="text-[#6d5acd]">사진을 클릭</b>해서 위치·확대 조절 · 우측 하단 모서리를 <b class="text-[#6d5acd]">드래그</b>하면 크기 조절
@@ -421,9 +427,9 @@
                 </div>
                 <p class="text-[11px] text-gray-400 -mt-2 mb-3">모바일은 항상 화면 하단에 고정됩니다 (바텀시트)</p>
 
-                <!-- 이미지 업로드 -->
+                <!-- 이미지 업로드 — 지금 편집 중인 화면(모바일/PC)의 사진만 바뀜 -->
                 <div class="mb-3">
-                    <label class="block text-[11px] text-gray-400 font-medium mb-1.5">이 슬라이드의 배경 사진 (선택 — 없으면 아래 배경색만 사용)</label>
+                    <label class="block text-[11px] text-gray-400 font-medium mb-1.5">이 슬라이드의 <b id="promo-img-mode-label" class="text-[#6d5acd]">모바일</b> 화면 배경 사진 (선택 — 없으면 아래 배경색만 사용)</label>
                     <div class="flex gap-2">
                         <input type="file" id="promo-file-input" accept="image/*"
                                class="flex-1 text-[12px] border border-gray-200 rounded-xl px-3 py-2.5 bg-white">
@@ -436,6 +442,8 @@
                         <button type="button" onclick="applyPromoImageUrl()"
                                 class="border border-violet-200 text-[#6d5acd] rounded-xl px-3 text-[12px] font-bold hover:bg-violet-50 transition">주소 적용</button>
                     </div>
+                    <button type="button" id="promo-copy-img-btn" onclick="copyPromoImageFromOtherMode()"
+                            class="text-[11px] text-[#6d5acd] hover:underline mt-1.5" style="display:none"></button>
                     <p id="promo-upload-status" class="text-[11px] text-gray-400 mt-1"></p>
                 </div>
 
@@ -1579,14 +1587,24 @@ const PROMO_DEFAULT = {
     size: { mobile:{width:414,height:280}, pc:{width:480,height:320} },
     pcPosition: { v:'bottom', h:'center' }, // PC에서 팝업이 뜨는 위치 — 모바일은 항상 하단 고정(바텀시트)이라 별도 설정 없음
     slides: [
-        { texts:{ eyebrow:'무주 스키 렌탈 신규 오픈', title:'풀세트 {{40,000원}}', desc:'장비 + 의류 + 헬멧 + 고글\n오픈 기념 한정 특가', buttonText:'지금 예약하기' }, links:{}, actionType:'quote', actionValue:'', gradFrom:'', gradTo:'', img:'', mobile:freshFocal(), pc:freshFocal() },
-        { texts:{ eyebrow:'26/27 시즌 신상 입고', title:'올해 제일 {{잘 입은 사람}}', desc:'사장이 직접 고른 트렌디한 신상 스키복\n슬로프 앞까지 무료 배달', buttonText:'룩북 구경하기' }, links:{}, actionType:'section', actionValue:'outfit-section', gradFrom:'', gradTo:'', img:'', mobile:freshFocal(), pc:freshFocal() }
+        { texts:{ eyebrow:'무주 스키 렌탈 신규 오픈', title:'풀세트 {{40,000원}}', desc:'장비 + 의류 + 헬멧 + 고글\n오픈 기념 한정 특가', buttonText:'지금 예약하기' }, links:{}, actionType:'quote', actionValue:'', gradFrom:'', gradTo:'', imgs:{ mobile:'', pc:'' }, show:{ mobile:true, pc:true }, mobile:freshFocal(), pc:freshFocal() },
+        { texts:{ eyebrow:'26/27 시즌 신상 입고', title:'올해 제일 {{잘 입은 사람}}', desc:'사장이 직접 고른 트렌디한 신상 스키복\n슬로프 앞까지 무료 배달', buttonText:'룩북 구경하기' }, links:{}, actionType:'section', actionValue:'outfit-section', gradFrom:'', gradTo:'', imgs:{ mobile:'', pc:'' }, show:{ mobile:true, pc:true }, mobile:freshFocal(), pc:freshFocal() }
     ]
 };
 let promoConfig = JSON.parse(JSON.stringify(PROMO_DEFAULT));
 let promoTextStyle = { order:['eyebrow','title','desc','buttonText'], mobile:{}, pc:{} };
 let currentPromoIdx = 0;
 let promoEditMode = 'mobile'; // 'mobile' | 'pc' — 팝업 사진 초점·문구·크기를 어느 화면 기준으로 편집 중인지
+
+// 슬라이드 사진과 표시 여부는 모바일/PC가 완전히 따로 — imgs.mobile / imgs.pc, show.mobile / show.pc
+function promoModeLabel(mode) { return mode === 'pc' ? 'PC' : '모바일'; }
+function promoOtherMode(mode) { return mode === 'pc' ? 'mobile' : 'pc'; }
+function promoSlideImg(s, mode) { return (s && s.imgs && s.imgs[mode]) || ''; }
+function promoSlideShown(s, mode) { return !(s && s.show && s.show[mode] === false); }
+function promoSetSlideImg(s, mode, url) {
+    if (!s.imgs) s.imgs = { mobile:'', pc:'' };
+    s.imgs[mode] = url;
+}
 
 const promoCtx = {
     key: 'promo',
@@ -1622,14 +1640,22 @@ function promoMigrateConfig(parsed) {
     const legacyEnabled = parsed.enabled !== false;
     const enabledMobile = parsed.enabledMobile != null ? parsed.enabledMobile !== false : legacyEnabled;
     const enabledPc = parsed.enabledPc != null ? parsed.enabledPc !== false : legacyEnabled;
-    const slides = parsed.slides.map(s => ({
-        ...s,
-        texts: s.texts ? { ...s.texts } : { eyebrow: s.eyebrow || '', title: s.title || '', desc: s.desc || '', buttonText: s.buttonText || '' },
-        links: s.links ? { ...s.links } : {},
-        img: s.img || '',
-        mobile: s.mobile || freshFocal(),
-        pc: s.pc || freshFocal()
-    }));
+    // 예전엔 사진(img)이 모바일/PC 공용 하나뿐이었음 → 양쪽 칸에 같은 사진을 채워 넣어 기존 화면이 그대로 유지되게 함
+    const slides = parsed.slides.map(s => {
+        const { img: legacyImg, ...rest } = s;
+        return {
+            ...rest,
+            texts: s.texts ? { ...s.texts } : { eyebrow: s.eyebrow || '', title: s.title || '', desc: s.desc || '', buttonText: s.buttonText || '' },
+            links: s.links ? { ...s.links } : {},
+            imgs: {
+                mobile: s.imgs && s.imgs.mobile != null ? s.imgs.mobile : (legacyImg || ''),
+                pc: s.imgs && s.imgs.pc != null ? s.imgs.pc : (legacyImg || '')
+            },
+            show: { mobile: promoSlideShown(s, 'mobile'), pc: promoSlideShown(s, 'pc') },
+            mobile: s.mobile || freshFocal(),
+            pc: s.pc || freshFocal()
+        };
+    });
     const pcPosition = {
         v: (parsed.pcPosition && parsed.pcPosition.v) || 'bottom',
         h: (parsed.pcPosition && parsed.pcPosition.h) || 'center'
@@ -1676,9 +1702,31 @@ function promoHexToRgba(hex, alpha) {
 
 function renderPromoTabs() {
     const wrap = document.getElementById('promo-tabs');
-    wrap.innerHTML = promoConfig.slides.map((_, i) =>
-        `<button type="button" class="hero-tab ${i === currentPromoIdx ? 'active' : ''}" onclick="switchPromoSlide(${i})">슬라이드 ${i + 1}</button>`
-    ).join('');
+    // 지금 화면(모바일/PC)에서 숨긴 슬라이드는 흐리게 + 취소선으로 표시
+    wrap.innerHTML = promoConfig.slides.map((s, i) => {
+        const shown = promoSlideShown(s, promoEditMode);
+        const title = shown ? '' : ` title="${promoModeLabel(promoEditMode)} 화면에는 표시 안 함"`;
+        const style = shown ? '' : ' style="opacity:.45; text-decoration:line-through;"';
+        return `<button type="button" class="hero-tab ${i === currentPromoIdx ? 'active' : ''}"${title}${style} onclick="switchPromoSlide(${i})">슬라이드 ${i + 1}</button>`;
+    }).join('');
+}
+
+// 지금 편집 중인 화면 기준으로 "표시" 체크박스·사진 라벨·사진 가져오기 버튼을 갱신
+function refreshPromoModeUi() {
+    const s = promoConfig.slides[currentPromoIdx];
+    if (!s) return;
+    const label = promoModeLabel(promoEditMode);
+    const other = promoOtherMode(promoEditMode);
+    document.getElementById('promo-show-mode-label').textContent = label;
+    document.getElementById('promo-img-mode-label').textContent = label;
+    document.getElementById('promo-slide-show').checked = promoSlideShown(s, promoEditMode);
+    document.getElementById('promo-file-input').value = '';
+    document.getElementById('promo-upload-status').textContent = '';
+    const copyBtn = document.getElementById('promo-copy-img-btn');
+    const otherImg = promoSlideImg(s, other);
+    const showCopy = !!otherImg && otherImg !== promoSlideImg(s, promoEditMode);
+    copyBtn.style.display = showCopy ? 'inline-block' : 'none';
+    copyBtn.innerHTML = `<i class="fa-solid fa-copy mr-1"></i>${promoModeLabel(other)} 사진을 ${label}에도 그대로 쓰기`;
 }
 
 // 지금 모드(모바일/PC)의 크기를 미리보기·입력칸에 반영 — aspect-ratio로 실제 비율을 유지하면서 좁은 관리자 화면에도 맞게 축소 표시
@@ -1689,7 +1737,7 @@ function applyPromoPreviewSize() {
     preview.style.aspectRatio = `${sz.width} / ${sz.height}`;
     document.getElementById('promo-width').value = sz.width;
     document.getElementById('promo-height').value = sz.height;
-    document.getElementById('promo-size-mode-label').textContent = promoEditMode === 'pc' ? 'PC' : '모바일';
+    document.getElementById('promo-size-mode-label').textContent = promoModeLabel(promoEditMode);
 }
 
 window.switchPromoEditMode = function(mode) {
@@ -1700,6 +1748,8 @@ window.switchPromoEditMode = function(mode) {
     applyPromoPreviewSize();
     applyAllTextStyles(promoCtx);
     renderPromoPreview();
+    refreshPromoModeUi();
+    renderPromoTabs();
 };
 
 // 배경(사진/색) 갱신 — 문구 자체의 위치·모양은 공용 텍스트 엔진(renderTextEls/applyAllTextStyles)이 담당
@@ -1711,10 +1761,11 @@ function renderPromoPreview() {
     const preview = document.getElementById('promo-preview');
     const hasColor = !!s.gradFrom;
     const gradient = hasColor ? `linear-gradient(to bottom right, ${s.gradFrom}, ${s.gradTo || s.gradFrom})` : '';
+    const modeImg = promoSlideImg(s, promoEditMode);
 
-    if (s.img) {
+    if (modeImg) {
         const f = s[promoEditMode] || freshFocal();
-        img.src = s.img;
+        img.src = modeImg;
         img.style.display = 'block';
         img.style.setProperty('--fx', (f.focalX != null ? f.focalX : 50) + '%');
         img.style.setProperty('--fy', (f.focalY != null ? f.focalY : 50) + '%');
@@ -1742,10 +1793,10 @@ function loadCurrentPromoIntoEditor() {
     document.getElementById('promo-action-url').value = s.actionType === 'url' ? (s.actionValue || '') : '';
     document.getElementById('promo-grad-from').value = s.gradFrom || '#0f172a';
     document.getElementById('promo-grad-to').value = s.gradTo || s.gradFrom || '#0f172a';
-    document.getElementById('promo-upload-status').textContent = '';
     promoUpdateActionFieldVisibility();
     applyPromoPreviewSize();
     renderPromoPreview();
+    refreshPromoModeUi();
     renderTextFields(promoCtx);
     promoTextStyle.order.forEach(id => updateTextElContent(promoCtx, id));
 }
@@ -1763,7 +1814,7 @@ window.switchPromoSlide = function(i) {
 };
 
 window.addPromoSlide = function() {
-    promoConfig.slides.push({ texts:{}, links:{}, actionType:'quote', actionValue:'', gradFrom:'', gradTo:'', img:'', mobile:freshFocal(), pc:freshFocal() });
+    promoConfig.slides.push({ texts:{}, links:{}, actionType:'quote', actionValue:'', gradFrom:'', gradTo:'', imgs:{ mobile:'', pc:'' }, show:{ mobile:true, pc:true }, mobile:freshFocal(), pc:freshFocal() });
     currentPromoIdx = promoConfig.slides.length - 1;
     loadCurrentPromoIntoEditor();
     renderPromoTabs();
@@ -1777,9 +1828,22 @@ window.removeCurrentPromoSlide = function() {
 };
 
 window.removePromoImage = function() {
-    promoConfig.slides[currentPromoIdx].img = '';
-    document.getElementById('promo-file-input').value = '';
+    promoSetSlideImg(promoConfig.slides[currentPromoIdx], promoEditMode, '');
     renderPromoPreview();
+    refreshPromoModeUi();
+};
+
+// 반대쪽 화면(모바일↔PC)에 올린 사진을 지금 화면에도 똑같이 쓰기
+window.copyPromoImageFromOtherMode = function() {
+    const s = promoConfig.slides[currentPromoIdx];
+    const otherImg = promoSlideImg(s, promoOtherMode(promoEditMode));
+    if (!otherImg) return;
+    promoSetSlideImg(s, promoEditMode, otherImg);
+    renderPromoPreview();
+    refreshPromoModeUi();
+    const status = document.getElementById('promo-upload-status');
+    status.textContent = `${promoModeLabel(promoEditMode)} 사진 적용 완료 — 아래 "전체 저장"을 눌러야 사이트에 반영됩니다`;
+    status.className = 'text-[11px] text-green-600 mt-1 font-medium';
 };
 
 // 파일 대신 이미 올라가 있는 사진의 주소로 지정 (다른 컴퓨터·원격 접속처럼 파일 선택이 어려울 때)
@@ -1792,10 +1856,11 @@ window.applyPromoImageUrl = function() {
         status.className = 'text-[11px] text-red-500 mt-1';
         return;
     }
-    promoConfig.slides[currentPromoIdx].img = url;
+    promoSetSlideImg(promoConfig.slides[currentPromoIdx], promoEditMode, url);
     input.value = '';
     renderPromoPreview();
-    status.textContent = '사진 주소 적용 완료 — 아래 "전체 저장"을 눌러야 사이트에 반영됩니다';
+    refreshPromoModeUi();
+    status.textContent = `${promoModeLabel(promoEditMode)} 사진 주소 적용 완료 — 아래 "전체 저장"을 눌러야 사이트에 반영됩니다`;
     status.className = 'text-[11px] text-green-600 mt-1 font-medium';
 };
 
@@ -1854,6 +1919,12 @@ async function initPromoPanel() {
     });
     document.getElementById('promo-pos-v').addEventListener('change', (e) => { promoConfig.pcPosition.v = e.target.value; });
     document.getElementById('promo-pos-h').addEventListener('change', (e) => { promoConfig.pcPosition.h = e.target.value; });
+    document.getElementById('promo-slide-show').addEventListener('change', (e) => {
+        const s = promoConfig.slides[currentPromoIdx];
+        if (!s.show) s.show = { mobile:true, pc:true };
+        s.show[promoEditMode] = e.target.checked;
+        renderPromoTabs();
+    });
 
     // 미리보기 우측 하단 모서리 드래그로 크기 조절 (지금 모드(모바일/PC)에 개별 저장)
     (function initPromoResizeHandle() {
@@ -1911,6 +1982,9 @@ async function initPromoPanel() {
     document.getElementById('promo-file-input').addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
+        // 업로드 도중 화면 탭이나 슬라이드를 바꿔도 처음 고른 슬라이드·화면에 정확히 들어가도록 미리 기억
+        const targetSlide = promoConfig.slides[currentPromoIdx];
+        const targetMode = promoEditMode;
         const status = document.getElementById('promo-upload-status');
         status.textContent = '업로드 중...';
         status.className = 'text-[11px] text-gray-400 mt-1';
@@ -1920,9 +1994,10 @@ async function initPromoPanel() {
             const { error: upErr } = await _supabase.storage.from('site-images').upload(path, file, { upsert: true });
             if (upErr) throw upErr;
             const { data: pub } = _supabase.storage.from('site-images').getPublicUrl(path);
-            promoConfig.slides[currentPromoIdx].img = pub.publicUrl;
+            promoSetSlideImg(targetSlide, targetMode, pub.publicUrl);
             renderPromoPreview();
-            status.textContent = '업로드 완료 — 아래 "전체 저장"을 눌러야 사이트에 반영됩니다';
+            refreshPromoModeUi();
+            status.textContent = `${promoModeLabel(targetMode)} 사진 업로드 완료 — 아래 "전체 저장"을 눌러야 사이트에 반영됩니다`;
             status.className = 'text-[11px] text-green-600 mt-1 font-medium';
         } catch (err) {
             status.textContent = '업로드 실패: ' + err.message;
@@ -1933,15 +2008,16 @@ async function initPromoPanel() {
     // 미리보기 사진 클릭 → 히어로와 같은 초점 조절 팝업을 이 슬라이드 대상으로 열기
     document.getElementById('promo-prev-img').addEventListener('click', () => {
         const s = promoConfig.slides[currentPromoIdx];
-        if (!s.img) return;
+        const modeImg = promoSlideImg(s, promoEditMode);
+        if (!modeImg) return;
         openFocalModalFor({
             getFocal: () => {
                 if (!s[promoEditMode]) s[promoEditMode] = freshFocal();
                 return s[promoEditMode];
             },
-            imgSrc: s.img,
+            imgSrc: modeImg,
             frameEl: document.getElementById('promo-preview'),
-            modeLabel: promoEditMode === 'pc' ? 'PC' : '모바일',
+            modeLabel: promoModeLabel(promoEditMode),
             onFocalChange: () => renderPromoPreview()
         });
     });
@@ -1963,8 +2039,17 @@ window.savePromoPopup = async function() {
         ];
         const { error } = await _supabase.from('site_content').upsert(rows, { onConflict: 'key' });
         if (error) throw error;
-        status.textContent = '저장되었습니다. 사이트를 새로고침하면 반영됩니다.';
-        status.className = 'text-[11px] text-center mt-2 text-green-600 font-medium';
+        // 켜 둔 화면인데 표시할 슬라이드가 하나도 없으면 그 화면엔 팝업이 안 뜸 — 저장은 하되 알려 줌
+        const emptyModes = ['mobile', 'pc'].filter(m =>
+            (m === 'pc' ? promoConfig.enabledPc : promoConfig.enabledMobile) &&
+            !promoConfig.slides.some(s => promoSlideShown(s, m)));
+        if (emptyModes.length) {
+            status.textContent = `저장되었습니다. 단, ${emptyModes.map(promoModeLabel).join('·')} 화면에 표시할 슬라이드가 없어 팝업이 뜨지 않습니다.`;
+            status.className = 'text-[11px] text-center mt-2 text-amber-600 font-medium';
+        } else {
+            status.textContent = '저장되었습니다. 사이트를 새로고침하면 반영됩니다.';
+            status.className = 'text-[11px] text-center mt-2 text-green-600 font-medium';
+        }
     } catch (err) {
         status.textContent = '저장 실패: ' + err.message;
         status.className = 'text-[11px] text-center mt-2 text-red-500';
