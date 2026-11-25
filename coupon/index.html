@@ -165,47 +165,7 @@
       letter-spacing: -0.03em;
     }
 
-    /* ===== 무곡펜션 (상단 와이드 단독 블록) ===== */
-    .cp_featured {
-      margin-bottom: 36px;
-      border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 24px;
-    }
-    .cp_featured_thumb {
-      width: 100%;
-      aspect-ratio: 1200 / 344;
-      overflow: hidden;
-      background: #f1f5f9;
-      margin-bottom: 12px;
-    }
-    .cp_featured_thumb img {
-      width: 100%;
-      height: calc(100% * 440 / 344);
-      object-fit: cover;
-      object-position: top center;
-      display: block;
-    }
-    /* 실사 사진 배너(네버랜드)는 잘림 없이 가운데 기준으로 채움 */
-    .cp_featured_thumb img.is-photo {
-      height: 100%;
-      object-position: center 58%;
-    }
-    .cp_featured_note {
-      margin: 8px 0 0;
-      font-size: 15px;
-      font-weight: 700;
-      color: #6d5acd;
-      letter-spacing: -0.02em;
-      line-height: 1.5;
-    }
-    .cp_featured_note span {
-      font-size: 13px;
-      font-weight: 500;
-      color: #64748b;
-      margin-left: 4px;
-    }
-
-    /* ===== 2열 펜션 목록 (스케치, 로베, 루마인, 모모) ===== */
+    /* ===== 2열 펜션 목록 (무곡, 네버랜드, 스케치, 로베, 루마인, 모모) ===== */
     .cp_list {
       list-style: none;
       margin: 0;
@@ -228,6 +188,32 @@
       object-fit: cover;
       object-position: top center;
       display: block;
+    }
+    /* 실사 사진(무곡·네버랜드)은 칸에 맞춰 채우고 가운데 기준으로 자름 */
+    .cp_list > li .thumb img.is-photo {
+      height: 100%;
+      object-position: center;
+    }
+    .cp_list > li .thumb img.is-mugok {
+      object-position: center 30%;
+    }
+    .cp_list > li .thumb img.is-neverland {
+      object-position: center 58%;
+    }
+    /* 펜션 자체 할인 안내 (무곡) */
+    .cp_note {
+      margin: 6px 0 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: #6d5acd;
+      letter-spacing: -0.02em;
+      line-height: 1.45;
+    }
+    .cp_note span {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #64748b;
     }
 
     /* 펜션 이름 + 우측 아이콘 버튼 (홈페이지 / 전화) */
@@ -315,13 +301,11 @@
       .subject {
         font-size: 14px;
       }
-      .cp_featured_note {
-        font-size: 13px;
-      }
-      .cp_featured_note span {
-        display: block;
-        margin-left: 0;
+      .cp_note {
         font-size: 12px;
+      }
+      .cp_note span {
+        font-size: 11px;
       }
       .cp_btn {
         gap: 5px;
@@ -365,37 +349,29 @@
       <div class="cp_section_bar">쿠폰사용 가능펜션</div>
     </div>
 
-    <!-- 무곡펜션 (단독 와이드 배너) -->
-    <div class="cp_featured">
-      <div class="cp_featured_thumb">
-        <img src="../p/무곡1.PNG" alt="무곡펜션">
-      </div>
-      <div class="info">
-        <div class="subject">무곡펜션</div>
-        <ul class="cp_btn">
-          <li><a class="btn_home" href="https://mugok.co.kr/" target="_blank" rel="noopener" aria-label="무곡펜션 홈페이지"><i class="fa-solid fa-house"></i></a></li>
-          <li><a class="btn_tel" href="tel:010-9813-3421" aria-label="무곡펜션 전화걸기"><i class="fa-solid fa-phone"></i></a></li>
-        </ul>
-      </div>
-      <p class="cp_featured_note">겨울시즌 자체 할인 중 · 주중 30% / 주말 20%<span>(스키샵 쿠폰 중복 할인 불가)</span></p>
-    </div>
-
-    <!-- 네버랜드펜션 (단독 와이드 배너) -->
-    <div class="cp_featured">
-      <div class="cp_featured_thumb">
-        <img class="is-photo" src="../p/네버랜드.jpg" alt="네버랜드펜션 수영장과 정자">
-      </div>
-      <div class="info">
-        <div class="subject">네버랜드펜션</div>
-        <ul class="cp_btn">
-          <li><a class="btn_home" href="https://www.xn--950bo4elycd7eb0bfw9a.com/" target="_blank" rel="noopener" aria-label="네버랜드펜션 홈페이지"><i class="fa-solid fa-house"></i></a></li>
-          <li><a class="btn_tel" href="tel:010-5322-9030" aria-label="네버랜드펜션 전화걸기"><i class="fa-solid fa-phone"></i></a></li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- 나머지 제휴펜션 4곳 (빌라드무주·라비앙로즈 제외) -->
+    <!-- 제휴펜션 6곳 (빌라드무주·라비앙로즈 제외) -->
     <ul class="cp_list">
+      <li>
+        <div class="thumb"><img class="is-photo is-mugok" src="../p/무곡.jpg" alt="무곡펜션 외관과 억새 정원"></div>
+        <div class="info">
+          <div class="subject">무곡펜션</div>
+          <ul class="cp_btn">
+            <li><a class="btn_home" href="https://mugok.co.kr/" target="_blank" rel="noopener" aria-label="무곡펜션 홈페이지"><i class="fa-solid fa-house"></i></a></li>
+            <li><a class="btn_tel" href="tel:010-9813-3421" aria-label="무곡펜션 전화걸기"><i class="fa-solid fa-phone"></i></a></li>
+          </ul>
+        </div>
+        <p class="cp_note">겨울시즌 자체 할인 중 · 주중 30% / 주말 20%<span>(스키샵 쿠폰 중복 할인 불가)</span></p>
+      </li>
+      <li>
+        <div class="thumb"><img class="is-photo is-neverland" src="../p/네버랜드.jpg" alt="네버랜드펜션 수영장과 정자"></div>
+        <div class="info">
+          <div class="subject">네버랜드펜션</div>
+          <ul class="cp_btn">
+            <li><a class="btn_home" href="https://www.xn--950bo4elycd7eb0bfw9a.com/" target="_blank" rel="noopener" aria-label="네버랜드펜션 홈페이지"><i class="fa-solid fa-house"></i></a></li>
+            <li><a class="btn_tel" href="tel:010-5322-9030" aria-label="네버랜드펜션 전화걸기"><i class="fa-solid fa-phone"></i></a></li>
+          </ul>
+        </div>
+      </li>
       <li>
         <div class="thumb"><img src="../p/스케치.PNG" alt="스케치펜션"></div>
         <div class="info">
