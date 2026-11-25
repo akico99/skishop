@@ -211,9 +211,12 @@
     }
     .cp_note span {
       display: block;
-      font-size: 12.5px;
-      font-weight: 500;
-      color: #64748b;
+    }
+    .cp_note .cp_note_warn {
+      margin-top: 2px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #dc2626;
     }
 
     /* 펜션 이름 + 우측 아이콘 버튼 (홈페이지 / 전화) */
@@ -304,8 +307,8 @@
       .cp_note {
         font-size: 12px;
       }
-      .cp_note span {
-        font-size: 11px;
+      .cp_note .cp_note_warn {
+        font-size: 11.5px;
       }
       .cp_btn {
         gap: 5px;
@@ -360,7 +363,11 @@
             <li><a class="btn_tel" href="tel:010-9813-3421" aria-label="무곡펜션 전화걸기"><i class="fa-solid fa-phone"></i></a></li>
           </ul>
         </div>
-        <p class="cp_note">겨울시즌 자체 할인 중 · 주중 30% / 주말 20%<span>(스키샵 쿠폰 중복 할인 불가)</span></p>
+        <p class="cp_note">
+          <span>겨울시즌 자체 할인 중</span>
+          <span>주중 30% · 주말 20%</span>
+          <span class="cp_note_warn">스키샵 쿠폰과 중복 할인 불가</span>
+        </p>
       </li>
       <li>
         <div class="thumb"><img class="is-photo is-neverland" src="../p/네버랜드.jpg" alt="네버랜드펜션 수영장과 정자"></div>
