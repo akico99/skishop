@@ -2423,23 +2423,20 @@ window.quickFilter = function(state) {
 // ====================================================
 // 목록 렌더링
 // ====================================================
-// 강습: 한 줄 = 시간대 · 종목 · 레벨 · 인원. 요금은 1~5명 한 팀 기준(팀당).
+// 강습: 한 줄 = 시간대 · 종목 · 레벨 · 인원(한 팀 최대 5명).
 // 시간대·종목·레벨을 섞어 여러 줄 담을 수 있고, 예약에는 reservations.lessons(jsonb 배열)로 저장합니다.
 const LESSON_SLOTS  = [['am', '오전', '09:00~12:00'], ['pm', '오후', '13:00~16:00'], ['night', '야간', '18:30~21:30']];
 const LESSON_SPORTS = [['ski', '스키'], ['board', '보드']];
-const LESSON_LEVELS = [[1, '레벨1', 170000], [2, '레벨2', 220000]];
+const LESSON_LEVELS = [[1, '레벨1'], [2, '레벨2']];
 const LESSON_MAX_PEOPLE = 5;
-function fmtWon(n) { return Number(n || 0).toLocaleString('ko-KR') + '원'; }
-function lessonPrice(level) { const v = LESSON_LEVELS.find(x => x[0] === Number(level)); return v ? v[2] : 0; }
 function lessonList(r) { return Array.isArray(r && r.lessons) ? r.lessons.filter(l => l && Number(l.people) > 0) : []; }
 function lessonLabel(l) {
     const slot  = (LESSON_SLOTS.find(s => s[0] === l.slot) || [])[1] || l.slot;
     const sport = (LESSON_SPORTS.find(s => s[0] === l.sport) || [])[1] || l.sport;
     return slot + ' ' + sport + ' 레벨' + l.level + ' ' + l.people + '명';
 }
-function lessonParts(r, withPrice) { return lessonList(r).map(l => lessonLabel(l) + (withPrice ? ' ' + fmtWon(l.price) : '')); }
+function lessonParts(r) { return lessonList(r).map(lessonLabel); }
 function lessonTotal(r)  { return lessonList(r).reduce((s, l) => s + (Number(l.people) || 0), 0); }
-function lessonAmount(r) { return lessonList(r).reduce((s, l) => s + (Number(l.price) || 0), 0); }
 
 function itemSummary(r) {
     const equip = (r.equip_normal||0) + (r.equip_premium||0);
@@ -2759,8 +2756,7 @@ function buildResFields(p) {
         '<span class="font-bold text-[#0f172a]">' + label + '</span>'
         + manualNumInput(p + 'lift_' + h + '_adult', label + ' 대인')
         + manualNumInput(p + 'lift_' + h + '_child', label + ' 소인')).join(''));
-    el('lesson-hint').textContent = '시간대·종목·레벨을 섞어 여러 줄 담을 수 있어요. 요금은 1~' + LESSON_MAX_PEOPLE + '명 한 팀 기준('
-        + LESSON_LEVELS.map(([, label, price]) => label + ' ' + fmtWon(price)).join(' · ') + ')이고, '
+    el('lesson-hint').textContent = '시간대·종목·레벨을 섞어 여러 줄 담을 수 있어요. 한 줄은 한 팀(최대 ' + LESSON_MAX_PEOPLE + '명)이라, '
         + (LESSON_MAX_PEOPLE + 1) + '명 이상이면 한 줄 더 추가하세요.';
     el('lessons').addEventListener('change', () => updateLessonTotal(p));
     el('lessons').addEventListener('click', (e) => {
@@ -2776,22 +2772,19 @@ function manualNum(id) {
     return Number.isFinite(n) ? Math.min(99, Math.max(0, n)) : 0;
 }
 
-// ---- 강습 줄 (시간대 · 종목 · 레벨 · 인원 → 팀당 요금) ----
+// ---- 강습 줄 (시간대 · 종목 · 레벨 · 인원) ----
 function lessonRowHtml(l) {
     const opts = (list, val, fmt) => list.map(item => '<option value="' + item[0] + '"' + (String(item[0]) === String(val) ? ' selected' : '') + '>' + fmt(item) + '</option>').join('');
     const people = [];
     for (let n = 1; n <= LESSON_MAX_PEOPLE; n++) people.push([n]);
-    // 저장된 요금은 레벨을 바꾸지 않는 한 그대로 둡니다(나중에 요금표가 바뀌어도 예약 당시 금액 유지)
-    const saved = l.price != null ? ' data-saved-level="' + escHtml(l.level) + '" data-saved-price="' + escHtml(l.price) + '"' : '';
-    return '<div class="lesson-line bg-white rounded-xl p-2.5 space-y-2"' + saved + '>'
+    return '<div class="lesson-line bg-white rounded-xl p-2.5 space-y-2">'
         + '<div class="grid grid-cols-[1fr_84px] gap-2">'
         +   '<select data-f="slot" class="m-input" aria-label="강습 시간대">' + opts(LESSON_SLOTS, l.slot, ([, label, hours]) => label + ' ' + hours) + '</select>'
         +   '<select data-f="sport" class="m-input" aria-label="강습 종목">' + opts(LESSON_SPORTS, l.sport, ([, label]) => label) + '</select>'
         + '</div>'
-        + '<div class="grid grid-cols-[84px_72px_1fr_auto] gap-2 items-center">'
+        + '<div class="grid grid-cols-[1fr_1fr_auto] gap-2 items-center">'
         +   '<select data-f="level" class="m-input" aria-label="강습 레벨">' + opts(LESSON_LEVELS, l.level, ([, label]) => label) + '</select>'
         +   '<select data-f="people" class="m-input" aria-label="강습 인원">' + opts(people, l.people, ([n]) => n + '명') + '</select>'
-        +   '<span data-price class="text-right font-black text-[#0f172a] text-[13px] whitespace-nowrap"></span>'
         +   '<button type="button" data-del class="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 flex items-center justify-center" aria-label="이 강습 빼기"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>'
         + '</div></div>';
 }
@@ -2800,21 +2793,15 @@ function readLessons(p) {
     if (!box) return [];
     return Array.from(box.querySelectorAll('.lesson-line'), (row) => {
         const v = (f) => row.querySelector('[data-f="' + f + '"]').value;
-        const level = Number(v('level'));
-        const kept  = row.dataset.savedPrice != null && Number(row.dataset.savedLevel) === level;
         return {
-            slot: v('slot'), sport: v('sport'), level,
-            people: Math.min(LESSON_MAX_PEOPLE, Math.max(1, parseInt(v('people'), 10) || 1)),
-            price: kept ? Number(row.dataset.savedPrice) || 0 : lessonPrice(level)
+            slot: v('slot'), sport: v('sport'), level: Number(v('level')) || 1,
+            people: Math.min(LESSON_MAX_PEOPLE, Math.max(1, parseInt(v('people'), 10) || 1))
         };
     });
 }
 function updateLessonTotal(p) {
-    const box = document.getElementById(p + 'lessons');
     const list = readLessons(p);
-    box.querySelectorAll('.lesson-line').forEach((row, i) => { row.querySelector('[data-price]').textContent = fmtWon(list[i].price); });
-    document.getElementById(p + 'lesson-total').textContent = list.length
-        ? lessonTotal({ lessons: list }) + '명 · ' + fmtWon(lessonAmount({ lessons: list })) : '';
+    document.getElementById(p + 'lesson-total').textContent = list.length ? '총 ' + lessonTotal({ lessons: list }) + '명' : '';
 }
 function setLessons(p, list) {
     document.getElementById(p + 'lessons').innerHTML = (list || []).map(lessonRowHtml).join('');
@@ -2998,7 +2985,7 @@ window.submitManualForm = async function() {
     const row    = form.row;
     const digits = form.digits;
     const { name, phone, visit_date: date, visit_time: time } = row;
-    const lessons = lessonParts(row, true);
+    const lessons = lessonParts(row);
 
     const adminMemo = document.getElementById('m-admin-memo').value.trim();
     row.admin_memo = PHONE_TAG + (adminMemo ? ' ' + adminMemo : '');
@@ -3006,7 +2993,7 @@ window.submitManualForm = async function() {
     const state  = document.getElementById('m-deposit').value;
     const notify = document.getElementById('m-notify').checked && isMobileDigits(digits);
     const notice = !notify ? '보내지 않음' : state === '예약 완료' ? '예약 확정 안내' : '예약 접수 안내';
-    const lessonMsg = lessons.length ? '\n강습: ' + lessons.join(', ') + (lessons.length > 1 ? ' (합계 ' + fmtWon(lessonAmount(row)) + ')' : '') : '';
+    const lessonMsg = lessons.length ? '\n강습: ' + lessons.join(', ') : '';
     if (!window.confirm(name + '님 예약을 등록할까요?\n\n방문: ' + date + ' ' + time + lessonMsg + '\n입금 상태: ' + state + '\n고객 안내: ' + notice)) return;
 
     setManualSaving(true);
@@ -3372,7 +3359,7 @@ function printReservations() {
     const equipTotal = rows.reduce((s, r) => s + (r.equip_normal||0) + (r.equip_premium||0), 0);
     const clothTotal = rows.reduce((s, r) => s + (r.cloth_normal||0) + (r.cloth_premium||0), 0);
     const optTotal   = rows.reduce((s, r) => s + (r.helmet_count||0) + (r.goggle_count||0) + (r.visor_count||0), 0);
-    // 강습 합계: 시간대·종목·레벨별 인원과 팀 수, 전체 금액
+    // 강습 합계: 시간대·종목·레벨별 인원과 팀 수
     const lessonAgg = new Map();
     rows.forEach(r => lessonList(r).forEach(l => {
         const key = lessonLabel({ ...l, people: 0 }).replace(/ 0명$/, '');
@@ -3380,9 +3367,7 @@ function printReservations() {
         a.people += Number(l.people) || 0; a.teams += 1;
         lessonAgg.set(key, a);
     }));
-    const lessonMoney = rows.reduce((s, r) => s + lessonAmount(r), 0);
-    const lessonLine = Array.from(lessonAgg, ([k, a]) => k + ' ' + a.people + '명(' + a.teams + '팀)').join(' · ')
-        + (lessonAgg.size ? ' · 금액 ' + fmtWon(lessonMoney) : '');
+    const lessonLine = Array.from(lessonAgg, ([k, a]) => k + ' ' + a.people + '명(' + a.teams + '팀)').join(' · ');
 
     // 방문일 → 시간 순 정렬
     const sorted = [...rows].sort((a, b) =>
@@ -3402,7 +3387,7 @@ function printReservations() {
         const cloth = (r.cloth_normal||0)+(r.cloth_premium||0);
         const opt   = (r.helmet_count||0)+(r.goggle_count||0)+(r.visor_count||0);
         const gear = [equip?`장비 ${equip}`:'', cloth?`의류 ${cloth}`:'', opt?`옵션 ${opt}`:''].filter(Boolean).join(', ') || '-';
-        const lessonStr = lessonParts(r, true).map(esc).join('<br>') || '-';
+        const lessonStr = lessonParts(r).map(esc).join('<br>') || '-';
         return `<tr>
             <td class="num">${i+1}</td>
             <td>${esc(r.visit_date)}</td>
