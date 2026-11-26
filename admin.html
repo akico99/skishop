@@ -701,9 +701,9 @@
                 </div>
             </div>
 
-            <!-- 알림톡 발송 결과 -->
+            <!-- 고객 안내 발송 결과 (알림톡 또는 문자) -->
             <div class="bg-gray-50 rounded-2xl p-4 space-y-2.5 text-[13px]">
-                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1">알림톡 발송</p>
+                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1">고객 안내 발송</p>
                 <div class="flex justify-between">
                     <span class="text-gray-400">접수 안내</span>
                     <span id="d-notify-received" class="font-bold text-right text-gray-400">-</span>
@@ -2535,7 +2535,7 @@ function closeDetailOutside(e) {
 
 
 // ====================================================
-// 알림톡 발송 결과 표시
+// 고객 안내(알림톡 또는 문자) 발송 결과 표시
 // ====================================================
 const NOTIFY_LABEL = { pending: '발송 대기', sending: '발송 중', sent: '발송 완료', failed: '발송 실패', skipped: '보내지 않음' };
 const NOTIFY_COLOR = { pending: 'text-gray-500', sending: 'text-gray-500', sent: 'text-green-600', failed: 'text-red-600', skipped: 'text-gray-400' };
@@ -2605,7 +2605,7 @@ function updateRequestButton() {
     else if (n.status === 'failed') text = '마지막 발송 실패 · ' + fmtShort(n.updated_at);
     else if (n.status === 'skipped') text = '보내지 않음 · ' + fmtShort(n.updated_at);
     else text = '발송 중 · ' + fmtShort(n.updated_at);
-    if (ok && off) text += ' (알림톡은 카카오 승인 후 켜짐)';
+    if (ok && off) text += ' (입금 요청 안내가 꺼져 있음)';
     info.textContent = text;
 }
 
@@ -2638,9 +2638,9 @@ async function saveDetail() {
         closeDetail();
         await loadReservations();
         if (nextDep === '취소' && prevState !== '취소') {
-            showToast('취소로 저장했습니다. 취소 안내 알림톡이 켜져 있으면 고객에게 발송됩니다.');
+            showToast('취소로 저장했습니다. 고객에게 취소 안내를 보냅니다.');
         } else if (nextDep === '예약 완료' && prevState !== '예약 완료') {
-            showToast('저장했습니다. 예약 확정 알림톡을 보냅니다.');
+            showToast('저장했습니다. 고객에게 예약 확정 안내를 보냅니다.');
         } else if (nextDep === '예약 완료(미입금)' && prevState !== '예약 완료(미입금)') {
             showToast('저장했습니다. 입금 요청 안내는 \'입금 요청 보내기\' 버튼으로 보낼 수 있어요.');
         } else {
@@ -2727,15 +2727,15 @@ async function doRequestDeposit(ids) {
     }
     if (skipped) msg += '\n입금 요청 대상이 아닌 ' + skipped + '건(예약 완료·취소)은 빼고 보냅니다.';
     msg += on ? '\n\n보내면 상태가 \'예약 완료(미입금)\'으로 바뀝니다.'
-              : '\n\n※ 입금 요청 알림톡은 카카오 승인 후 켜집니다. 지금은 상태만 \'예약 완료(미입금)\'으로 바뀝니다.';
+              : '\n\n※ 입금 요청 안내가 꺼져 있어 지금은 상태만 \'예약 완료(미입금)\'으로 바뀝니다.';
     if (!window.confirm(msg)) return false;
 
     const { data, error } = await _supabase.rpc('request_deposit', { p_ids: targets.map(r => r.id) });
     if (error) { showToast('입금 요청 실패: ' + error.message); return false; }
     const res = data || {};
-    if (!res.notify_enabled) showToast(res.updated + '건을 예약 완료(미입금)으로 바꿨습니다. 알림톡은 카카오 승인 후 보낼 수 있어요.');
+    if (!res.notify_enabled) showToast(res.updated + '건을 예약 완료(미입금)으로 바꿨습니다. 입금 요청 안내가 꺼져 있어 보내지 않았어요.');
     else if (res.queued < res.updated) showToast(res.queued + '건에 입금 요청을 보냈습니다. ' + (res.updated - res.queued) + '건은 지금 발송 중이라 건너뛰었어요.');
-    else showToast(res.queued + '건에 입금 요청 알림톡을 보냈습니다.');
+    else showToast(res.queued + '건에 입금 요청 안내를 보냈습니다.');
     await loadReservations({ quiet: true });
     return true;
 }
