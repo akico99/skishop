@@ -52,6 +52,9 @@
         .m-input:focus { border-color:#004de6; }
         .m-num { width:58px; border:2px solid #f1f5f9; border-radius:10px; padding:6px 4px; font-size:14px; font-weight:800; text-align:center; outline:none; background:#fff; }
         .m-num:focus { border-color:#004de6; }
+        .m-num.has-val { border-color:#bfd3ff; color:#004de6; }
+        .lesson-line select.m-input { padding:7px 8px; font-weight:700; }
+        #d-fields:disabled .m-input, #d-fields:disabled .m-num { background:#f8fafc; color:#64748b; }
         .phone-badge { background:#f1f5f9; color:#475569; }
 
         /* 스피너 */
@@ -149,7 +152,7 @@
         #promo-panel.open .promo-panel-chevron { transform:rotate(180deg); }
         .promo-panel-chevron { transition:transform .2s ease; }
 
-        #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:#0f172a; color:#fff; padding:10px 20px; border-radius:999px; font-size:13px; font-weight:600; white-space:nowrap; opacity:0; transition:opacity .3s,transform .3s; pointer-events:none; z-index:9999; max-width:90vw; overflow:hidden; text-overflow:ellipsis; }
+        #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:#0f172a; color:#fff; padding:10px 20px; border-radius:18px; font-size:13px; font-weight:600; line-height:1.45; text-align:center; width:max-content; max-width:min(90vw, 480px); word-break:keep-all; opacity:0; transition:opacity .3s,transform .3s; pointer-events:none; z-index:9999; }
         #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
     </style>
 </head>
@@ -641,48 +644,32 @@
 <div id="detail-overlay"
      class="hidden fixed inset-0 bg-black/60 z-50 flex items-end justify-center opacity-0 transition-opacity"
      onclick="closeDetailOutside(event)">
-    <div id="detail-box" class="bg-white w-full max-w-lg rounded-t-3xl max-h-[92vh] overflow-y-auto">
+    <div id="detail-box" class="bg-white w-full max-w-lg rounded-t-3xl max-h-[92vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="detail-title">
 
         <!-- 모달 헤더 -->
         <div class="sticky top-0 bg-white px-5 pt-5 pb-3 border-b border-gray-100 flex justify-between items-center z-10">
             <div>
-                <p class="text-[11px] text-gray-400 font-medium">예약 상세</p>
+                <p class="text-[11px] text-gray-400 font-medium">예약 상세 · 수정</p>
                 <h2 id="detail-title" class="font-black text-[#0f172a] text-[18px] leading-tight"></h2>
             </div>
-            <button onclick="closeDetail()"
+            <button type="button" onclick="requestCloseDetail()"
                     class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition"
                     aria-label="닫기">
                 <i class="fa-solid fa-xmark text-gray-600" aria-hidden="true"></i>
             </button>
         </div>
 
-        <div class="px-5 pb-10 pt-4 space-y-4">
+        <div class="px-5 pb-6 pt-4 space-y-4">
 
-            <!-- 기본 정보 -->
+            <!-- 예약 정보 (바꿀 수 없는 값) -->
             <div class="bg-gray-50 rounded-2xl p-4 space-y-2.5 text-[13px]">
-                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1">예약 정보</p>
                 <div class="flex justify-between">
                     <span class="text-gray-400">예약번호</span>
                     <span id="d-no" class="font-black text-[#004de6]"></span>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-400">접수일시</span>
+                <div class="flex justify-between gap-3">
+                    <span class="text-gray-400 flex-shrink-0">접수일시</span>
                     <span id="d-created" class="font-bold text-[#0f172a] text-right"></span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-400">예약자</span>
-                    <span id="d-name" class="font-bold text-[#0f172a]"></span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-400">연락처</span>
-                    <a id="d-phone" href="" class="font-bold text-[#004de6] flex items-center gap-1">
-                        <i class="fa-solid fa-phone text-[11px]" aria-hidden="true"></i>
-                        <span id="d-phone-text"></span>
-                    </a>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-400">방문일시</span>
-                    <span id="d-date" class="font-bold text-[#0f172a]"></span>
                 </div>
                 <div id="d-cancel-row" class="hidden flex justify-between">
                     <span class="text-gray-400">취소</span>
@@ -694,30 +681,97 @@
                 </div>
             </div>
 
-            <!-- 렌탈 내역 -->
-            <div class="bg-gray-50 rounded-2xl p-4 space-y-2.5 text-[13px]">
-                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1">렌탈 내역</p>
-                <div class="flex justify-between">
-                    <span class="text-gray-400">장비</span>
-                    <span id="d-equip" class="font-bold text-[#0f172a] text-right max-w-[200px]"></span>
+            <!-- 입금 상태 -->
+            <div id="d-edit" class="bg-gray-50 rounded-2xl p-4 space-y-3">
+                <div>
+                    <label for="d-deposit" class="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">입금 상태</label>
+                    <select id="d-deposit" class="m-input font-bold">
+                        <option>예약 신청(미입금)</option>
+                        <option>예약 완료(미입금)</option>
+                        <option>예약 완료</option>
+                        <option>취소</option>
+                    </select>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-400">의류</span>
-                    <span id="d-cloth" class="font-bold text-[#0f172a] text-right max-w-[200px]"></span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-400">헬멧</span>
-                    <span id="d-helmet" class="font-bold text-[#0f172a]"></span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-400">리프트권</span>
-                    <span id="d-lift" class="font-bold text-[#0f172a] text-right max-w-[200px]"></span>
-                </div>
-                <div id="d-memo-row" class="flex justify-between">
-                    <span class="text-gray-400">고객 요청</span>
-                    <span id="d-memo" class="font-medium text-[#0f172a] text-right max-w-[200px] text-[12px] leading-relaxed"></span>
+                <div class="bg-amber-50 border border-amber-100 rounded-xl p-3 flex items-center gap-3">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[12px] font-bold text-amber-800">입금 요청 안내</p>
+                        <p id="d-request-info" class="text-[11px] text-amber-700/80 leading-relaxed">아직 보낸 적 없음</p>
+                    </div>
+                    <button type="button" id="d-request-btn" onclick="requestDepositCurrent()"
+                            class="bg-amber-400 text-[#0f172a] text-[12px] font-black px-3 py-2 rounded-xl hover:bg-amber-300 transition whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed">
+                        입금 요청 보내기
+                    </button>
                 </div>
             </div>
+
+            <!-- 예약 내용 (관리자가 바로 고침) -->
+            <fieldset id="d-fields" class="space-y-4 min-w-0 border-0 p-0 m-0" aria-label="예약 내용 수정">
+                <div class="bg-gray-50 rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide">예약자 · 방문</p>
+                        <a id="d-phone" href="" class="text-[12px] font-bold text-[#004de6] flex items-center gap-1">
+                            <i class="fa-solid fa-phone text-[11px]" aria-hidden="true"></i> 전화 걸기
+                        </a>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label for="e-name" class="m-label">이름</label>
+                            <input id="e-name" type="text" maxlength="50" autocomplete="off" class="m-input">
+                        </div>
+                        <div>
+                            <label for="e-phone" class="m-label">연락처</label>
+                            <input id="e-phone" type="tel" inputmode="numeric" maxlength="13" autocomplete="off" class="m-input" oninput="formatManualPhone(this)">
+                        </div>
+                        <div>
+                            <label for="e-date" class="m-label">방문 날짜</label>
+                            <input id="e-date" type="date" class="m-input">
+                        </div>
+                        <div>
+                            <label for="e-time" class="m-label">방문 시간</label>
+                            <select id="e-time" class="m-input"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-4">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">렌탈 품목</p>
+                    <div id="e-items" class="divide-y divide-gray-100"></div>
+                    <label class="flex items-center gap-2 mt-3 text-[13px] font-bold text-[#0f172a]">
+                        <input type="checkbox" id="e-helmet-own" class="w-4 h-4 accent-[#004de6]"> 헬멧 지참 (대여 안 함)
+                    </label>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-4">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">리프트권 (인원)</p>
+                    <div class="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-2 items-center text-[13px]" id="e-lifts">
+                        <span></span><span class="text-[11px] text-gray-400 font-bold text-center w-[58px]">대인</span><span class="text-[11px] text-gray-400 font-bold text-center w-[58px]">소인</span>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-2xl p-4">
+                    <div class="flex items-baseline justify-between gap-2 mb-2">
+                        <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide">강습</p>
+                        <p id="e-lesson-total" class="text-[12px] font-black text-[#004de6] text-right"></p>
+                    </div>
+                    <div id="e-lessons" class="space-y-2"></div>
+                    <button type="button" onclick="addLessonRow('e-')"
+                            class="mt-2 w-full border-2 border-dashed border-gray-200 text-[#004de6] rounded-xl py-2.5 text-[13px] font-bold hover:border-[#004de6] transition">
+                        <i class="fa-solid fa-plus mr-1" aria-hidden="true"></i> 강습 추가
+                    </button>
+                    <p id="e-lesson-hint" class="text-[11px] text-gray-400 mt-2 leading-relaxed"></p>
+                </div>
+
+                <div>
+                    <label for="e-memo" class="m-label">고객 요청사항</label>
+                    <textarea id="e-memo" rows="2" maxlength="1000" placeholder="키·발 사이즈, 픽업 장소 등" class="m-input resize-none"></textarea>
+                </div>
+                <div>
+                    <label for="d-admin-memo" class="m-label">관리자 메모 (내부용)</label>
+                    <textarea id="d-admin-memo" rows="2"
+                              placeholder="내부 메모를 입력하세요 (고객에게 보이지 않음)"
+                              class="m-input resize-none"></textarea>
+                </div>
+            </fieldset>
 
             <!-- 고객 안내 발송 결과 (알림톡 또는 문자) -->
             <div class="bg-gray-50 rounded-2xl p-4 space-y-2.5 text-[13px]">
@@ -739,45 +793,9 @@
                     <span id="d-notify-cancelled" class="font-bold text-right text-gray-400">-</span>
                 </div>
                 <p id="d-notify-error" class="hidden text-[11px] text-red-500 leading-relaxed whitespace-pre-line"></p>
-                <p class="text-[11px] text-gray-400 leading-relaxed">입금 상태를 '예약 완료'로 저장하면 확정 안내, '취소'로 저장하면 취소 안내가 나갑니다. 입금 요청 안내는 아래 '입금 요청 보내기' 버튼으로 보냅니다. 발송에 실패한 접수·확정·취소 안내는 다시 저장하면 한 번 더 보냅니다.</p>
+                <p class="text-[11px] text-gray-400 leading-relaxed">입금 상태를 '예약 완료'로 저장하면 확정 안내, '취소'로 저장하면 취소 안내가 나갑니다. 입금 요청 안내는 위 '입금 요청 보내기' 버튼으로 보냅니다. 이름·날짜·품목·강습만 고칠 때는 안내가 나가지 않습니다. 발송에 실패한 접수·확정·취소 안내는 다시 저장하면 한 번 더 보냅니다.</p>
             </div>
 
-            <!-- 상태 변경 -->
-            <div id="d-edit" class="space-y-3">
-                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide">상태 변경</p>
-                <div>
-                    <label for="d-deposit" class="block text-[11px] text-gray-400 font-medium mb-1.5">입금 상태</label>
-                    <select id="d-deposit"
-                            class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 text-[13px] font-bold outline-none focus:border-[#004de6] bg-white transition">
-                        <option>예약 신청(미입금)</option>
-                        <option>예약 완료(미입금)</option>
-                        <option>예약 완료</option>
-                        <option>취소</option>
-                    </select>
-                </div>
-                <div class="bg-amber-50 border border-amber-100 rounded-xl p-3 flex items-center gap-3">
-                    <div class="flex-1 min-w-0">
-                        <p class="text-[12px] font-bold text-amber-800">입금 요청 안내</p>
-                        <p id="d-request-info" class="text-[11px] text-amber-700/80 leading-relaxed">아직 보낸 적 없음</p>
-                    </div>
-                    <button type="button" id="d-request-btn" onclick="requestDepositCurrent()"
-                            class="bg-amber-400 text-[#0f172a] text-[12px] font-black px-3 py-2 rounded-xl hover:bg-amber-300 transition whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed">
-                        입금 요청 보내기
-                    </button>
-                </div>
-                <div>
-                    <label class="block text-[11px] text-gray-400 font-medium mb-1.5">관리자 메모 (내부용)</label>
-                    <textarea id="d-admin-memo" rows="2"
-                              placeholder="내부 메모를 입력하세요 (고객에게 보이지 않음)"
-                              class="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 text-[13px] outline-none focus:border-[#004de6] resize-none transition"></textarea>
-                </div>
-            </div>
-
-            <!-- 저장 버튼 -->
-            <button id="save-btn" onclick="saveDetail()"
-                    class="w-full bg-[#004de6] text-white rounded-xl py-4 font-bold text-[15px] hover:bg-blue-700 transition shadow-sm">
-                <span id="save-btn-text">변경사항 저장</span>
-            </button>
             <button type="button" id="d-trash-btn" onclick="trashCurrent()"
                     class="w-full border border-red-200 text-red-500 rounded-xl py-3 font-bold text-[13px] hover:bg-red-50 transition">
                 <i class="fa-regular fa-trash-can mr-1" aria-hidden="true"></i> 예약 삭제 (휴지통으로)
@@ -787,6 +805,15 @@
                 <i class="fa-solid fa-rotate-left mr-1" aria-hidden="true"></i> 휴지통에서 복원
             </button>
 
+        </div>
+
+        <!-- 저장 (화면 아래에 고정) -->
+        <div id="d-save-bar" class="sticky bottom-0 z-10 bg-white/95 backdrop-blur border-t border-gray-100 px-5 pt-3" style="padding-bottom:max(16px, env(safe-area-inset-bottom));">
+            <p id="d-dirty" class="hidden text-[11px] font-bold text-amber-600 text-center mb-2">저장하지 않은 수정 내용이 있어요</p>
+            <button type="button" id="save-btn" onclick="saveDetail()"
+                    class="w-full bg-[#004de6] text-white rounded-xl py-4 font-bold text-[15px] hover:bg-blue-700 transition shadow-sm disabled:opacity-60">
+                <span id="save-btn-text">변경사항 저장</span>
+            </button>
         </div>
     </div>
 </div>
@@ -849,6 +876,19 @@
                 </div>
             </div>
 
+            <div class="bg-gray-50 rounded-2xl p-4">
+                <div class="flex items-baseline justify-between gap-2 mb-2">
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide">강습</p>
+                    <p id="m-lesson-total" class="text-[12px] font-black text-[#004de6] text-right"></p>
+                </div>
+                <div id="m-lessons" class="space-y-2"></div>
+                <button type="button" onclick="addLessonRow('m-')"
+                        class="mt-2 w-full border-2 border-dashed border-gray-200 text-[#004de6] rounded-xl py-2.5 text-[13px] font-bold hover:border-[#004de6] transition">
+                    <i class="fa-solid fa-plus mr-1" aria-hidden="true"></i> 강습 추가
+                </button>
+                <p id="m-lesson-hint" class="text-[11px] text-gray-400 mt-2 leading-relaxed"></p>
+            </div>
+
             <div class="space-y-3">
                 <div>
                     <label for="m-memo" class="m-label">고객 요청사항</label>
@@ -894,7 +934,8 @@ window.showToast = function(msg) {
     if (!t) { console.warn(msg); return; }
     t.innerText = msg; t.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+    // 긴 안내는 끝까지 읽을 수 있게 조금 더 오래 보여 줌
+    toastTimer = setTimeout(() => t.classList.remove('show'), Math.min(6000, Math.max(2600, String(msg).length * 70)));
 };
 
 // ====================================================
@@ -2382,13 +2423,32 @@ window.quickFilter = function(state) {
 // ====================================================
 // 목록 렌더링
 // ====================================================
+// 강습: 한 줄 = 시간대 · 종목 · 레벨 · 인원. 요금은 1~5명 한 팀 기준(팀당).
+// 시간대·종목·레벨을 섞어 여러 줄 담을 수 있고, 예약에는 reservations.lessons(jsonb 배열)로 저장합니다.
+const LESSON_SLOTS  = [['am', '오전', '09:00~12:00'], ['pm', '오후', '13:00~16:00'], ['night', '야간', '18:30~21:30']];
+const LESSON_SPORTS = [['ski', '스키'], ['board', '보드']];
+const LESSON_LEVELS = [[1, '레벨1', 170000], [2, '레벨2', 220000]];
+const LESSON_MAX_PEOPLE = 5;
+function fmtWon(n) { return Number(n || 0).toLocaleString('ko-KR') + '원'; }
+function lessonPrice(level) { const v = LESSON_LEVELS.find(x => x[0] === Number(level)); return v ? v[2] : 0; }
+function lessonList(r) { return Array.isArray(r && r.lessons) ? r.lessons.filter(l => l && Number(l.people) > 0) : []; }
+function lessonLabel(l) {
+    const slot  = (LESSON_SLOTS.find(s => s[0] === l.slot) || [])[1] || l.slot;
+    const sport = (LESSON_SPORTS.find(s => s[0] === l.sport) || [])[1] || l.sport;
+    return slot + ' ' + sport + ' 레벨' + l.level + ' ' + l.people + '명';
+}
+function lessonParts(r, withPrice) { return lessonList(r).map(l => lessonLabel(l) + (withPrice ? ' ' + fmtWon(l.price) : '')); }
+function lessonTotal(r)  { return lessonList(r).reduce((s, l) => s + (Number(l.people) || 0), 0); }
+function lessonAmount(r) { return lessonList(r).reduce((s, l) => s + (Number(l.price) || 0), 0); }
+
 function itemSummary(r) {
     const equip = (r.equip_normal||0) + (r.equip_premium||0);
     const cloth = (r.cloth_normal||0) + (r.cloth_premium||0);
     const opt   = (r.helmet_count||0) + (r.goggle_count||0) + (r.visor_count||0);
     const lift  = (r.lift_3h_adult||0) + (r.lift_3h_child||0) + (r.lift_4h_adult||0) + (r.lift_4h_child||0) + (r.lift_6h_adult||0) + (r.lift_6h_child||0);
-    return { equip, cloth, opt, lift,
-             text: [equip ? '장비 ' + equip + '명' : '', cloth ? '의류 ' + cloth + '명' : '', opt ? '옵션 ' + opt + '개' : '', lift ? '리프트 ' + lift + '명' : ''].filter(Boolean).join(' · ') };
+    const lesson = lessonTotal(r);
+    return { equip, cloth, opt, lift, lesson,
+             text: [equip ? '장비 ' + equip + '명' : '', cloth ? '의류 ' + cloth + '명' : '', opt ? '옵션 ' + opt + '개' : '', lift ? '리프트 ' + lift + '명' : '', lesson ? '강습 ' + lesson + '명' : ''].filter(Boolean).join(' · ') };
 }
 
 function cardHtml(r) {
@@ -2465,8 +2525,8 @@ function renderList(data) {
         });
         list.innerHTML = groups.map(g => {
             const active = g.rows.filter(r => stateOf(r) !== '취소');
-            const sum = active.reduce((s, r) => { const x = itemSummary(r); s.equip += x.equip; s.cloth += x.cloth; s.lift += x.lift; return s; }, { equip:0, cloth:0, lift:0 });
-            const prep = [sum.equip ? '장비 ' + sum.equip : '', sum.cloth ? '의류 ' + sum.cloth : '', sum.lift ? '리프트 ' + sum.lift + '명' : ''].filter(Boolean).join(' · ');
+            const sum = active.reduce((s, r) => { const x = itemSummary(r); s.equip += x.equip; s.cloth += x.cloth; s.lift += x.lift; s.lesson += x.lesson; return s; }, { equip:0, cloth:0, lift:0, lesson:0 });
+            const prep = [sum.equip ? '장비 ' + sum.equip : '', sum.cloth ? '의류 ' + sum.cloth : '', sum.lift ? '리프트 ' + sum.lift + '명' : '', sum.lesson ? '강습 ' + sum.lesson + '명' : ''].filter(Boolean).join(' · ');
             const cancelled = g.rows.length - active.length;
             return '<section aria-label="' + escHtml(formatDay(g.key)) + ' 예약">'
                 + '<div class="day-head flex items-baseline justify-between px-1 pt-3 pb-2">'
@@ -2565,12 +2625,17 @@ function stopLive() {
 
 
 // ====================================================
-// 상세 모달 열기
+// 상세 모달 열기 — 예약 내용을 바로 고칠 수 있는 입력 칸으로 보여 줌
 // ====================================================
+let detailRow = null;        // 상세 창을 연 순간의 예약 (저장할 때 그사이 바뀌었는지 비교)
+let detailSnapshot = null;   // 열었을 때 입력 칸 값 (저장하지 않은 수정 확인)
+let detailSaving = false;
+
 function openDetail(id) {
     const r = _reservationMap[id];
     if (!r) return;
     currentId = id;
+    detailRow = { ...r };
     markSeen(id);
 
     const no = '#' + String(r.reservation_no || 0).padStart(4, '0');
@@ -2578,10 +2643,7 @@ function openDetail(id) {
     document.getElementById('detail-title').innerText = `${r.name} ${no}`;
     document.getElementById('d-no').innerText      = no;
     document.getElementById('d-created').innerText = new Date(r.created_at).toLocaleString('ko-KR') + (isPhoneBooking(r) ? ' · 전화 예약' : '');
-    document.getElementById('d-name').innerText    = r.name;
-    document.getElementById('d-phone').href        = `tel:${r.phone}`;
-    document.getElementById('d-phone-text').innerText = r.phone;
-    document.getElementById('d-date').innerText    = `${r.visit_date} ${r.visit_time}`;
+    document.getElementById('d-phone').href        = 'tel:' + String(r.phone || '').replace(/[^\d+]/g, '');
 
     const st = stateOf(r);
     const cancelRow = document.getElementById('d-cancel-row');
@@ -2596,35 +2658,22 @@ function openDetail(id) {
     const inTrash = !!r.deleted_at;
     document.getElementById('d-trash-row').classList.toggle('hidden', !inTrash);
     document.getElementById('d-trash').innerText = inTrash ? trashLeft(r.deleted_at) : '';
-    ['d-edit', 'save-btn', 'd-trash-btn'].forEach(x => document.getElementById(x).classList.toggle('hidden', inTrash));
+    ['d-edit', 'd-save-bar', 'd-trash-btn'].forEach(x => document.getElementById(x).classList.toggle('hidden', inTrash));
     document.getElementById('d-restore-btn').classList.toggle('hidden', !inTrash);
+    // 휴지통에 있는 예약은 보기만 (복원한 뒤 고칠 수 있음)
+    document.getElementById('d-fields').disabled = inTrash;
 
-    document.getElementById('d-equip').innerText  =
-        [r.equip_normal  > 0 ? `일반 ${r.equip_normal}명`  : '',
-         r.equip_premium > 0 ? `고급 ${r.equip_premium}명` : ''].filter(Boolean).join(' / ') || '없음';
-    document.getElementById('d-cloth').innerText  =
-        [r.cloth_normal  > 0 ? `일반 ${r.cloth_normal}명`  : '',
-         r.cloth_premium > 0 ? `고급 ${r.cloth_premium}명` : ''].filter(Boolean).join(' / ') || '없음';
-    document.getElementById('d-helmet').innerText =
-        [r.visor_count   > 0 ? `헬멧+고글 세트 ${r.visor_count}개` : '',
-         r.helmet_count > 0 ? `헬멧 ${r.helmet_count}개`   : '',
-         r.goggle_count  > 0 ? `고글 ${r.goggle_count}개`  : '',
-         r.helmet_own ? '헬멧 지참' : ''].filter(Boolean).join(' / ') || '없음';
-    const liftParts = [
-        (r.lift_3h_adult > 0 || r.lift_3h_child > 0) ? `3시간권 대인${r.lift_3h_adult} 소인${r.lift_3h_child}` : '',
-        (r.lift_4h_adult > 0 || r.lift_4h_child > 0) ? `4시간권 대인${r.lift_4h_adult} 소인${r.lift_4h_child}` : '',
-        (r.lift_6h_adult > 0 || r.lift_6h_child > 0) ? `6시간권 대인${r.lift_6h_adult} 소인${r.lift_6h_child}` : ''
-    ].filter(Boolean);
-    document.getElementById('d-lift').innerText = liftParts.join('\n') || '없음';
-    document.getElementById('d-memo').innerText   = r.memo || '-';
-
+    fillResFields('e-', r);
     document.getElementById('d-deposit').value     = st;
     document.getElementById('d-admin-memo').value  = adminMemoText(r);
+    detailSnapshot = detailFormState();
+    updateDetailDirty();
     updateRequestButton();
     loadNotifyStatus(id);
 
     // 모달 열기
     const overlay = document.getElementById('detail-overlay');
+    document.getElementById('detail-box').scrollTop = 0;
     overlay.classList.remove('hidden');
     requestAnimationFrame(() => {
         overlay.classList.add('open');
@@ -2643,17 +2692,39 @@ function closeDetail() {
     }, 300);
     document.body.style.overflow = '';
     currentId = null;
+    detailRow = null;
+    detailSnapshot = null;
+    document.getElementById('d-dirty').classList.add('hidden');
 }
 
 function closeDetailOutside(e) {
-    if (e.target === document.getElementById('detail-overlay')) closeDetail();
+    if (e.target === document.getElementById('detail-overlay')) requestCloseDetail();
 }
 
+// 입력 칸 값을 모아 열었을 때와 비교 → 저장하지 않은 수정이 있으면 닫기 전에 물어봄
+function detailFormState() {
+    const s = {};
+    document.querySelectorAll('#detail-box input[id], #detail-box select[id], #detail-box textarea[id]').forEach(e => {
+        s[e.id] = e.type === 'checkbox' ? e.checked : e.value;
+    });
+    s.lessons = JSON.stringify(readLessons('e-'));
+    return s;
+}
+function updateDetailDirty() {
+    const now = detailFormState();
+    const dirty = !!currentId && !!detailSnapshot && Object.keys(now).some(k => now[k] !== detailSnapshot[k]);
+    document.getElementById('d-dirty').classList.toggle('hidden', !dirty);
+    return dirty;
+}
+window.requestCloseDetail = function() {
+    if (detailSaving) return;
+    if (updateDetailDirty() && !window.confirm('저장하지 않은 수정 내용이 있어요.\n저장하지 않고 닫을까요?')) return;
+    closeDetail();
+};
+['input', 'change'].forEach(t => document.getElementById('detail-box').addEventListener(t, updateDetailDirty));
+
 // ====================================================
-// 전화 예약 직접 등록
-// 유선으로 받은 예약을 관리자가 입력합니다. 관리자 메모 앞에 '[전화 예약]'을 붙여 목록에서 구분합니다.
-// 고객 안내: 미입금 상태면 접수 안내(입금 계좌 포함), '예약 완료'면 확정 안내만, 끄면 아무것도 보내지 않습니다.
-// DB 트리거는 휴지통에 있는 예약에 안내를 보내지 않으므로, 안내를 고를 때는 휴지통 상태로 저장한 뒤 바로 꺼냅니다.
+// 예약 입력 칸 (전화 예약 등록 'm-' · 상세 수정 'e-' 공용)
 // ====================================================
 const PHONE_TAG = '[전화 예약]';
 const MANUAL_ITEMS = [
@@ -2664,7 +2735,174 @@ const MANUAL_ITEMS = [
     ['goggle_count', '고글만', '개']
 ];
 const MANUAL_LIFTS = [['3h', '3시간권'], ['4h', '4시간권'], ['6h', '6시간권']];
-let manualBuilt = false;
+const RES_TIMES = (() => {
+    const t = [];
+    for (let m = 7 * 60 + 30; m <= 23 * 60; m += 30) t.push(String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'));
+    return t;
+})();
+const builtResForms = new Set();
+
+function manualNumInput(id, label) {
+    return '<input type="number" id="' + id + '" min="0" max="99" step="1" inputmode="numeric" value="0" class="m-num"'
+         + ' aria-label="' + escHtml(label) + '" onfocus="this.select()">';
+}
+function buildResFields(p) {
+    if (builtResForms.has(p)) return;
+    builtResForms.add(p);
+    const el = (k) => document.getElementById(p + k);
+    el('time').innerHTML = RES_TIMES.map(t => '<option' + (t === '09:00' ? ' selected' : '') + '>' + t + '</option>').join('');
+    el('items').innerHTML = MANUAL_ITEMS.map(([key, label, unit]) =>
+        '<div class="flex items-center justify-between py-2">'
+        + '<label for="' + p + key + '" class="text-[13px] font-bold text-[#0f172a]">' + label + ' <span class="text-[11px] text-gray-400 font-medium">(' + unit + ')</span></label>'
+        + manualNumInput(p + key, label) + '</div>').join('');
+    el('lifts').insertAdjacentHTML('beforeend', MANUAL_LIFTS.map(([h, label]) =>
+        '<span class="font-bold text-[#0f172a]">' + label + '</span>'
+        + manualNumInput(p + 'lift_' + h + '_adult', label + ' 대인')
+        + manualNumInput(p + 'lift_' + h + '_child', label + ' 소인')).join(''));
+    el('lesson-hint').textContent = '시간대·종목·레벨을 섞어 여러 줄 담을 수 있어요. 요금은 1~' + LESSON_MAX_PEOPLE + '명 한 팀 기준('
+        + LESSON_LEVELS.map(([, label, price]) => label + ' ' + fmtWon(price)).join(' · ') + ')이고, '
+        + (LESSON_MAX_PEOPLE + 1) + '명 이상이면 한 줄 더 추가하세요.';
+    el('lessons').addEventListener('change', () => updateLessonTotal(p));
+    el('lessons').addEventListener('click', (e) => {
+        const del = e.target.closest('[data-del]');
+        if (!del) return;
+        del.closest('.lesson-line').remove();
+        updateLessonTotal(p);
+        if (p === 'e-') updateDetailDirty();
+    });
+}
+function manualNum(id) {
+    const n = parseInt(document.getElementById(id).value, 10);
+    return Number.isFinite(n) ? Math.min(99, Math.max(0, n)) : 0;
+}
+
+// ---- 강습 줄 (시간대 · 종목 · 레벨 · 인원 → 팀당 요금) ----
+function lessonRowHtml(l) {
+    const opts = (list, val, fmt) => list.map(item => '<option value="' + item[0] + '"' + (String(item[0]) === String(val) ? ' selected' : '') + '>' + fmt(item) + '</option>').join('');
+    const people = [];
+    for (let n = 1; n <= LESSON_MAX_PEOPLE; n++) people.push([n]);
+    // 저장된 요금은 레벨을 바꾸지 않는 한 그대로 둡니다(나중에 요금표가 바뀌어도 예약 당시 금액 유지)
+    const saved = l.price != null ? ' data-saved-level="' + escHtml(l.level) + '" data-saved-price="' + escHtml(l.price) + '"' : '';
+    return '<div class="lesson-line bg-white rounded-xl p-2.5 space-y-2"' + saved + '>'
+        + '<div class="grid grid-cols-[1fr_84px] gap-2">'
+        +   '<select data-f="slot" class="m-input" aria-label="강습 시간대">' + opts(LESSON_SLOTS, l.slot, ([, label, hours]) => label + ' ' + hours) + '</select>'
+        +   '<select data-f="sport" class="m-input" aria-label="강습 종목">' + opts(LESSON_SPORTS, l.sport, ([, label]) => label) + '</select>'
+        + '</div>'
+        + '<div class="grid grid-cols-[84px_72px_1fr_auto] gap-2 items-center">'
+        +   '<select data-f="level" class="m-input" aria-label="강습 레벨">' + opts(LESSON_LEVELS, l.level, ([, label]) => label) + '</select>'
+        +   '<select data-f="people" class="m-input" aria-label="강습 인원">' + opts(people, l.people, ([n]) => n + '명') + '</select>'
+        +   '<span data-price class="text-right font-black text-[#0f172a] text-[13px] whitespace-nowrap"></span>'
+        +   '<button type="button" data-del class="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-500 flex items-center justify-center" aria-label="이 강습 빼기"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>'
+        + '</div></div>';
+}
+function readLessons(p) {
+    const box = document.getElementById(p + 'lessons');
+    if (!box) return [];
+    return Array.from(box.querySelectorAll('.lesson-line'), (row) => {
+        const v = (f) => row.querySelector('[data-f="' + f + '"]').value;
+        const level = Number(v('level'));
+        const kept  = row.dataset.savedPrice != null && Number(row.dataset.savedLevel) === level;
+        return {
+            slot: v('slot'), sport: v('sport'), level,
+            people: Math.min(LESSON_MAX_PEOPLE, Math.max(1, parseInt(v('people'), 10) || 1)),
+            price: kept ? Number(row.dataset.savedPrice) || 0 : lessonPrice(level)
+        };
+    });
+}
+function updateLessonTotal(p) {
+    const box = document.getElementById(p + 'lessons');
+    const list = readLessons(p);
+    box.querySelectorAll('.lesson-line').forEach((row, i) => { row.querySelector('[data-price]').textContent = fmtWon(list[i].price); });
+    document.getElementById(p + 'lesson-total').textContent = list.length
+        ? lessonTotal({ lessons: list }) + '명 · ' + fmtWon(lessonAmount({ lessons: list })) : '';
+}
+function setLessons(p, list) {
+    document.getElementById(p + 'lessons').innerHTML = (list || []).map(lessonRowHtml).join('');
+    updateLessonTotal(p);
+}
+// 새 줄은 바로 위 줄과 같은 값으로 (6명 이상 나눠 담기 편하게), 첫 줄은 방문 시간에 맞는 시간대
+window.addLessonRow = function(p) {
+    const list = readLessons(p);
+    const last = list[list.length - 1];
+    const t = (document.getElementById(p + 'time') || {}).value || '09:00';
+    const slot = t >= '17:00' ? 'night' : t >= '12:00' ? 'pm' : 'am';
+    const l = last ? { slot: last.slot, sport: last.sport, level: last.level, people: 1 } : { slot, sport: 'ski', level: 1, people: 1 };
+    document.getElementById(p + 'lessons').insertAdjacentHTML('beforeend', lessonRowHtml(l));
+    updateLessonTotal(p);
+    if (p === 'e-') updateDetailDirty();
+};
+// 1 이상 넣은 칸은 파란 테두리로 표시해 한눈에 보이게
+function markNums(p) {
+    document.querySelectorAll('.m-num[id^="' + p + '"]').forEach(i => i.classList.toggle('has-val', (parseInt(i.value, 10) || 0) > 0));
+}
+document.addEventListener('input', (e) => {
+    const t = e.target;
+    if (t && t.classList && t.classList.contains('m-num')) t.classList.toggle('has-val', (parseInt(t.value, 10) || 0) > 0);
+});
+
+// 입력 칸 → 예약 행. 이름·연락처·날짜와 품목·리프트권·강습 중 1개 이상을 확인합니다.
+function readResFields(p, minName) {
+    const el = (k) => document.getElementById(p + k);
+    const name   = el('name').value.trim();
+    const phone  = el('phone').value.trim();
+    const digits = phone.replace(/\D/g, '');
+    const date   = el('date').value;
+    if (name.length < minName) return { error: '예약자 이름을 ' + (minName > 1 ? minName + '자 이상 ' : '') + '입력해 주세요', focus: p + 'name' };
+    if (digits.length < 9 || digits.length > 11) return { error: '연락처를 확인해 주세요', focus: p + 'phone' };
+    if (!date) return { error: '방문 날짜를 골라 주세요', focus: p + 'date' };
+
+    const row = {
+        name, phone, visit_date: date, visit_time: el('time').value,
+        equip_premium: 0, cloth_premium: 0,
+        helmet_own: el('helmet-own').checked
+    };
+    MANUAL_ITEMS.forEach(([key]) => { row[key] = manualNum(p + key); });
+    MANUAL_LIFTS.forEach(([h]) => {
+        row['lift_' + h + '_adult'] = manualNum(p + 'lift_' + h + '_adult');
+        row['lift_' + h + '_child'] = manualNum(p + 'lift_' + h + '_child');
+    });
+    row.lessons = readLessons(p);
+    const qty = MANUAL_ITEMS.reduce((s, [k]) => s + row[k], 0)
+              + MANUAL_LIFTS.reduce((s, [h]) => s + row['lift_' + h + '_adult'] + row['lift_' + h + '_child'], 0)
+              + lessonTotal(row);
+    if (!qty) return { error: '렌탈 품목, 리프트권, 강습 중 1개 이상 입력해 주세요' };
+    row.memo = el('memo').value.trim() || null;
+    return { row, digits };
+}
+
+// 예약 행 → 입력 칸 (상세 수정). 예전 '고급' 장비·의류 수량은 같은 칸에 합쳐 보여 줍니다.
+function fillResFields(p, r) {
+    buildResFields(p);
+    const el  = (k) => document.getElementById(p + k);
+    const num = (v) => Math.min(99, Math.max(0, parseInt(v, 10) || 0));
+    el('name').value  = r.name || '';
+    el('phone').value = r.phone || '';
+    el('date').value  = r.visit_date || '';
+    const sel = el('time');
+    sel.querySelectorAll('option[data-extra]').forEach(o => o.remove());
+    const t = r.visit_time || '09:00';
+    if (!RES_TIMES.includes(t)) { const o = new Option(t, t); o.dataset.extra = '1'; sel.add(o); }
+    sel.value = t;
+    MANUAL_ITEMS.forEach(([key]) => {
+        const extra = key === 'equip_normal' ? r.equip_premium : key === 'cloth_normal' ? r.cloth_premium : 0;
+        el(key).value = num(num(r[key]) + num(extra));
+    });
+    MANUAL_LIFTS.forEach(([h]) => {
+        el('lift_' + h + '_adult').value = num(r['lift_' + h + '_adult']);
+        el('lift_' + h + '_child').value = num(r['lift_' + h + '_child']);
+    });
+    setLessons(p, lessonList(r));
+    el('helmet-own').checked = !!r.helmet_own;
+    el('memo').value = r.memo || '';
+    markNums(p);
+}
+
+// ====================================================
+// 전화 예약 직접 등록
+// 유선으로 받은 예약을 관리자가 입력합니다. 관리자 메모 앞에 '[전화 예약]'을 붙여 목록에서 구분합니다.
+// 고객 안내: 미입금 상태면 접수 안내(입금 계좌 포함), '예약 완료'면 확정 안내만, 끄면 아무것도 보내지 않습니다.
+// DB 트리거는 휴지통에 있는 예약에 안내를 보내지 않으므로, 안내를 고를 때는 휴지통 상태로 저장한 뒤 바로 꺼냅니다.
+// ====================================================
 let manualSaving = false;
 let manualAutoOff = false;   // 휴대폰 번호가 아니라서 안내를 자동으로 끈 경우
 let manualEcho = null;       // 방금 직접 등록한 예약: 실시간 '새 예약' 알림을 건너뜀
@@ -2675,32 +2913,6 @@ function adminMemoText(r) {
     return (m.startsWith(PHONE_TAG) ? m.slice(PHONE_TAG.length) : m).trim();
 }
 function isMobileDigits(d) { return /^(010\d{8}|01[16789]\d{7,8})$/.test(d); }
-
-function manualNumInput(id, label) {
-    return '<input type="number" id="' + id + '" min="0" max="99" step="1" inputmode="numeric" value="0" class="m-num"'
-         + ' aria-label="' + escHtml(label) + '" onfocus="this.select()">';
-}
-function buildManualForm() {
-    if (manualBuilt) return;
-    manualBuilt = true;
-    const times = [];
-    for (let m = 7 * 60 + 30; m <= 23 * 60; m += 30) {
-        times.push(String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'));
-    }
-    document.getElementById('m-time').innerHTML = times.map(t => '<option' + (t === '09:00' ? ' selected' : '') + '>' + t + '</option>').join('');
-    document.getElementById('m-items').innerHTML = MANUAL_ITEMS.map(([key, label, unit]) =>
-        '<div class="flex items-center justify-between py-2">'
-        + '<label for="m-' + key + '" class="text-[13px] font-bold text-[#0f172a]">' + label + ' <span class="text-[11px] text-gray-400 font-medium">(' + unit + ')</span></label>'
-        + manualNumInput('m-' + key, label) + '</div>').join('');
-    document.getElementById('m-lifts').insertAdjacentHTML('beforeend', MANUAL_LIFTS.map(([h, label]) =>
-        '<span class="font-bold text-[#0f172a]">' + label + '</span>'
-        + manualNumInput('m-lift_' + h + '_adult', label + ' 대인')
-        + manualNumInput('m-lift_' + h + '_child', label + ' 소인')).join(''));
-}
-function manualNum(id) {
-    const n = parseInt(document.getElementById(id).value, 10);
-    return Number.isFinite(n) ? Math.min(99, Math.max(0, n)) : 0;
-}
 
 window.formatManualPhone = function(input) {
     const d = input.value.replace(/\D/g, '').slice(0, 11);
@@ -2738,8 +2950,10 @@ window.updateManualNotifyHint = function() {
 };
 
 window.openManualForm = function() {
-    buildManualForm();
+    buildResFields('m-');
     document.getElementById('manual-form').reset();
+    markNums('m-');
+    setLessons('m-', []);
     document.getElementById('m-notify').disabled = false;
     manualAutoOff = false;
     updateManualNotifyHint();
@@ -2775,38 +2989,25 @@ function setManualSaving(on) {
 
 window.submitManualForm = async function() {
     if (manualSaving) return;
-    const name   = document.getElementById('m-name').value.trim();
-    const phone  = document.getElementById('m-phone').value.trim();
-    const digits = phone.replace(/\D/g, '');
-    const date   = document.getElementById('m-date').value;
-    const time   = document.getElementById('m-time').value;
-    if (name.length < 2) { showToast('예약자 이름을 2자 이상 입력해 주세요'); document.getElementById('m-name').focus(); return; }
-    if (digits.length < 9 || digits.length > 11) { showToast('연락처를 확인해 주세요'); document.getElementById('m-phone').focus(); return; }
-    if (!date) { showToast('방문 날짜를 골라 주세요'); document.getElementById('m-date').focus(); return; }
+    const form = readResFields('m-', 2);
+    if (form.error) {
+        showToast(form.error);
+        if (form.focus) document.getElementById(form.focus).focus();
+        return;
+    }
+    const row    = form.row;
+    const digits = form.digits;
+    const { name, phone, visit_date: date, visit_time: time } = row;
+    const lessons = lessonParts(row, true);
 
-    const row = {
-        name, phone, visit_date: date, visit_time: time,
-        equip_premium: 0, cloth_premium: 0,
-        helmet_own: document.getElementById('m-helmet-own').checked
-    };
-    MANUAL_ITEMS.forEach(([key]) => { row[key] = manualNum('m-' + key); });
-    MANUAL_LIFTS.forEach(([h]) => {
-        row['lift_' + h + '_adult'] = manualNum('m-lift_' + h + '_adult');
-        row['lift_' + h + '_child'] = manualNum('m-lift_' + h + '_child');
-    });
-    const qty = MANUAL_ITEMS.reduce((s, [k]) => s + row[k], 0)
-              + MANUAL_LIFTS.reduce((s, [h]) => s + row['lift_' + h + '_adult'] + row['lift_' + h + '_child'], 0);
-    if (!qty) { showToast('렌탈 품목이나 리프트권을 1개 이상 입력해 주세요'); return; }
-
-    const memo      = document.getElementById('m-memo').value.trim();
     const adminMemo = document.getElementById('m-admin-memo').value.trim();
-    row.memo       = memo || null;
     row.admin_memo = PHONE_TAG + (adminMemo ? ' ' + adminMemo : '');
 
     const state  = document.getElementById('m-deposit').value;
     const notify = document.getElementById('m-notify').checked && isMobileDigits(digits);
     const notice = !notify ? '보내지 않음' : state === '예약 완료' ? '예약 확정 안내' : '예약 접수 안내';
-    if (!window.confirm(name + '님 예약을 등록할까요?\n\n방문: ' + date + ' ' + time + '\n입금 상태: ' + state + '\n고객 안내: ' + notice)) return;
+    const lessonMsg = lessons.length ? '\n강습: ' + lessons.join(', ') + (lessons.length > 1 ? ' (합계 ' + fmtWon(lessonAmount(row)) + ')' : '') : '';
+    if (!window.confirm(name + '님 예약을 등록할까요?\n\n방문: ' + date + ' ' + time + lessonMsg + '\n입금 상태: ' + state + '\n고객 안내: ' + notice)) return;
 
     setManualSaving(true);
     manualEcho = { name, phone, until: Date.now() + 20000 };
@@ -2932,47 +3133,69 @@ function updateRequestButton() {
 
 
 // ====================================================
-// 상태 저장
+// 상세 저장 — 입금 상태와 예약 내용(이름·연락처·방문일시·품목·리프트권·강습·메모)을 한 번에 저장
+// 안내는 입금 상태가 바뀔 때만 나갑니다(DB 트리거). 내용만 고치면 고객에게 아무것도 가지 않습니다.
 // ====================================================
 async function saveDetail() {
-    if (!currentId) return;
+    if (!currentId || detailSaving) return;
+    const id = currentId;
+    const before = detailRow || _reservationMap[id] || {};
+    const form = readResFields('e-', 1);
+    if (form.error) {
+        showToast(form.error);
+        if (form.focus) document.getElementById(form.focus).focus();
+        return;
+    }
 
-    const before    = _reservationMap[currentId] || {};
     const nextDep   = document.getElementById('d-deposit').value;
     const prevState = stateOf(before);
+    const memoText  = document.getElementById('d-admin-memo').value.trim();
+    const patch = {
+        ...form.row,
+        deposit_status: nextDep,
+        // 전화 예약 표시는 메모를 고쳐도 남깁니다
+        admin_memo: isPhoneBooking(before) ? PHONE_TAG + (memoText ? ' ' + memoText : '') : (memoText || null)
+    };
+    const whenChanged = String(before.visit_date || '') !== patch.visit_date || String(before.visit_time || '') !== patch.visit_time;
+
     const btn     = document.getElementById('save-btn');
     const btnText = document.getElementById('save-btn-text');
+    detailSaving  = true;
     btn.disabled  = true;
     btnText.innerHTML = '<i class="fa-solid fa-rotate fa-spin mr-2"></i>저장 중...';
 
-    const memoText = document.getElementById('d-admin-memo').value.trim();
     try {
-        const { error } = await _supabase
-            .from('reservations')
-            .update({
-                deposit_status: nextDep,
-                // 전화 예약 표시는 메모를 고쳐도 남깁니다
-                admin_memo:     isPhoneBooking(before) ? PHONE_TAG + (memoText ? ' ' + memoText : '') : (memoText || null)
-            })
-            .eq('id', currentId);
-
+        let q = _supabase.from('reservations').update(patch).eq('id', id);
+        // 창을 열어 둔 사이 고객이 취소하는 등 입금 상태가 바뀌었으면 덮어쓰지 않습니다
+        if (before.deposit_status) q = q.eq('deposit_status', before.deposit_status);
+        const { data, error } = await q.select('id');
         if (error) throw error;
+        if (Array.isArray(data) && !data.length) {
+            detailSaving = false;
+            closeDetail();
+            await loadReservations({ quiet: true });
+            showToast('그사이 예약 상태가 바뀌어(예: 고객 취소) 저장하지 않았습니다. 예약을 다시 열어 확인해 주세요.');
+            return;
+        }
 
+        detailSaving = false;
         closeDetail();
         await loadReservations();
+        const whenNote = whenChanged ? ' 바뀐 방문 일시는 고객에게 따로 알려 주세요.' : '';
         if (nextDep === '취소' && prevState !== '취소') {
             showToast('취소로 저장했습니다. 고객에게 취소 안내를 보냅니다.');
         } else if (nextDep === '예약 완료' && prevState !== '예약 완료') {
             showToast('저장했습니다. 고객에게 예약 확정 안내를 보냅니다.');
         } else if (nextDep === '예약 완료(미입금)' && prevState !== '예약 완료(미입금)') {
-            showToast('저장했습니다. 입금 요청 안내는 \'입금 요청 보내기\' 버튼으로 보낼 수 있어요.');
+            showToast('저장했습니다. 입금 요청 안내는 \'입금 요청 보내기\' 버튼으로 보낼 수 있어요.' + whenNote);
         } else {
-            showToast('저장했습니다.');
+            showToast('저장했습니다.' + whenNote);
         }
 
     } catch (err) {
-        showToast('저장 실패: ' + err.message);
+        showToast('저장 실패: ' + ((err && err.message) || err));
     } finally {
+        detailSaving = false;
         btn.disabled = false;
         btnText.innerText = '변경사항 저장';
     }
@@ -3069,7 +3292,12 @@ window.requestDepositCurrent = async function() {
     const id = currentId;
     if (!id) return;
     if (await doRequestDeposit([id]) && currentId === id) {
-        document.getElementById('d-deposit').value = stateOf(_reservationMap[id]);
+        // 버튼으로 바뀐 입금 상태를 '열었을 때 값'에도 반영 (다른 칸의 저장 안 한 수정은 그대로 둠)
+        const fresh = _reservationMap[id] || {};
+        document.getElementById('d-deposit').value = stateOf(fresh);
+        if (detailRow) detailRow.deposit_status = fresh.deposit_status;
+        if (detailSnapshot) detailSnapshot['d-deposit'] = document.getElementById('d-deposit').value;
+        updateDetailDirty();
         loadNotifyStatus(id);
     }
 };
@@ -3144,6 +3372,17 @@ function printReservations() {
     const equipTotal = rows.reduce((s, r) => s + (r.equip_normal||0) + (r.equip_premium||0), 0);
     const clothTotal = rows.reduce((s, r) => s + (r.cloth_normal||0) + (r.cloth_premium||0), 0);
     const optTotal   = rows.reduce((s, r) => s + (r.helmet_count||0) + (r.goggle_count||0) + (r.visor_count||0), 0);
+    // 강습 합계: 시간대·종목·레벨별 인원과 팀 수, 전체 금액
+    const lessonAgg = new Map();
+    rows.forEach(r => lessonList(r).forEach(l => {
+        const key = lessonLabel({ ...l, people: 0 }).replace(/ 0명$/, '');
+        const a = lessonAgg.get(key) || { people: 0, teams: 0 };
+        a.people += Number(l.people) || 0; a.teams += 1;
+        lessonAgg.set(key, a);
+    }));
+    const lessonMoney = rows.reduce((s, r) => s + lessonAmount(r), 0);
+    const lessonLine = Array.from(lessonAgg, ([k, a]) => k + ' ' + a.people + '명(' + a.teams + '팀)').join(' · ')
+        + (lessonAgg.size ? ' · 금액 ' + fmtWon(lessonMoney) : '');
 
     // 방문일 → 시간 순 정렬
     const sorted = [...rows].sort((a, b) =>
@@ -3163,6 +3402,7 @@ function printReservations() {
         const cloth = (r.cloth_normal||0)+(r.cloth_premium||0);
         const opt   = (r.helmet_count||0)+(r.goggle_count||0)+(r.visor_count||0);
         const gear = [equip?`장비 ${equip}`:'', cloth?`의류 ${cloth}`:'', opt?`옵션 ${opt}`:''].filter(Boolean).join(', ') || '-';
+        const lessonStr = lessonParts(r, true).map(esc).join('<br>') || '-';
         return `<tr>
             <td class="num">${i+1}</td>
             <td>${esc(r.visit_date)}</td>
@@ -3170,6 +3410,7 @@ function printReservations() {
             <td>${esc(r.name)}<br><span class="phone">${esc(r.phone)}</span></td>
             <td class="lift">${liftStr}</td>
             <td>${esc(gear)}</td>
+            <td class="lift">${lessonStr}</td>
             <td>${esc(stateOf(r))}</td>
             <td class="memo">${esc(r.admin_memo)}</td>
         </tr>`;
@@ -3206,13 +3447,13 @@ function printReservations() {
             <thead><tr><th>권종</th><th>대인수</th><th>소인수</th></tr></thead>
             <tbody>${summaryRows || '<tr><td colspan="3">리프트권 신청 없음</td></tr>'}</tbody>
         </table>
-        <div style="font-size:12px;margin-bottom:8px;">장비 합계 ${equipTotal}명 · 의류 합계 ${clothTotal}명 · 옵션 합계 ${optTotal}개</div>
+        <div style="font-size:12px;margin-bottom:8px;">장비 합계 ${equipTotal}명 · 의류 합계 ${clothTotal}명 · 옵션 합계 ${optTotal}개${lessonLine ? '<br>강습 합계 ' + esc(lessonLine) : ''}</div>
 
         <div class="cap">- 상세목록</div>
         <table>
             <thead><tr>
                 <th>No</th><th>방문일</th><th>시간</th><th>성명/연락처</th>
-                <th>리프트권</th><th>장비/의류</th><th>입금 상태</th><th>메모</th>
+                <th>리프트권</th><th>장비/의류</th><th>강습</th><th>입금 상태</th><th>메모</th>
             </tr></thead>
             <tbody>${detailRows}</tbody>
         </table>
