@@ -41,6 +41,18 @@
         }
         #detail-overlay.open #detail-box { transform: translateY(0); }
         #detail-overlay { transition: opacity 0.2s; }
+        #manual-box {
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.34,1.2,0.64,1);
+        }
+        #manual-overlay.open #manual-box { transform: translateY(0); }
+        #manual-overlay { transition: opacity 0.2s; }
+        .m-label { display:block; font-size:11px; color:#94a3b8; font-weight:500; margin-bottom:4px; }
+        .m-input { width:100%; border:2px solid #f1f5f9; border-radius:12px; padding:9px 11px; font-size:13px; outline:none; background:#fff; transition:border-color .15s; }
+        .m-input:focus { border-color:#004de6; }
+        .m-num { width:58px; border:2px solid #f1f5f9; border-radius:10px; padding:6px 4px; font-size:14px; font-weight:800; text-align:center; outline:none; background:#fff; }
+        .m-num:focus { border-color:#004de6; }
+        .phone-badge { background:#f1f5f9; color:#475569; }
 
         /* 스피너 */
         .spin { animation: spin 0.7s linear infinite; }
@@ -583,15 +595,21 @@
         </div>
 
         <!-- 예약 목록 -->
-        <div class="flex items-center justify-between mb-2 px-1">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2 px-1">
             <div class="flex items-center gap-2">
-                <div id="reservation-count" class="text-[12px] text-gray-400 font-medium"></div>
-                <button type="button" id="mark-all-seen" onclick="markAllSeen()" class="hidden text-[11px] font-bold text-[#004de6] bg-white border border-blue-100 px-2.5 py-1 rounded-lg hover:bg-blue-50 transition">새 예약 모두 확인</button>
+                <div id="reservation-count" class="text-[12px] text-gray-400 font-medium whitespace-nowrap"></div>
+                <button type="button" id="mark-all-seen" onclick="markAllSeen()" class="hidden whitespace-nowrap text-[11px] font-bold text-[#004de6] bg-white border border-blue-100 px-2.5 py-1 rounded-lg hover:bg-blue-50 transition">새 예약 모두 확인</button>
             </div>
-            <button onclick="printReservations()"
-                    class="text-[12px] font-bold text-[#004de6] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
-                <i class="fa-solid fa-print"></i> 목록 인쇄
-            </button>
+            <div class="flex items-center gap-1.5 ml-auto">
+                <button type="button" id="manual-open-btn" onclick="openManualForm()"
+                        class="whitespace-nowrap text-[12px] font-bold text-white bg-[#004de6] hover:bg-blue-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-phone" aria-hidden="true"></i> 전화 예약 등록
+                </button>
+                <button onclick="printReservations()"
+                        class="whitespace-nowrap text-[12px] font-bold text-[#004de6] bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-print"></i> 목록 인쇄
+                </button>
+            </div>
         </div>
         <div id="reservation-list" class="space-y-2.5 pb-10">
             <div class="text-center py-12 text-gray-300">
@@ -770,6 +788,98 @@
             </button>
 
         </div>
+    </div>
+</div>
+
+
+<!-- ====================================================
+     전화 예약 직접 등록 (유선으로 받은 예약을 관리자가 입력)
+===================================================== -->
+<div id="manual-overlay"
+     class="hidden fixed inset-0 bg-black/60 z-50 flex items-end justify-center opacity-0 transition-opacity"
+     onclick="if (event.target === this) closeManualForm()">
+    <div id="manual-box" class="bg-white w-full max-w-lg rounded-t-3xl max-h-[92vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="manual-title">
+        <div class="sticky top-0 bg-white px-5 pt-5 pb-3 border-b border-gray-100 flex justify-between items-center z-10">
+            <div>
+                <p class="text-[11px] text-gray-400 font-medium">전화로 받은 예약</p>
+                <h2 id="manual-title" class="font-black text-[#0f172a] text-[18px] leading-tight">예약 직접 등록</h2>
+            </div>
+            <button type="button" onclick="closeManualForm()"
+                    class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition"
+                    aria-label="닫기">
+                <i class="fa-solid fa-xmark text-gray-600" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <form id="manual-form" class="px-5 pb-10 pt-4 space-y-4" novalidate onsubmit="event.preventDefault(); submitManualForm();">
+            <div class="bg-gray-50 rounded-2xl p-4 space-y-3">
+                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide">예약자 · 방문</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label for="m-name" class="m-label">이름</label>
+                        <input id="m-name" type="text" maxlength="50" autocomplete="off" placeholder="홍길동" class="m-input">
+                    </div>
+                    <div>
+                        <label for="m-phone" class="m-label">연락처</label>
+                        <input id="m-phone" type="tel" inputmode="numeric" maxlength="13" autocomplete="off" placeholder="010-0000-0000" class="m-input" oninput="formatManualPhone(this); updateManualNotifyHint()">
+                    </div>
+                    <div>
+                        <label for="m-date" class="m-label">방문 날짜</label>
+                        <input id="m-date" type="date" class="m-input">
+                    </div>
+                    <div>
+                        <label for="m-time" class="m-label">방문 시간</label>
+                        <select id="m-time" class="m-input"></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-2xl p-4">
+                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">렌탈 품목</p>
+                <div id="m-items" class="divide-y divide-gray-100"></div>
+                <label class="flex items-center gap-2 mt-3 text-[13px] font-bold text-[#0f172a]">
+                    <input type="checkbox" id="m-helmet-own" class="w-4 h-4 accent-[#004de6]"> 헬멧 지참 (대여 안 함)
+                </label>
+            </div>
+
+            <div class="bg-gray-50 rounded-2xl p-4">
+                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">리프트권 (인원)</p>
+                <div class="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-2 items-center text-[13px]" id="m-lifts">
+                    <span></span><span class="text-[11px] text-gray-400 font-bold text-center w-[58px]">대인</span><span class="text-[11px] text-gray-400 font-bold text-center w-[58px]">소인</span>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label for="m-memo" class="m-label">고객 요청사항</label>
+                    <textarea id="m-memo" rows="2" maxlength="1000" placeholder="키·발 사이즈, 픽업 장소 등" class="m-input resize-none"></textarea>
+                </div>
+                <div>
+                    <label for="m-admin-memo" class="m-label">관리자 메모 (내부용)</label>
+                    <textarea id="m-admin-memo" rows="2" placeholder="고객에게 보이지 않습니다" class="m-input resize-none"></textarea>
+                </div>
+                <div>
+                    <label for="m-deposit" class="m-label">입금 상태</label>
+                    <select id="m-deposit" class="m-input font-bold" onchange="updateManualNotifyHint()">
+                        <option>예약 신청(미입금)</option>
+                        <option>예약 완료(미입금)</option>
+                        <option>예약 완료</option>
+                    </select>
+                </div>
+                <label class="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl p-3">
+                    <input type="checkbox" id="m-notify" class="w-4 h-4 mt-0.5 accent-[#004de6]" checked onchange="updateManualNotifyHint()">
+                    <span class="min-w-0">
+                        <span class="block text-[13px] font-bold text-[#0f172a]">고객에게 안내 보내기</span>
+                        <span id="m-notify-hint" class="block text-[11px] text-gray-500 leading-relaxed"></span>
+                    </span>
+                </label>
+            </div>
+
+            <button type="submit" id="m-submit"
+                    class="w-full bg-[#004de6] text-white rounded-xl py-4 font-bold text-[15px] hover:bg-blue-700 transition shadow-sm disabled:opacity-50">
+                <span id="m-submit-text">예약 등록</span>
+            </button>
+        </form>
     </div>
 </div>
 
@@ -2304,6 +2414,7 @@ function cardHtml(r) {
       +       (isNew ? '<span class="new-badge text-[9px] font-black px-1.5 py-0.5 rounded">NEW</span>' : '')
       +       '<span class="text-[#004de6] font-black text-[13px]">' + escHtml(resNo(r)) + '</span>'
       +       '<span class="font-bold text-[#0f172a] text-[15px]">' + escHtml(r.name) + '</span>'
+      +       (isPhoneBooking(r) ? '<span class="phone-badge text-[9px] font-black px-1.5 py-0.5 rounded whitespace-nowrap"><i class="fa-solid fa-phone mr-0.5" aria-hidden="true"></i>전화</span>' : '')
       +       '<span class="text-gray-400 text-[12px]">' + escHtml(r.phone) + '</span>'
       +     '</div>'
       +     '<div class="flex gap-1.5 flex-shrink-0">'
@@ -2321,7 +2432,7 @@ function cardHtml(r) {
                +     '<button type="button" onclick="event.stopPropagation(); doRestore([\'' + id + '\'])" class="font-bold text-[#0f172a] bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded-lg">복원</button>'
                +     '<button type="button" onclick="event.stopPropagation(); doPurge([\'' + id + '\'])" class="font-bold text-red-500 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-lg">완전 삭제</button>'
                +   '</span></div>' : '')
-      +   (r.admin_memo ? '<div class="mt-2 pt-2 border-t border-gray-100 text-[11px] text-blue-500 flex items-center gap-1"><i class="fa-solid fa-note-sticky"></i> ' + escHtml(r.admin_memo) + '</div>' : '')
+      +   (adminMemoText(r) ? '<div class="mt-2 pt-2 border-t border-gray-100 text-[11px] text-blue-500 flex items-center gap-1"><i class="fa-solid fa-note-sticky"></i> ' + escHtml(adminMemoText(r)) + '</div>' : '')
       + '</div>';
 }
 
@@ -2400,8 +2511,13 @@ function onLiveChange(payload) {
     const row = payload.new || {};
     const prev = row.id ? _reservationMap[row.id] : null;
     if (payload.eventType === 'INSERT' && row.id) {
-        flashIds.add(row.id);
-        showToast('새 예약 ' + resNo(row) + ' ' + (row.name || '') + ' · 방문 ' + (row.visit_date || '') + ' ' + (row.visit_time || ''));
+        // 관리자가 방금 직접 등록한 전화 예약은 등록 완료 안내를 따로 띄우므로 '새 예약' 알림을 건너뜀
+        const own = manualEcho && Date.now() < manualEcho.until && row.name === manualEcho.name && row.phone === manualEcho.phone;
+        if (own) manualEcho = null;
+        else if (!row.deleted_at) {
+            flashIds.add(row.id);
+            showToast('새 예약 ' + resNo(row) + ' ' + (row.name || '') + ' · 방문 ' + (row.visit_date || '') + ' ' + (row.visit_time || ''));
+        }
     } else if (payload.eventType === 'UPDATE' && row.id && !row.deleted_at && stateOf(row) === '취소'
                && row.cancelled_by === 'customer' && (!prev || stateOf(prev) !== '취소')) {
         seenIds.delete(row.id);
@@ -2461,7 +2577,7 @@ function openDetail(id) {
 
     document.getElementById('detail-title').innerText = `${r.name} ${no}`;
     document.getElementById('d-no').innerText      = no;
-    document.getElementById('d-created').innerText = new Date(r.created_at).toLocaleString('ko-KR');
+    document.getElementById('d-created').innerText = new Date(r.created_at).toLocaleString('ko-KR') + (isPhoneBooking(r) ? ' · 전화 예약' : '');
     document.getElementById('d-name').innerText    = r.name;
     document.getElementById('d-phone').href        = `tel:${r.phone}`;
     document.getElementById('d-phone-text').innerText = r.phone;
@@ -2503,7 +2619,7 @@ function openDetail(id) {
     document.getElementById('d-memo').innerText   = r.memo || '-';
 
     document.getElementById('d-deposit').value     = st;
-    document.getElementById('d-admin-memo').value  = r.admin_memo || '';
+    document.getElementById('d-admin-memo').value  = adminMemoText(r);
     updateRequestButton();
     loadNotifyStatus(id);
 
@@ -2532,6 +2648,211 @@ function closeDetail() {
 function closeDetailOutside(e) {
     if (e.target === document.getElementById('detail-overlay')) closeDetail();
 }
+
+// ====================================================
+// 전화 예약 직접 등록
+// 유선으로 받은 예약을 관리자가 입력합니다. 관리자 메모 앞에 '[전화 예약]'을 붙여 목록에서 구분합니다.
+// 고객 안내: 미입금 상태면 접수 안내(입금 계좌 포함), '예약 완료'면 확정 안내만, 끄면 아무것도 보내지 않습니다.
+// DB 트리거는 휴지통에 있는 예약에 안내를 보내지 않으므로, 안내를 고를 때는 휴지통 상태로 저장한 뒤 바로 꺼냅니다.
+// ====================================================
+const PHONE_TAG = '[전화 예약]';
+const MANUAL_ITEMS = [
+    ['equip_normal', '장비', '명'],
+    ['cloth_normal', '의류', '명'],
+    ['visor_count',  '헬멧+고글 세트', '개'],
+    ['helmet_count', '헬멧만', '개'],
+    ['goggle_count', '고글만', '개']
+];
+const MANUAL_LIFTS = [['3h', '3시간권'], ['4h', '4시간권'], ['6h', '6시간권']];
+let manualBuilt = false;
+let manualSaving = false;
+let manualAutoOff = false;   // 휴대폰 번호가 아니라서 안내를 자동으로 끈 경우
+let manualEcho = null;       // 방금 직접 등록한 예약: 실시간 '새 예약' 알림을 건너뜀
+
+function isPhoneBooking(r) { return !!(r && r.admin_memo && String(r.admin_memo).startsWith(PHONE_TAG)); }
+function adminMemoText(r) {
+    const m = String((r && r.admin_memo) || '');
+    return (m.startsWith(PHONE_TAG) ? m.slice(PHONE_TAG.length) : m).trim();
+}
+function isMobileDigits(d) { return /^(010\d{8}|01[16789]\d{7,8})$/.test(d); }
+
+function manualNumInput(id, label) {
+    return '<input type="number" id="' + id + '" min="0" max="99" step="1" inputmode="numeric" value="0" class="m-num"'
+         + ' aria-label="' + escHtml(label) + '" onfocus="this.select()">';
+}
+function buildManualForm() {
+    if (manualBuilt) return;
+    manualBuilt = true;
+    const times = [];
+    for (let m = 7 * 60 + 30; m <= 23 * 60; m += 30) {
+        times.push(String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'));
+    }
+    document.getElementById('m-time').innerHTML = times.map(t => '<option' + (t === '09:00' ? ' selected' : '') + '>' + t + '</option>').join('');
+    document.getElementById('m-items').innerHTML = MANUAL_ITEMS.map(([key, label, unit]) =>
+        '<div class="flex items-center justify-between py-2">'
+        + '<label for="m-' + key + '" class="text-[13px] font-bold text-[#0f172a]">' + label + ' <span class="text-[11px] text-gray-400 font-medium">(' + unit + ')</span></label>'
+        + manualNumInput('m-' + key, label) + '</div>').join('');
+    document.getElementById('m-lifts').insertAdjacentHTML('beforeend', MANUAL_LIFTS.map(([h, label]) =>
+        '<span class="font-bold text-[#0f172a]">' + label + '</span>'
+        + manualNumInput('m-lift_' + h + '_adult', label + ' 대인')
+        + manualNumInput('m-lift_' + h + '_child', label + ' 소인')).join(''));
+}
+function manualNum(id) {
+    const n = parseInt(document.getElementById(id).value, 10);
+    return Number.isFinite(n) ? Math.min(99, Math.max(0, n)) : 0;
+}
+
+window.formatManualPhone = function(input) {
+    const d = input.value.replace(/\D/g, '').slice(0, 11);
+    if (d.startsWith('02')) {   // 서울 지역번호
+        input.value = d.length <= 2 ? d : d.length <= 5 ? d.slice(0, 2) + '-' + d.slice(2)
+            : d.length <= 9 ? d.slice(0, 2) + '-' + d.slice(2, 5) + '-' + d.slice(5)
+            : d.slice(0, 2) + '-' + d.slice(2, 6) + '-' + d.slice(6);
+    } else {
+        input.value = d.length <= 3 ? d : d.length <= 7 ? d.slice(0, 3) + '-' + d.slice(3)
+            : d.length <= 10 ? d.slice(0, 3) + '-' + d.slice(3, 6) + '-' + d.slice(6)
+            : d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7);
+    }
+};
+
+window.updateManualNotifyHint = function() {
+    const notify = document.getElementById('m-notify');
+    const hint   = document.getElementById('m-notify-hint');
+    const digits = document.getElementById('m-phone').value.replace(/\D/g, '');
+    const state  = document.getElementById('m-deposit').value;
+    if (digits.length >= 9 && !isMobileDigits(digits)) {
+        if (!notify.disabled) { manualAutoOff = notify.checked; }
+        notify.checked = false;
+        notify.disabled = true;
+        hint.textContent = '휴대폰 번호가 아니라 안내를 보낼 수 없습니다. 예약만 등록합니다.';
+        return;
+    }
+    if (notify.disabled) {
+        notify.disabled = false;
+        if (manualAutoOff) notify.checked = true;
+        manualAutoOff = false;
+    }
+    hint.textContent = !notify.checked ? '안내를 보내지 않고 예약만 등록합니다.'
+        : state === '예약 완료' ? '입금이 확인된 예약이라 예약 확정 안내만 보냅니다.'
+        : '예약 접수 안내(예약금 입금 계좌 포함)를 보냅니다.';
+};
+
+window.openManualForm = function() {
+    buildManualForm();
+    document.getElementById('manual-form').reset();
+    document.getElementById('m-notify').disabled = false;
+    manualAutoOff = false;
+    updateManualNotifyHint();
+    const overlay = document.getElementById('manual-overlay');
+    overlay.classList.remove('hidden');
+    requestAnimationFrame(() => {
+        overlay.classList.add('open');
+        overlay.style.opacity = '1';
+    });
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('m-name').focus(), 320);
+};
+
+window.closeManualForm = function() {
+    if (manualSaving) return;
+    const overlay = document.getElementById('manual-overlay');
+    overlay.style.opacity = '0';
+    overlay.classList.remove('open');
+    setTimeout(() => {
+        overlay.classList.add('hidden');
+        overlay.style.opacity = '1';
+    }, 300);
+    document.body.style.overflow = '';
+};
+
+function setManualSaving(on) {
+    manualSaving = on;
+    document.getElementById('m-submit').disabled = on;
+    document.getElementById('m-submit-text').innerHTML = on
+        ? '<i class="fa-solid fa-rotate spin mr-1" aria-hidden="true"></i> 등록 중...'
+        : '예약 등록';
+}
+
+window.submitManualForm = async function() {
+    if (manualSaving) return;
+    const name   = document.getElementById('m-name').value.trim();
+    const phone  = document.getElementById('m-phone').value.trim();
+    const digits = phone.replace(/\D/g, '');
+    const date   = document.getElementById('m-date').value;
+    const time   = document.getElementById('m-time').value;
+    if (name.length < 2) { showToast('예약자 이름을 2자 이상 입력해 주세요'); document.getElementById('m-name').focus(); return; }
+    if (digits.length < 9 || digits.length > 11) { showToast('연락처를 확인해 주세요'); document.getElementById('m-phone').focus(); return; }
+    if (!date) { showToast('방문 날짜를 골라 주세요'); document.getElementById('m-date').focus(); return; }
+
+    const row = {
+        name, phone, visit_date: date, visit_time: time,
+        equip_premium: 0, cloth_premium: 0,
+        helmet_own: document.getElementById('m-helmet-own').checked
+    };
+    MANUAL_ITEMS.forEach(([key]) => { row[key] = manualNum('m-' + key); });
+    MANUAL_LIFTS.forEach(([h]) => {
+        row['lift_' + h + '_adult'] = manualNum('m-lift_' + h + '_adult');
+        row['lift_' + h + '_child'] = manualNum('m-lift_' + h + '_child');
+    });
+    const qty = MANUAL_ITEMS.reduce((s, [k]) => s + row[k], 0)
+              + MANUAL_LIFTS.reduce((s, [h]) => s + row['lift_' + h + '_adult'] + row['lift_' + h + '_child'], 0);
+    if (!qty) { showToast('렌탈 품목이나 리프트권을 1개 이상 입력해 주세요'); return; }
+
+    const memo      = document.getElementById('m-memo').value.trim();
+    const adminMemo = document.getElementById('m-admin-memo').value.trim();
+    row.memo       = memo || null;
+    row.admin_memo = PHONE_TAG + (adminMemo ? ' ' + adminMemo : '');
+
+    const state  = document.getElementById('m-deposit').value;
+    const notify = document.getElementById('m-notify').checked && isMobileDigits(digits);
+    const notice = !notify ? '보내지 않음' : state === '예약 완료' ? '예약 확정 안내' : '예약 접수 안내';
+    if (!window.confirm(name + '님 예약을 등록할까요?\n\n방문: ' + date + ' ' + time + '\n입금 상태: ' + state + '\n고객 안내: ' + notice)) return;
+
+    setManualSaving(true);
+    manualEcho = { name, phone, until: Date.now() + 20000 };
+    let saved = null;
+    let stuckInTrash = false;
+    try {
+        if (notify && state !== '예약 완료') {
+            // 보통 등록: 저장되는 순간 접수 안내가 나갑니다.
+            const { data, error } = await _supabase.from('reservations')
+                .insert({ ...row, deposit_status: state }).select().single();
+            if (error) throw error;
+            saved = data;
+        } else {
+            // 휴지통 상태로 저장하면 어떤 안내도 나가지 않습니다. 바로 꺼내면서
+            // 입금 완료 예약은 '예약 완료'로 바꿔 확정 안내만 나가게 합니다.
+            const { data, error } = await _supabase.from('reservations')
+                .insert({ ...row, deposit_status: notify ? '예약 신청(미입금)' : state, deleted_at: new Date().toISOString() })
+                .select().single();
+            if (error) throw error;
+            saved = data;
+            const patch = notify ? { deleted_at: null, deposit_status: '예약 완료' } : { deleted_at: null };
+            const { error: e2 } = await _supabase.from('reservations').update(patch).eq('id', saved.id);
+            if (e2) { stuckInTrash = true; throw e2; }
+        }
+    } catch (err) {
+        setManualSaving(false);
+        if (stuckInTrash) {
+            closeManualForm();
+            showToast('예약은 저장됐지만 휴지통에 들어갔습니다. 휴지통에서 ' + resNo(saved) + '을 복원해 주세요.');
+            await loadReservations({ quiet: true });
+            return;
+        }
+        manualEcho = null;
+        showToast('등록하지 못했습니다: ' + ((err && err.message) || err));
+        return;
+    }
+
+    setManualSaving(false);
+    markSeen(saved.id);
+    flashIds.add(saved.id);
+    closeManualForm();
+    showToast('전화 예약 ' + resNo(saved) + ' ' + name + '님을 등록했습니다.' + (notify ? ' 고객에게 ' + notice + '를 보냅니다.' : ''));
+    if (viewMode === 'trash') setViewMode('queue');
+    else await loadReservations({ quiet: true });
+};
+
 
 
 // ====================================================
@@ -2624,12 +2945,14 @@ async function saveDetail() {
     btn.disabled  = true;
     btnText.innerHTML = '<i class="fa-solid fa-rotate fa-spin mr-2"></i>저장 중...';
 
+    const memoText = document.getElementById('d-admin-memo').value.trim();
     try {
         const { error } = await _supabase
             .from('reservations')
             .update({
                 deposit_status: nextDep,
-                admin_memo:     document.getElementById('d-admin-memo').value.trim() || null
+                // 전화 예약 표시는 메모를 고쳐도 남깁니다
+                admin_memo:     isPhoneBooking(before) ? PHONE_TAG + (memoText ? ' ' + memoText : '') : (memoText || null)
             })
             .eq('id', currentId);
 
