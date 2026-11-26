@@ -760,10 +760,11 @@
                         <i class="fa-solid fa-plus mr-1" aria-hidden="true"></i> 강습 추가
                     </button>
                     <label id="e-lesson-paid-row" class="hidden mt-2 flex items-center gap-2 bg-white border-2 border-violet-100 rounded-xl px-3 py-2.5 cursor-pointer">
-                        <input type="checkbox" id="e-lesson-paid" class="w-4 h-4 accent-[#6d28d9] flex-shrink-0">
+                        <input type="checkbox" id="e-lesson-paid" class="w-4 h-4 accent-[#6d28d9] flex-shrink-0" onchange="onLessonPaidChange('e-')">
                         <span class="text-[13px] font-bold text-[#0f172a]">강습료 입금 완료</span>
                         <span class="ml-auto text-[11px] font-bold text-[#6d28d9] whitespace-nowrap">목록에 '강습 확정'</span>
                     </label>
+                    <p id="e-lesson-paid-note" class="hidden text-[11px] font-bold text-[#6d28d9] mt-1.5 leading-relaxed"></p>
                     <p id="e-lesson-hint" class="text-[11px] text-gray-400 mt-2 leading-relaxed"></p>
                 </div>
 
@@ -893,10 +894,11 @@
                     <i class="fa-solid fa-plus mr-1" aria-hidden="true"></i> 강습 추가
                 </button>
                 <label id="m-lesson-paid-row" class="hidden mt-2 flex items-center gap-2 bg-white border-2 border-violet-100 rounded-xl px-3 py-2.5 cursor-pointer">
-                    <input type="checkbox" id="m-lesson-paid" class="w-4 h-4 accent-[#6d28d9] flex-shrink-0">
+                    <input type="checkbox" id="m-lesson-paid" class="w-4 h-4 accent-[#6d28d9] flex-shrink-0" onchange="onLessonPaidChange('m-')">
                     <span class="text-[13px] font-bold text-[#0f172a]">강습료 입금 완료</span>
                     <span class="ml-auto text-[11px] font-bold text-[#6d28d9] whitespace-nowrap">목록에 '강습 확정'</span>
                 </label>
+                <p id="m-lesson-paid-note" class="hidden text-[11px] font-bold text-[#6d28d9] mt-1.5 leading-relaxed"></p>
                 <p id="m-lesson-hint" class="text-[11px] text-gray-400 mt-2 leading-relaxed"></p>
             </div>
 
@@ -2681,6 +2683,7 @@ function openDetail(id) {
     fillResFields('e-', r);
     document.getElementById('d-deposit').value     = st;
     document.getElementById('d-admin-memo').value  = adminMemoText(r);
+    updateLessonPaidNote('e-');
     detailSnapshot = detailFormState();
     updateDetailDirty();
     updateRequestButton();
@@ -2777,6 +2780,7 @@ function buildResFields(p) {
     el('lesson-hint').textContent = '시간대·종목·레벨을 섞어 여러 줄 담을 수 있어요. 한 줄은 한 팀(최대 ' + LESSON_MAX_PEOPLE + '명)이라, '
         + (LESSON_MAX_PEOPLE + 1) + '명 이상이면 한 줄 더 추가하세요.';
     el('lessons').addEventListener('change', () => updateLessonTotal(p));
+    depositSelect(p).addEventListener('change', () => updateLessonPaidNote(p));
     el('lessons').addEventListener('click', (e) => {
         const del = e.target.closest('[data-del]');
         if (!del) return;
@@ -2822,6 +2826,44 @@ function updateLessonTotal(p) {
     document.getElementById(p + 'lesson-total').textContent = list.length ? '총 ' + lessonTotal({ lessons: list }) + '명' : '';
     // 강습을 한 줄 이상 담았을 때만 '강습료 입금 완료' 체크를 보여 줌
     document.getElementById(p + 'lesson-paid-row').classList.toggle('hidden', !list.length);
+    const box = document.getElementById(p + 'lesson-paid');
+    if (!list.length && box.checked) { box.checked = false; onLessonPaidChange(p); }
+    else updateLessonPaidNote(p);
+}
+
+// 강습료 입금도 예약금 입금과 같이 '예약 완료'로 봅니다.
+// 체크하면 입금 상태를 '예약 완료'로 맞춰, 저장할 때 기존 예약 확정 안내가 고객에게 나가게 합니다.
+const UNPAID_STATES_LESSON = ['예약 신청(미입금)', '예약 완료(미입금)'];
+const lessonPaidPrev = {};   // 체크로 자동 변경하기 전 입금 상태 (체크를 풀면 되돌림)
+function depositSelect(p) { return document.getElementById(p === 'e-' ? 'd-deposit' : 'm-deposit'); }
+window.onLessonPaidChange = function(p) {
+    const box = document.getElementById(p + 'lesson-paid');
+    const sel = depositSelect(p);
+    if (box.checked && UNPAID_STATES_LESSON.includes(sel.value)) {
+        lessonPaidPrev[p] = sel.value;
+        sel.value = '예약 완료';
+    } else if (!box.checked && lessonPaidPrev[p] && sel.value === '예약 완료') {
+        sel.value = lessonPaidPrev[p];
+        lessonPaidPrev[p] = null;
+    }
+    if (p === 'm-') updateManualNotifyHint();
+    updateLessonPaidNote(p);
+    if (p === 'e-') updateDetailDirty();
+};
+function updateLessonPaidNote(p) {
+    const note = document.getElementById(p + 'lesson-paid-note');
+    const shown = !document.getElementById(p + 'lesson-paid-row').classList.contains('hidden')
+               && document.getElementById(p + 'lesson-paid').checked;
+    const v = depositSelect(p).value;
+    let msg = '';
+    if (shown && UNPAID_STATES_LESSON.includes(v)) {
+        msg = '입금 상태가 아직 미입금이에요. \'예약 완료\'로 바꿔 저장해야 고객에게 예약 확정 안내가 나갑니다.';
+    } else if (shown && v === '예약 완료') {
+        if (p === 'm-') msg = '강습료 입금으로 \'예약 완료\'로 등록합니다.';
+        else if (detailRow && stateOf(detailRow) !== '예약 완료') msg = '강습료 입금으로 \'예약 완료\' 처리돼요. 저장하면 고객에게 예약 확정 안내가 나갑니다.';
+    }
+    note.textContent = msg;
+    note.classList.toggle('hidden', !msg);
 }
 function setLessons(p, list) {
     document.getElementById(p + 'lessons').innerHTML = (list || []).map(lessonRowHtml).join('');
@@ -2881,6 +2923,7 @@ function readResFields(p, minName) {
 // 예약 행 → 입력 칸 (상세 수정). 예전 '고급' 장비·의류 수량은 같은 칸에 합쳐 보여 줍니다.
 function fillResFields(p, r) {
     buildResFields(p);
+    lessonPaidPrev[p] = null;
     const el  = (k) => document.getElementById(p + k);
     const num = (v) => Math.min(99, Math.max(0, parseInt(v, 10) || 0));
     el('name').value  = r.name || '';
@@ -2962,6 +3005,7 @@ window.openManualForm = function() {
     buildResFields('m-');
     document.getElementById('manual-form').reset();
     markNums('m-');
+    lessonPaidPrev['m-'] = null;
     setLessons('m-', []);
     document.getElementById('m-notify').disabled = false;
     manualAutoOff = false;
